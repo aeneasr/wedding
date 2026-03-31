@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1774957023251,
+      "tag": "0000_calm_menace",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774985831407,
+      "tag": "0001_drop_has_whatsapp",
+      "breakpoints": true
+    }
+  ]
+}

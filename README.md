@@ -19,7 +19,6 @@ Private wedding RSVP platform built with `Next.js` for Vercel deployment.
 - Two isolated event flows with per-invitation entitlements
 - Separate RSVP behavior for Event One and Event Two
 - Per-attendee dietary requirements
-- Adult phone number and WhatsApp capture
 - Guest recovery flow based on existing invitation email only
 - Private event details area scoped to invited events
 - Admin dashboard for send/open/responded status

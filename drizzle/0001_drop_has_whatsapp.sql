@@ -1,0 +1,1 @@
+ALTER TABLE "attendee_responses" DROP COLUMN "has_whatsapp";
