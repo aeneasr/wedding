@@ -38,12 +38,11 @@ import {
 } from "@/src/lib/validation";
 import { buildAttendeeRows } from "@/src/lib/csv-export";
 
-export type InvitationRecord = typeof invitations.$inferSelect;
-export type InviteeRecord = typeof invitees.$inferSelect;
-export type InvitationEventRecord = typeof invitationEvents.$inferSelect;
-export type RsvpRecord = typeof rsvps.$inferSelect;
-export type AttendeeResponseRecord = typeof attendeeResponses.$inferSelect;
-export type InvitationActivityRecord = typeof invitationActivity.$inferSelect;
+type InvitationRecord = typeof invitations.$inferSelect;
+type InviteeRecord = typeof invitees.$inferSelect;
+type InvitationEventRecord = typeof invitationEvents.$inferSelect;
+type RsvpRecord = typeof rsvps.$inferSelect;
+type AttendeeResponseRecord = typeof attendeeResponses.$inferSelect;
 
 export type InvitationBundle = {
   invitation: InvitationRecord;

@@ -1,14 +1,14 @@
 import path from "node:path";
 
-export const e2eAppPort = 34100;
+export const e2eAppPort = 34101;
 export const e2eBaseUrl = `http://localhost:${e2eAppPort}`;
 
 export const e2eDbHost = "127.0.0.1";
-export const e2eDbPort = 35432;
+export const e2eDbPort = 35433;
 export const e2eDbName = "wedding_playwright";
 export const e2eDbUrl = `postgres://postgres@${e2eDbHost}:${e2eDbPort}/${e2eDbName}`;
 
-export const e2eTmpDir = path.join(process.cwd(), ".playwright");
+export const e2eTmpDir = path.join(process.cwd(), ".e2e-tmp");
 export const e2ePostgresDataDir = path.join(e2eTmpDir, "postgres-data");
 export const e2eManifestPath = path.join(e2eTmpDir, "e2e-manifest.json");
 export const e2eMigrationsDir = path.join(process.cwd(), "drizzle");

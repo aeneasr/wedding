@@ -1,79 +1,54 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import {
-  buttonClassName,
-  Eyebrow,
-  Heading,
-  PageBackground,
-  PageContainer,
-  Pill,
-  SubtleText,
-  SurfaceCard,
-} from "@/src/components/ui";
-import { getDictionary } from "@/src/lib/i18n";
+import { LandingInvitationCard } from "@/src/components/landing-invitation-card";
+
+export const metadata: Metadata = {
+  title: "Aeneas & Anna | Wedding Invitation",
+  description:
+    "Wedding invitation and private RSVP portal for Aeneas & Anna on August 20 and August 22, 2026.",
+};
 
 export default function Home() {
-  const dictionary = getDictionary("en");
-
   return (
-    <PageBackground>
-      <PageContainer className="gap-8 py-8 sm:py-12">
-        <SurfaceCard className="overflow-hidden px-6 py-8 sm:px-10 sm:py-12">
-          <div className="grid gap-10 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
-            <div className="space-y-6">
-              <Eyebrow>{dictionary.landing.eyebrow}</Eyebrow>
-              <Heading className="max-w-3xl">{dictionary.landing.title}</Heading>
-              <SubtleText className="max-w-2xl text-base sm:text-lg">
-                {dictionary.landing.description}
-              </SubtleText>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link href="/recover" className={buttonClassName()}>
-                  {dictionary.landing.recoverCta}
-                </Link>
-                <Link
-                  href="/admin"
-                  className={buttonClassName({ secondary: true })}
-                >
-                  Admin
-                </Link>
-              </div>
-            </div>
-            <div className="grid gap-4">
-              {dictionary.landing.features.map((feature) => (
-                <div
-                  key={feature}
-                  className="rounded-[24px] border border-[#ead8ca] bg-[#fffaf6] p-5"
-                >
-                  <Pill tone="warm">RSVP</Pill>
-                  <p className="mt-4 text-sm leading-6 text-[#43342a]">{feature}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </SurfaceCard>
+    <main className="relative min-h-screen overflow-hidden bg-[#f6f2ea] text-[#304030]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(223,232,218,0.82),transparent_38%),linear-gradient(180deg,#f8f4ed_0%,#f2ede3_100%)]" />
+      <div className="pointer-events-none absolute -left-20 top-10 h-64 w-64 rounded-full bg-[#dbe5d5]/60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-[#e9dfcf]/78 blur-3xl" />
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <SurfaceCard className="space-y-4">
-            <Eyebrow>{dictionary.landing.privacyTitle}</Eyebrow>
-            <Heading className="text-3xl sm:text-4xl">
-              {dictionary.landing.privacyBody}
-            </Heading>
-            <SubtleText>
-              Guests do not self-register. Organizers preload the invitation list,
-              define access for one or both events, and send each invitation link
-              directly by email.
-            </SubtleText>
-          </SurfaceCard>
-          <SurfaceCard className="space-y-4">
-            <Eyebrow>How it works</Eyebrow>
-            <ol className="space-y-3 text-sm leading-6 text-[#4b3a2f]">
-              <li>1. Open the secure invitation link you received by email.</li>
-              <li>2. Review only the event details that apply to your invitation.</li>
-              <li>3. Submit or update your RSVP, dietary needs, and contact details.</li>
-            </ol>
-          </SurfaceCard>
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-5 py-10 sm:px-8 sm:py-14">
+        <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.34em] text-[#7f8f80] sm:mb-8">
+          Wedding invitation
+        </p>
+
+        <LandingInvitationCard />
+
+        <div className="mt-8 max-w-xl text-center">
+          <p className="text-sm leading-7 text-[#566756] sm:text-base">
+            Your personal invitation link holds the event details and RSVP form
+            that apply to you. If the email has gone missing, recover it here.
+          </p>
+
+          <div className="mt-6 flex justify-center">
+            <Link
+              href="/recover"
+              className="inline-flex items-center justify-center rounded-full border border-[#738373] bg-[#738373] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#fffdf8] transition hover:border-[#607060] hover:bg-[#607060] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#738373]"
+            >
+              Recover my invitation link
+            </Link>
+          </div>
+
+          <p className="mt-5 text-xs uppercase tracking-[0.26em] text-[#849384]">
+            Invitation details are shared privately by email
+          </p>
+          <Link
+            href="/admin"
+            className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.26em] text-[#738373] underline decoration-[#a6b3a4] underline-offset-4 transition hover:text-[#5f715f]"
+          >
+            Admin
+          </Link>
         </div>
-      </PageContainer>
-    </PageBackground>
+      </div>
+    </main>
   );
 }

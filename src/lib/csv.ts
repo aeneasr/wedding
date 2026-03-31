@@ -34,7 +34,7 @@ const csvRowSchema = z.object({
   event_2_max_children: z.number().int().min(0).max(maxChildrenPerInvitation).default(0),
 });
 
-export type InvitationCsvGroup = {
+type InvitationCsvGroup = {
   externalId: string;
   primaryEmail: string;
   invitationMode: InvitationMode;

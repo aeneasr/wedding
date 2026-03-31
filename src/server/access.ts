@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 
 import { getInvitationFromGuestSession } from "@/src/server/invitations";
 import {
-  clearAdminSession,
   clearGuestSession,
   getAdminSession,
   getGuestSession,
@@ -46,8 +45,4 @@ export async function requireGuestBundle() {
   }
 
   return invitation;
-}
-
-export async function clearAdminAuth() {
-  await clearAdminSession();
 }

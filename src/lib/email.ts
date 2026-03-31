@@ -4,7 +4,7 @@ import {
   type EventKey,
   type Locale,
 } from "@/src/lib/constants";
-import { env, isEmailConfigured } from "@/src/lib/env";
+import { env } from "@/src/lib/env";
 import { getEventContent, localizeEventText } from "@/src/lib/events";
 import { getDictionary } from "@/src/lib/i18n";
 import { buildCalendarFile } from "@/src/lib/calendar";
@@ -178,8 +178,3 @@ export async function sendConfirmationEmail(input: {
   });
 }
 
-export function emailCapabilities() {
-  return {
-    configured: isEmailConfigured(),
-  };
-}

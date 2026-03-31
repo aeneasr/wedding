@@ -1,14 +1,13 @@
 import { format } from "date-fns";
 
 import {
-  eventKeys,
   type EventKey,
   type Locale,
 } from "@/src/lib/constants";
 
 type LocalizedValue<T> = Record<Locale, T>;
 
-export type EventContent = {
+type EventContent = {
   key: EventKey;
   startsAt: string;
   endsAt: string;
@@ -29,11 +28,11 @@ export type EventContent = {
   }>;
 };
 
-export const events: Record<EventKey, EventContent> = {
+const events: Record<EventKey, EventContent> = {
   event_1: {
     key: "event_1",
-    startsAt: "2026-09-18T18:00:00+02:00",
-    endsAt: "2026-09-18T23:30:00+02:00",
+    startsAt: "2026-08-20T18:00:00+02:00",
+    endsAt: "2026-08-20T23:30:00+02:00",
     hero: {
       en: "An intimate gathering before the main celebration",
       de: "Ein intimes Treffen vor der grossen Feier",
@@ -115,8 +114,8 @@ export const events: Record<EventKey, EventContent> = {
   },
   event_2: {
     key: "event_2",
-    startsAt: "2026-09-19T14:30:00+02:00",
-    endsAt: "2026-09-20T00:30:00+02:00",
+    startsAt: "2026-08-22T14:30:00+02:00",
+    endsAt: "2026-08-23T00:30:00+02:00",
     hero: {
       en: "The main wedding celebration",
       de: "Die grosse Hochzeitsfeier",
@@ -232,10 +231,6 @@ export const events: Record<EventKey, EventContent> = {
 
 export function getEventContent(eventKey: EventKey) {
   return events[eventKey];
-}
-
-export function listEventKeys() {
-  return [...eventKeys];
 }
 
 export function localizeEventText<T>(value: LocalizedValue<T>, locale: Locale) {

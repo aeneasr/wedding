@@ -22,8 +22,13 @@ import { requireGuestBundle } from "@/src/server/access";
 
 export const dynamic = "force-dynamic";
 
-export default async function GuestHubPage() {
+export default async function GuestHubPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
   const bundle = await requireGuestBundle();
+  const { saved } = await searchParams;
   const locale = (await getStoredGuestLocale()) ?? bundle.invitation.locale;
   const dictionary = getDictionary(locale);
   const primaryGuest =
@@ -59,6 +64,12 @@ export default async function GuestHubPage() {
               </div>
             </div>
           </SurfaceCard>
+
+          {saved === "1" ? (
+            <p className="rounded-2xl bg-[#e0ecde] px-4 py-3 text-sm text-[#355b39]">
+              {dictionary.guest.saved}
+            </p>
+          ) : null}
 
           <div className="grid gap-5">
             {bundle.events.map((eventAccess) => {

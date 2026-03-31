@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import { saveGuestRsvpAction, type GuestActionState } from "@/src/app-actions/guest";
 import {
   GuestRsvpFields,
   type ChildState,
-  type GuestRsvpFieldsProps,
   type InviteeState,
   type PlusOneState,
   type RsvpFormProps,
@@ -18,6 +18,13 @@ type GuestRsvpFormProps = RsvpFormProps;
 
 export function GuestRsvpForm(props: GuestRsvpFormProps) {
   const [state, formAction, pending] = useActionState(saveGuestRsvpAction, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      router.push("/guest?saved=1");
+    }
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -32,8 +39,6 @@ export function GuestRsvpForm(props: GuestRsvpFormProps) {
 
 export type {
   ChildState,
-  GuestRsvpFormProps,
-  GuestRsvpFieldsProps,
   InviteeState,
   PlusOneState,
   RsvpFormProps,

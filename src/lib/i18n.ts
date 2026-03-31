@@ -95,7 +95,7 @@ type Dictionary = {
   };
 };
 
-export const dictionaries: Record<Locale, Dictionary> = {
+const dictionaries: Record<Locale, Dictionary> = {
   en: {
     localeLabel: "English",
     switchTo: {
@@ -160,7 +160,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       childrenCount: "Number of children",
       childName: "Child name",
       saveRsvp: "Save RSVP",
-      saved: "RSVP saved",
+      saved: "Your RSVP has been saved.",
       informationHidden:
         "Guests only see information for the events they are invited to.",
       recoverLink: "Recover link",
@@ -274,7 +274,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       childrenCount: "Anzahl der Kinder",
       childName: "Name des Kindes",
       saveRsvp: "RSVP speichern",
-      saved: "RSVP gespeichert",
+      saved: "Deine RSVP wurde gespeichert.",
       informationHidden:
         "Gaste sehen nur Informationen zu den Veranstaltungen, fur die sie freigeschaltet sind.",
       recoverLink: "Link wiederherstellen",

@@ -1,17 +1,4 @@
-import Link from "next/link";
-
-import { type Locale, type RsvpStatus } from "@/src/lib/constants";
-import { getDictionary } from "@/src/lib/i18n";
 import { cn } from "@/src/lib/utils";
-
-function buildGuestLocaleUrl(locale: Locale, redirectTo = "/guest") {
-  const search = new URLSearchParams({
-    locale,
-    redirectTo,
-  });
-
-  return `/guest/locale?${search.toString()}`;
-}
 
 export function PageBackground({
   children,
@@ -135,13 +122,6 @@ export function Pill({
   );
 }
 
-export function StatusPill({ status }: { status: RsvpStatus }) {
-  const tone =
-    status === "attending" ? "success" : status === "declined" ? "muted" : "warm";
-
-  return <Pill tone={tone}>{status}</Pill>;
-}
-
 export function SectionTitle({
   title,
   description,
@@ -181,33 +161,6 @@ export function inputClassName() {
 
 export function textAreaClassName() {
   return `${inputClassName()} min-h-32 resize-y`;
-}
-
-export function LanguageSwitcher({
-  locale,
-  redirectTo,
-}: {
-  locale: Locale;
-  redirectTo?: string;
-}) {
-  const dictionary = getDictionary(locale);
-
-  return (
-    <div className="flex items-center gap-2">
-      {(["en", "de"] as const).map((option) => (
-        <Link
-          key={option}
-          href={buildGuestLocaleUrl(option, redirectTo)}
-          className={buttonClassName({
-            secondary: option !== locale,
-            compact: true,
-          })}
-        >
-          {dictionary.switchTo[option]}
-        </Link>
-      ))}
-    </div>
-  );
 }
 
 export function StatCard({

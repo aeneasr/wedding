@@ -57,7 +57,7 @@ npx tsx tests/setup/start-e2e-stack.ts
 Once the server is ready, open the manifest to get your test URLs and credentials:
 
 ```bash
-cat .playwright/e2e-manifest.json
+cat .e2e-tmp/e2e-manifest.json
 ```
 
 The manifest contains:

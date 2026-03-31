@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 
 import { clearGuestSession } from "@/src/lib/session";
 import { isDatabaseConfigured } from "@/src/lib/env";
+import { getDictionary } from "@/src/lib/i18n";
+import { getStoredGuestLocale } from "@/src/lib/session";
 import { requireGuestBundle } from "@/src/server/access";
 import { saveGuestRsvp, sendRecoveryLinks } from "@/src/server/invitations";
 
@@ -50,6 +52,8 @@ export async function saveGuestRsvpAction(
   formData: FormData,
 ): Promise<GuestActionState> {
   const bundle = await requireGuestBundle();
+  const locale = (await getStoredGuestLocale()) ?? bundle.invitation.locale;
+  const dictionary = getDictionary(locale);
   const eventKey = String(formData.get("eventKey") ?? "") as "event_1" | "event_2";
   const payload = JSON.parse(String(formData.get("payload") ?? "{}"));
 
@@ -66,7 +70,7 @@ export async function saveGuestRsvpAction(
   }
 
   return {
-    success: "Your RSVP has been saved.",
+    success: dictionary.guest.saved,
   };
 }
 

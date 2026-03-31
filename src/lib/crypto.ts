@@ -6,11 +6,11 @@ function encodeText(value: string) {
   return Buffer.from(value, "utf8");
 }
 
-export function hashSha256(value: string) {
+function hashSha256(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export function safeEqual(left: string, right: string) {
+function safeEqual(left: string, right: string) {
   const leftBuffer = encodeText(left);
   const rightBuffer = encodeText(right);
 
