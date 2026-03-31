@@ -46,7 +46,31 @@ Generate the admin password hash with the same logic used by the app. A quick op
 node -e "const { createHash } = require('node:crypto'); console.log('sha256:' + createHash('sha256').update('change-me').digest('hex'))"
 ```
 
-## Setup
+## Quick start (no external services needed)
+
+The test harness spins up a local Postgres, applies migrations, seeds sample data, and starts Next.js — all in one command:
+
+```bash
+npm install
+npx tsx tests/setup/start-e2e-stack.ts
+```
+
+Once the server is ready, open the manifest to get your test URLs and credentials:
+
+```bash
+cat .playwright/e2e-manifest.json
+```
+
+The manifest contains:
+
+- **Invitation URLs** for several test personas (event-1-only, event-2-only, both events, household with plus-one and children)
+- **Admin dashboard** at `http://localhost:3100/admin` with password `playwright-admin-password`
+
+Emails are silently skipped since no email provider is configured. Press `Ctrl+C` to tear everything down.
+
+Requires PostgreSQL CLI tools (`brew install postgresql@14` on macOS). No running Postgres server needed — the harness starts its own.
+
+## Production setup
 
 Install dependencies:
 
@@ -111,10 +135,15 @@ family-one,alex@example.com,household,en,Sam Rivera,sam@example.com,adult,false,
 - Email delivery is skipped automatically when `RESEND_API_KEY` or `EMAIL_FROM` are missing.
 - The database driver uses Neon because Vercel's previous `@vercel/postgres` package is deprecated for new setups.
 
-## Verification
+## Testing
 
-Current local verification:
+```bash
+npm run test:unit          # Vitest unit tests
+npm run test:ct            # Playwright component tests
+npm run test:e2e           # Playwright E2E tests (starts its own Postgres + Next.js)
+npm run test:playwright    # Both component and E2E tests
+npm run lint
+npm run build
+```
 
-- `npm run lint`
-- `npm test`
-- `npm run build`
+The E2E tests use the same self-contained stack as the quick start — no external services needed.
