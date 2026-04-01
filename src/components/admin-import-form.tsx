@@ -34,11 +34,11 @@ export function AdminImportForm() {
           <textarea
             name="csvText"
             className={textAreaClassName()}
-            placeholder="invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited,event_2_plus_one_allowed,event_2_children_allowed,event_2_max_children"
+            placeholder="invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited"
           />
         </Field>
         {state.error ? (
-          <p className="rounded-2xl bg-[#f7dfd9] px-4 py-3 text-sm text-[#8a3f34]">
+          <p className="rounded-xl bg-error-bg px-4 py-3 text-sm text-error-text">
             {state.error}
           </p>
         ) : null}
@@ -48,15 +48,15 @@ export function AdminImportForm() {
       </form>
 
       {state.info ? (
-        <p className="rounded-2xl bg-[#eee7df] px-4 py-3 text-sm text-[#5e4b3e]">
+        <p className="rounded-xl bg-cream-dark px-4 py-3 text-sm text-ink-light">
           {state.info}
         </p>
       ) : null}
 
       {state.errors && state.errors.length > 0 ? (
         <SurfaceCard className="space-y-3">
-          <h3 className="font-serif text-2xl text-[#2f241c]">Validation issues</h3>
-          <ul className="space-y-2 text-sm text-[#7b4e43]">
+          <h3 className="font-serif text-2xl text-ink">Validation issues</h3>
+          <ul className="space-y-2 text-sm text-error-text">
             {state.errors.map((error) => (
               <li key={error}>{error}</li>
             ))}
@@ -67,7 +67,7 @@ export function AdminImportForm() {
       {state.preview && state.preview.length > 0 ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h3 className="font-serif text-2xl text-[#2f241c]">Preview</h3>
+            <h3 className="font-serif text-2xl text-ink">Preview</h3>
             <form action={commitImportAction}>
               <input type="hidden" name="previewPayload" value={state.previewPayload ?? ""} />
               <button type="submit" className={buttonClassName()}>
@@ -84,16 +84,8 @@ export function AdminImportForm() {
                   <Pill tone="warm">{group.invitationMode}</Pill>
                   <Pill tone="neutral">{group.locale}</Pill>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {group.event1Invited ? <Pill tone="success">Event One</Pill> : null}
-                  {group.event2Invited ? <Pill tone="success">Event Two</Pill> : null}
-                  {group.event2PlusOneAllowed ? <Pill tone="neutral">Plus one</Pill> : null}
-                  {group.event2ChildrenAllowed ? (
-                    <Pill tone="neutral">Children up to {group.event2MaxChildren}</Pill>
-                  ) : null}
-                </div>
-                <ul className="space-y-2 text-sm text-[#43342a]">
-                  {group.people.map((person) => (
+                <ul className="space-y-2 text-sm text-ink">
+                  {group.invitees.map((person) => (
                     <li key={`${group.externalId}-${person.fullName}`}>
                       {person.fullName}
                       {person.email ? ` | ${person.email}` : ""}

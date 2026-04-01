@@ -3,15 +3,16 @@ import Link from "next/link";
 import { logoutAdminAction, sendInvitationAction } from "@/src/app-actions/admin";
 import { AdminLoginForm } from "@/src/components/admin-login-form";
 import {
+  AdminPanel,
+  AdminShell,
   Eyebrow,
   Heading,
-  PageBackground,
+  InkBadge,
   PageContainer,
-  Pill,
   StatCard,
   SubtleText,
-  SurfaceCard,
   buttonClassName,
+  inputClassName,
 } from "@/src/components/ui";
 import { getDictionary } from "@/src/lib/i18n";
 import { isAdminAuthConfigured, isDatabaseConfigured } from "@/src/lib/env";
@@ -25,7 +26,6 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{
     status?: "all" | "pending" | "responded" | "opened";
-    event?: "all" | "event_1" | "event_2";
     search?: string;
   }>;
 }) {
@@ -33,15 +33,15 @@ export default async function AdminPage({
 
   if (!isDatabaseConfigured() || !isAdminAuthConfigured()) {
     return (
-      <PageBackground>
+      <AdminShell>
         <PageContainer className="items-center justify-center py-8 sm:py-14">
-          <SurfaceCard className="w-full max-w-3xl space-y-4">
+          <AdminPanel className="w-full max-w-3xl space-y-4">
             <Eyebrow>Setup</Eyebrow>
             <Heading className="text-4xl">{dictionary.errors.setupTitle}</Heading>
             <SubtleText>{dictionary.errors.setupBody}</SubtleText>
-          </SurfaceCard>
+          </AdminPanel>
         </PageContainer>
-      </PageBackground>
+      </AdminShell>
     );
   }
 
@@ -49,15 +49,15 @@ export default async function AdminPage({
 
   if (!session) {
     return (
-      <PageBackground>
+      <AdminShell>
         <PageContainer className="items-center justify-center py-8 sm:py-14">
-          <SurfaceCard className="w-full max-w-2xl space-y-5">
+          <AdminPanel className="w-full max-w-2xl space-y-5">
             <Eyebrow>{dictionary.admin.loginTitle}</Eyebrow>
             <Heading className="text-4xl">{dictionary.admin.loginDescription}</Heading>
             <AdminLoginForm />
-          </SurfaceCard>
+          </AdminPanel>
         </PageContainer>
-      </PageBackground>
+      </AdminShell>
     );
   }
 
@@ -65,15 +65,16 @@ export default async function AdminPage({
   const { rows, stats } = await listDashboardData(filters);
 
   return (
-    <PageBackground>
+    <AdminShell>
       <PageContainer className="gap-6 py-6 sm:py-10">
-        <SurfaceCard className="space-y-5">
+        <AdminPanel className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
               <Eyebrow>Admin dashboard</Eyebrow>
               <Heading>Invitation state at a glance</Heading>
               <SubtleText>
-                Manage invitation links, track RSVP progress, and export attendee data.
+                See who has opened their invitation, replied, and still needs a
+                follow-up.
               </SubtleText>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -102,52 +103,43 @@ export default async function AdminPage({
               </form>
             </div>
           </div>
-        </SurfaceCard>
+        </AdminPanel>
 
         <div className="grid gap-4 md:grid-cols-4">
           <StatCard label="Invitations" value={stats.invitations} />
-          <StatCard label="Named guests" value={stats.guests} />
+          <StatCard label="People" value={stats.guests} />
           <StatCard label="Opened" value={stats.opened} />
           <StatCard label="Waiting" value={stats.waiting} />
         </div>
 
-        <SurfaceCard className="space-y-4">
-          <form className="grid gap-4 md:grid-cols-[1.2fr_0.6fr_0.6fr_auto]">
+        <AdminPanel className="space-y-4">
+          <form className="grid gap-4 md:grid-cols-[1.2fr_0.6fr_auto]">
             <input
               type="search"
               name="search"
               defaultValue={filters.search ?? ""}
               placeholder="Search guest, email, or external ID"
-              className="rounded-2xl border border-[#dbc8bb] bg-[#fffdfa] px-4 py-3 text-sm"
+              className={inputClassName()}
             />
             <select
               name="status"
               defaultValue={filters.status ?? "all"}
-              className="rounded-2xl border border-[#dbc8bb] bg-[#fffdfa] px-4 py-3 text-sm"
+              className={inputClassName()}
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
               <option value="responded">Fully responded</option>
               <option value="opened">Opened</option>
             </select>
-            <select
-              name="event"
-              defaultValue={filters.event ?? "all"}
-              className="rounded-2xl border border-[#dbc8bb] bg-[#fffdfa] px-4 py-3 text-sm"
-            >
-              <option value="all">All events</option>
-              <option value="event_1">Event One</option>
-              <option value="event_2">Event Two</option>
-            </select>
             <button type="submit" className={buttonClassName()}>
               Filter
             </button>
           </form>
-        </SurfaceCard>
+        </AdminPanel>
 
         <div className="grid gap-4">
           {rows.map((row) => (
-            <SurfaceCard key={row.id} className="space-y-4">
+            <AdminPanel key={row.id} className="space-y-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
                   <Heading className="text-3xl">{row.primaryGuestName}</Heading>
@@ -156,28 +148,10 @@ export default async function AdminPage({
                     {row.externalId ? ` | ${row.externalId}` : ""}
                   </SubtleText>
                   <div className="flex flex-wrap gap-2">
-                    {row.invitedEvents.map((event) => (
-                      <Pill key={event} tone="warm">
-                        {event}
-                      </Pill>
-                    ))}
-                    {Object.entries(row.eventStatuses).map(([event, status]) => (
-                      <Pill
-                        key={`${row.id}-${event}`}
-                        tone={
-                          status === "attending"
-                            ? "success"
-                            : status === "declined"
-                              ? "muted"
-                              : "neutral"
-                        }
-                      >
-                        {event}: {status}
-                      </Pill>
-                    ))}
+                    <InkBadge tone={row.rsvpStatus === "attending" ? "success" : row.rsvpStatus === "declined" ? "muted" : "neutral"}>{row.rsvpStatus}</InkBadge>
                   </div>
                 </div>
-                <div className="grid gap-2 text-sm text-[#57463b]">
+                <div className="grid gap-2 text-sm text-ink-light">
                   <p>Access count: {row.accessCount}</p>
                   <p>Sent: {row.sentAt ? row.sentAt.toLocaleString() : "Not yet"}</p>
                 </div>
@@ -202,10 +176,10 @@ export default async function AdminPage({
                   </button>
                 </form>
               </div>
-            </SurfaceCard>
+            </AdminPanel>
           ))}
         </div>
       </PageContainer>
-    </PageBackground>
+    </AdminShell>
   );
 }

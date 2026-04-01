@@ -8,7 +8,7 @@ async function main() {
       primaryEmail: "alex@example.com",
       invitationMode: "household",
       locale: "en",
-      namedGuests: [
+      invitees: [
         {
           fullName: "Alex Rivera",
           email: "alex@example.com",
@@ -21,19 +21,26 @@ async function main() {
           kind: "adult",
           isPrimary: false,
         },
+        {
+          fullName: "",
+          email: null,
+          kind: "child",
+          isPrimary: false,
+        },
+        {
+          fullName: "",
+          email: null,
+          kind: "child",
+          isPrimary: false,
+        },
       ],
-      event1Invited: true,
-      event2Invited: true,
-      event2PlusOneAllowed: false,
-      event2ChildrenAllowed: true,
-      event2MaxChildren: 2,
     },
     {
       externalId: "demo-individual",
       primaryEmail: "maria@example.com",
       invitationMode: "individual",
       locale: "de",
-      namedGuests: [
+      invitees: [
         {
           fullName: "Maria Keller",
           email: "maria@example.com",
@@ -41,11 +48,6 @@ async function main() {
           isPrimary: true,
         },
       ],
-      event1Invited: false,
-      event2Invited: true,
-      event2PlusOneAllowed: true,
-      event2ChildrenAllowed: false,
-      event2MaxChildren: 0,
     },
   ]);
 

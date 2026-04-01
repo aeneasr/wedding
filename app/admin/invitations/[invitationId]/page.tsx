@@ -8,15 +8,17 @@ import {
 } from "@/src/components/admin-invitation-form";
 import { AdminRsvpForm } from "@/src/components/admin-rsvp-form";
 import {
+  AdminPanel,
+  AdminShell,
   Eyebrow,
   Heading,
-  PageBackground,
+  InkBadge,
   PageContainer,
-  Pill,
   SubtleText,
-  SurfaceCard,
   buttonClassName,
+  inputClassName,
 } from "@/src/components/ui";
+import { mapAttendeesToInvitees } from "@/src/lib/household";
 import { buildInvitationUrl } from "@/src/lib/urls";
 import { requireAdminSession } from "@/src/server/access";
 import {
@@ -25,25 +27,6 @@ import {
 } from "@/src/server/invitations";
 
 export const dynamic = "force-dynamic";
-
-function buildNamedGuestsText(values: Awaited<ReturnType<typeof getInvitationForAdmin>>) {
-  if (!values) {
-    return "";
-  }
-
-  return values.invitees
-    .map((invitee) =>
-      [
-        invitee.fullName,
-        invitee.email ?? "",
-        invitee.kind,
-        invitee.isPrimary ? "primary" : "",
-      ]
-        .filter(Boolean)
-        .join(" | "),
-    )
-    .join("\n");
-}
 
 export default async function AdminInvitationDetailPage({
   params,
@@ -65,17 +48,12 @@ export default async function AdminInvitationDetailPage({
     primaryEmail: bundle.invitation.primaryEmail,
     invitationMode: bundle.invitation.invitationMode,
     locale: bundle.invitation.locale,
-    namedGuestsText: buildNamedGuestsText(bundle),
-    event1Invited: bundle.events.some((event) => event.eventKey === "event_1"),
-    event2Invited: bundle.events.some((event) => event.eventKey === "event_2"),
-    event2PlusOneAllowed:
-      bundle.events.find((event) => event.eventKey === "event_2")?.plusOneAllowed ??
-      false,
-    event2ChildrenAllowed:
-      bundle.events.find((event) => event.eventKey === "event_2")?.childrenAllowed ??
-      false,
-    event2MaxChildren:
-      bundle.events.find((event) => event.eventKey === "event_2")?.maxChildren ?? 0,
+    invitees: bundle.invitees.map((invitee) => ({
+      fullName: invitee.fullName,
+      email: invitee.email ?? "",
+      kind: invitee.kind,
+      isPrimary: invitee.isPrimary,
+    })),
   };
 
   const invitationLink = buildInvitationUrl(
@@ -84,9 +62,9 @@ export default async function AdminInvitationDetailPage({
   );
 
   return (
-    <PageBackground>
+    <AdminShell>
       <PageContainer className="gap-6 py-6 sm:py-10">
-        <SurfaceCard className="space-y-5">
+        <AdminPanel className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
               <Eyebrow>Invitation detail</Eyebrow>
@@ -95,13 +73,6 @@ export default async function AdminInvitationDetailPage({
                   bundle.invitation.primaryEmail}
               </Heading>
               <SubtleText>{bundle.invitation.primaryEmail}</SubtleText>
-              <div className="flex flex-wrap gap-2">
-                {bundle.events.map((event) => (
-                  <Pill key={event.eventKey} tone="warm">
-                    {event.eventKey}
-                  </Pill>
-                ))}
-              </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <form action={sendInvitationAction}>
@@ -126,39 +97,38 @@ export default async function AdminInvitationDetailPage({
             </div>
           </div>
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-[#3b2d24]">Invitation link</span>
+            <span className="text-sm font-medium text-ink">Invitation link</span>
             <input
               readOnly
               value={invitationLink}
-              className="w-full rounded-2xl border border-[#dbc8bb] bg-[#fffdfa] px-4 py-3 text-sm text-[#2f241c]"
+              className={inputClassName()}
             />
           </label>
-        </SurfaceCard>
+        </AdminPanel>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <SurfaceCard>
+          <AdminPanel>
             <AdminInvitationForm initial={formValues} />
-          </SurfaceCard>
+          </AdminPanel>
           <div className="grid gap-6">
-            <SurfaceCard className="space-y-4">
+            <AdminPanel className="space-y-4">
               <Eyebrow>Current RSVP state</Eyebrow>
               {bundle.rsvps.length === 0 ? (
                 <SubtleText>No RSVP has been submitted yet.</SubtleText>
               ) : (
                 <div className="space-y-4">
                   {bundle.rsvps.map((rsvp) => (
-                    <div key={rsvp.id} className="rounded-[24px] bg-[#faf4ee] p-4">
+                    <div key={rsvp.id} className="rounded-xl bg-cream p-4">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-semibold text-[#2f241c]">{rsvp.eventKey}</p>
-                        <Pill tone={rsvp.status === "attending" ? "success" : rsvp.status === "declined" ? "muted" : "warm"}>
+                        <InkBadge tone={rsvp.status === "attending" ? "success" : rsvp.status === "declined" ? "muted" : "warm"}>
                           {rsvp.status}
-                        </Pill>
+                        </InkBadge>
                       </div>
-                      <ul className="mt-3 space-y-2 text-sm text-[#4f3d32]">
-                        {rsvp.attendees.map((attendee) => (
-                          <li key={attendee.id}>
-                            {attendee.fullName} | {attendee.attendeeType} |{" "}
-                            {attendee.isAttending ? "attending" : "not attending"}
+                      <ul className="mt-3 space-y-2 text-sm text-ink-light">
+                        {mapAttendeesToInvitees(bundle.invitees, rsvp.attendees).map((invitee) => (
+                          <li key={invitee.inviteeId}>
+                            {invitee.fullName} | {invitee.kind} |{" "}
+                            {invitee.attending ? "attending" : "not attending"}
                           </li>
                         ))}
                       </ul>
@@ -166,83 +136,40 @@ export default async function AdminInvitationDetailPage({
                   ))}
                 </div>
               )}
-            </SurfaceCard>
+            </AdminPanel>
 
-            {bundle.events.map((event) => {
-              const rsvp = bundle.rsvps.find((r) => r.eventKey === event.eventKey);
-              const invitees = bundle.invitees.map((invitee) => {
-                const response = rsvp?.attendees.find((a) => a.inviteeId === invitee.id);
-                return {
-                  inviteeId: invitee.id,
-                  fullName: invitee.fullName,
-                  kind: invitee.kind,
-                  attending: response?.isAttending ?? false,
-                  dietaryRequirements: response?.dietaryRequirements ?? "",
-                  phoneNumber: response?.phoneNumber ?? "",
-                };
-              });
+            <AdminPanel className="space-y-4">
+              <Eyebrow>Update RSVP</Eyebrow>
+              <AdminRsvpForm
+                invitationId={bundle.invitation.id}
+                locale={bundle.invitation.locale}
+                invitationMode={bundle.invitation.invitationMode}
+                invitees={mapAttendeesToInvitees(bundle.invitees, bundle.rsvps[0]?.attendees ?? [])}
+              />
+            </AdminPanel>
 
-              const existingPlusOne = rsvp?.attendees.find(
-                (a) => a.attendeeType === "plus_one",
-              );
-              const existingChildren =
-                rsvp?.attendees.filter(
-                  (a) => a.attendeeType === "child" && !a.inviteeId,
-                ) ?? [];
-
-              return (
-                <SurfaceCard key={event.eventKey} className="space-y-4">
-                  <Eyebrow>RSVP for {event.eventKey}</Eyebrow>
-                  <AdminRsvpForm
-                    invitationId={bundle.invitation.id}
-                    locale={bundle.invitation.locale}
-                    eventKey={event.eventKey}
-                    invitees={invitees}
-                    plusOneAllowed={event.plusOneAllowed}
-                    childrenAllowed={event.childrenAllowed}
-                    maxChildren={event.maxChildren}
-                    initialPlusOne={
-                      existingPlusOne
-                          ? {
-                            attending: true,
-                            fullName: existingPlusOne.fullName,
-                            dietaryRequirements:
-                              existingPlusOne.dietaryRequirements ?? "",
-                            phoneNumber: existingPlusOne.phoneNumber ?? "",
-                          }
-                        : undefined
-                    }
-                    initialChildren={existingChildren.map((c) => ({
-                      fullName: c.fullName,
-                      dietaryRequirements: c.dietaryRequirements ?? "",
-                    }))}
-                  />
-                </SurfaceCard>
-              );
-            })}
-
-            <SurfaceCard className="space-y-4">
+            <AdminPanel className="space-y-4">
               <Eyebrow>Recent activity</Eyebrow>
               <div className="space-y-3">
                 {activity.length === 0 ? (
                   <SubtleText>No activity recorded yet.</SubtleText>
                 ) : (
                   activity.map((item) => (
-                    <div key={item.id} className="rounded-[22px] bg-[#faf4ee] p-4">
-                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8f6e57]">
+                    <div key={item.id} className="rounded-xl bg-cream p-4">
+                      <p className="text-sm font-medium uppercase tracking-wide text-sage-muted">
                         {item.type}
                       </p>
-                      <p className="mt-2 text-sm text-[#46362c]">
+                      <p className="mt-2 text-sm text-ink-light">
                         {item.createdAt.toLocaleString()}
                       </p>
                     </div>
                   ))
                 )}
               </div>
-            </SurfaceCard>
+            </AdminPanel>
           </div>
         </div>
       </PageContainer>
-    </PageBackground>
+    </AdminShell>
   );
 }
