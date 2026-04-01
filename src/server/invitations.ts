@@ -444,7 +444,6 @@ export async function sendInvitationEmailForInvitation(
       bundle.invitation.id,
       bundle.invitation.tokenVersion,
     ),
-    invitedEvents: [],
   });
 
   if (!("skipped" in result)) {
@@ -693,7 +692,6 @@ export async function saveGuestRsvp(input: {
         bundle.invitation.id,
         bundle.invitation.tokenVersion,
       ),
-      eventKey: "event_2",
     });
   }
 

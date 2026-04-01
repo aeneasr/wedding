@@ -1,6 +1,5 @@
 import {
   defaultLocale,
-  type EventKey,
   type Locale,
 } from "@/src/lib/constants";
 
@@ -13,6 +12,9 @@ type Dictionary = {
     description: string;
     primaryCta: string;
     recoverCta: string;
+    emailPrivacyNote: string;
+    imageAlt: string;
+    imageLabel: string;
     privacyTitle: string;
     privacyBody: string;
     features: string[];
@@ -22,15 +24,16 @@ type Dictionary = {
     description: string;
     emailLabel: string;
     submit: string;
+    missingEmail: string;
     neutralSuccess: string;
+    helpEyebrow: string;
+    helpTitle: string;
+    helpBody: string;
   };
   guest: {
-    overview: string;
     rsvp: string;
     details: string;
-    calendar: string;
     update: string;
-    invitedEvents: string;
     privateAccess: string;
     logout: string;
     schedule: string;
@@ -39,41 +42,37 @@ type Dictionary = {
     responsePending: string;
     responseAttending: string;
     responseDeclined: string;
-    noAccess: string;
     backToOverview: string;
     securedByLink: string;
     addToCalendar: string;
-    eventDetails: string;
     dietaryRequirements: string;
     phoneNumber: string;
+    fullName: string;
+    personType: string;
+    adult: string;
+    child: string;
     yes: string;
     no: string;
     attending: string;
     notAttending: string;
-    plusOne: string;
-    children: string;
-    bringPlusOne: string;
-    bringChildren: string;
-    childrenCount: string;
-    childName: string;
     saveRsvp: string;
     saved: string;
-    informationHidden: string;
     recoverLink: string;
-    mainGuests: string;
-    plusOneName: string;
-    invitedPerson: string;
+    primaryGuest: string;
+    householdMember: string;
     updateHint: string;
     summaryLead: string;
-    contactHeading: string;
+    venue: string;
+    address: string;
+    timing: string;
+    saveError: string;
   };
   admin: {
     loginTitle: string;
     loginDescription: string;
-    passwordLabel: string;
-    submit: string;
   };
   errors: {
+    linkEyebrow: string;
     invalidLinkTitle: string;
     invalidLinkBody: string;
     expiredLinkTitle: string;
@@ -84,10 +83,9 @@ type Dictionary = {
   emails: {
     invitationSubject: string;
     recoverySubject: string;
-    confirmationSubject: Record<EventKey, string>;
+    confirmationSubject: string;
     greeting: string;
     invitationIntro: string;
-    invitedTo: string;
     manageRsvp: string;
     reminder: string;
     recoveryIntro: string;
@@ -103,111 +101,108 @@ const dictionaries: Record<Locale, Dictionary> = {
       de: "German",
     },
     landing: {
-      eyebrow: "Invitation-only access",
-      title: "A private RSVP space for each invited guest",
+      eyebrow: "Wedding invitation",
+      title: "Your wedding invitation and RSVP",
       description:
-        "Open your personal invitation link to see the event details that apply to you, confirm attendance, and update your response at any time.",
+        "Use your personal invitation link to see the celebrations on your invitation, send your RSVP, and return later if your plans change.",
       primaryCta: "Open invitation",
-      recoverCta: "Recover my link",
-      privacyTitle: "Private by design",
+      recoverCta: "Find my invitation link",
+      emailPrivacyNote: "Invitation links are shared privately by email",
+      imageAlt:
+        "Wedding invitation for Anna and Aeneas with the message We're getting married and the date 22.08.2026.",
+      imageLabel: "Wedding invitation artwork",
+      privacyTitle: "Shared only with invited guests",
       privacyBody:
-        "Guests only see the events they are invited to. Invitation links are created by the organizers and sent directly by email.",
+        "Each invitation link opens only the celebrations and details meant for that guest or household.",
       features: [
-        "Separate RSVP flows for both wedding events",
-        "Updates allowed through the original secure invitation link",
-        "Practical event details only for invited guests",
+        "Reply separately for each wedding event",
+        "Return with the same invitation link if plans change",
+        "See the practical details that belong to your invitation",
       ],
     },
     recover: {
-      title: "Recover your invitation link",
+      title: "Find your invitation link",
       description:
-        "Enter the email address already associated with your invitation. If we find a match, we will resend your access link.",
+        "Enter the email address used for your invitation and we will send the same link again if we find a match.",
       emailLabel: "Invitation email address",
-      submit: "Send recovery email",
+      submit: "Send invitation link",
+      missingEmail: "Enter the email address associated with your invitation.",
       neutralSuccess:
-        "If that email address matches an existing invitation, a recovery message has been sent.",
+        "If that email address matches an invitation, we have sent the link again.",
+      helpEyebrow: "Invitation help",
+      helpTitle: "We can only resend an existing invitation",
+      helpBody:
+        "If the email address matches one already on the guest list, we will send the same invitation link again.",
     },
     guest: {
-      overview: "Overview",
       rsvp: "RSVP",
       details: "Details",
-      calendar: "Calendar",
-      update: "Update response",
-      invitedEvents: "Your invited events",
-      privateAccess: "Private invitation area",
-      logout: "Clear this browser session",
+      update: "Change reply",
+      privateAccess: "Your invitation",
+      logout: "Logout",
       schedule: "Schedule",
       logistics: "Practical information",
       status: "Status",
       responsePending: "Pending",
       responseAttending: "Attending",
       responseDeclined: "Declined",
-      noAccess: "You are not invited to this event.",
-      backToOverview: "Back to overview",
-      securedByLink: "Access is secured by your invitation link.",
+      backToOverview: "Back to invitation",
+      securedByLink: "Keep your invitation link handy.",
       addToCalendar: "Add to calendar",
-      eventDetails: "Event details",
       dietaryRequirements: "Dietary requirements",
       phoneNumber: "Phone number",
+      fullName: "Full name",
+      personType: "Person type",
+      adult: "Adult",
+      child: "Child",
       yes: "Yes",
       no: "No",
       attending: "Attending",
       notAttending: "Not attending",
-      plusOne: "Plus one",
-      children: "Children",
-      bringPlusOne: "Bringing a plus one",
-      bringChildren: "Bringing children",
-      childrenCount: "Number of children",
-      childName: "Child name",
       saveRsvp: "Save RSVP",
       saved: "Your RSVP has been saved.",
-      informationHidden:
-        "Guests only see information for the events they are invited to.",
-      recoverLink: "Recover link",
-      mainGuests: "Named guests",
-      plusOneName: "Plus-one name",
-      invitedPerson: "Invited guest",
+      recoverLink: "Find invitation link",
+      primaryGuest: "Primary guest",
+      householdMember: "Household member",
       updateHint:
-        "You can return later with the same invitation link to update any answer.",
-      summaryLead: "Your invitation includes the following event access.",
-      contactHeading: "Contact details for attending adults",
+        "Use that same link any time you need to change your reply.",
+      summaryLead: "Welcome to your wedding invitation.",
+      venue: "Venue",
+      address: "Address",
+      timing: "Timing",
+      saveError: "Unable to save your RSVP right now.",
     },
     admin: {
       loginTitle: "Admin access",
       loginDescription:
         "Use the shared organizer password to manage invitations and RSVP data.",
-      passwordLabel: "Shared password",
-      submit: "Open dashboard",
     },
     errors: {
-      invalidLinkTitle: "Invitation link not recognized",
+      linkEyebrow: "Invitation link",
+      invalidLinkTitle: "This invitation link is not working",
       invalidLinkBody:
-        "This link is invalid or has already been rotated. Request a new link using the invitation email address already on file.",
-      expiredLinkTitle: "Invitation access has expired",
+        "This link is no longer valid. Enter the email address on your invitation and we will send you the latest link.",
+      expiredLinkTitle: "This invitation has closed",
       expiredLinkBody:
-        "The linked invitation is no longer active because all invited events have already passed.",
+        "This invitation link is no longer active because the celebrations on it have already taken place.",
       setupTitle: "Configuration required",
       setupBody:
         "The application is missing one or more required environment variables.",
     },
     emails: {
-      invitationSubject: "Your wedding invitation link",
-      recoverySubject: "Your wedding invitation access link",
-      confirmationSubject: {
-        event_1: "RSVP confirmation for Event One",
-        event_2: "RSVP confirmation for Event Two",
-      },
+      invitationSubject: "Your wedding invitation",
+      recoverySubject: "Your wedding invitation link",
+      confirmationSubject: "Your RSVP for the Wedding Celebration",
       greeting: "Hello",
       invitationIntro:
-        "Your personal invitation page is ready. Use the secure link below to view your invitation details and submit or update your RSVP.",
-      invitedTo: "Invited events",
-      manageRsvp: "Manage RSVP",
+        "Use the link below to open your invitation, see your celebration details, and send or update your RSVP.",
+      manageRsvp: "Open invitation",
       reminder:
-        "The same link will remain valid, so you can come back later if your plans change.",
+        "Keep this email so you can return with the same link if your plans change.",
       recoveryIntro:
-        "A request was made to recover your invitation link. Use the same secure link below to access your private invitation area again.",
+        "You asked us to resend your invitation link. Use the link below to reopen your invitation and RSVP whenever you are ready.",
       confirmationIntro:
-        "Thank you for confirming. Your event details and RSVP update link are included below.",
+        "Thank you for replying. Your event details and invitation link are included below.",
     },
   },
   de: {
@@ -217,116 +212,112 @@ const dictionaries: Record<Locale, Dictionary> = {
       de: "Deutsch",
     },
     landing: {
-      eyebrow: "Nur mit Einladung",
-      title: "Ein privater RSVP-Bereich fur jeden eingeladenen Gast",
+      eyebrow: "Hochzeitseinladung",
+      title: "Deine Hochzeitseinladung und RSVP",
       description:
-        "Offne deinen personlichen Einladungslink, um nur die fur dich relevanten Veranstaltungsdetails zu sehen, deine Teilnahme zu bestatigen und deine Antwort spater zu aktualisieren.",
-      primaryCta: "Einladung offnen",
-      recoverCta: "Link erneut anfordern",
-      privacyTitle: "Privat gestaltet",
+        "Mit deinem persönlichen Einladungslink kannst du uns deine Zu- oder Absage mitteilen und später bei Bedarf Änderungen vornehmen.",
+      primaryCta: "Einladung öffnen",
+      recoverCta: "Meinen Einladungslink finden",
+      emailPrivacyNote: "Einladungslinks werden privat per E-Mail geteilt",
+      imageAlt:
+        "Hochzeitseinladung für Anna und Aeneas mit der Botschaft Wir heiraten und dem Datum 22.08.2026.",
+      imageLabel: "Darstellung der Hochzeitseinladung",
+      privacyTitle: "Nur für eingeladene Gäste",
       privacyBody:
-        "Gaste sehen nur die Veranstaltungen, zu denen sie eingeladen sind. Die Einladungslinks werden von den Organisatoren erstellt und direkt per E-Mail versendet.",
+        "Jeder Einladungslink zeigt die Feiern und Informationen, die für den jeweiligen Gast oder Haushalt gedacht sind.",
       features: [
-        "Getrennte RSVP-Ablaufe fur beide Hochzeitsveranstaltungen",
-        "Aktualisierungen jederzeit uber den ursprunglichen sicheren Link",
-        "Praktische Veranstaltungsdetails nur fur eingeladene Gaste",
+        "Für jede Feier separat antworten",
+        "Mit demselben Einladungslink später wiederkommen",
+        "Nur die Details sehen, die zu deiner Einladung gehören",
       ],
     },
     recover: {
-      title: "Einladungslink erneut erhalten",
+      title: "Deinen Einladungslink finden",
       description:
-        "Gib die E-Mail-Adresse ein, die bereits mit deiner Einladung verknupft ist. Wenn wir einen Treffer finden, schicken wir den Zugang erneut.",
+        "Gib die E-Mail-Adresse an, die für deine Einladung verwendet wurde. Wenn wir einen Treffer finden, schicken wir dir denselben Link erneut.",
       emailLabel: "E-Mail-Adresse der Einladung",
-      submit: "Wiederherstellungs-E-Mail senden",
+      submit: "Einladungslink senden",
+      missingEmail: "Gib die E-Mail-Adresse ein, die zu deiner Einladung gehört.",
       neutralSuccess:
-        "Wenn diese E-Mail-Adresse zu einer bestehenden Einladung gehort, wurde eine Nachricht mit dem Zugangslink gesendet.",
+        "Wenn diese E-Mail-Adresse zu einer Einladung gehört, haben wir den Link erneut gesendet.",
+      helpEyebrow: "Hilfe zur Einladung",
+      helpTitle: "Wir können nur eine bestehende Einladung erneut senden",
+      helpBody:
+        "Wenn die E-Mail-Adresse bereits auf der Gästeliste steht, schicken wir denselben Einladungslink erneut.",
     },
     guest: {
-      overview: "Uberblick",
       rsvp: "RSVP",
       details: "Details",
-      calendar: "Kalender",
-      update: "Antwort aktualisieren",
-      invitedEvents: "Deine eingeladenen Veranstaltungen",
-      privateAccess: "Privater Einladungsbereich",
-      logout: "Browser-Sitzung entfernen",
+      update: "Antwort ändern",
+      privateAccess: "Deine Einladung",
+      logout: "Abmelden",
       schedule: "Ablauf",
       logistics: "Praktische Informationen",
       status: "Status",
       responsePending: "Ausstehend",
       responseAttending: "Zugesagt",
       responseDeclined: "Abgesagt",
-      noAccess: "Du bist zu dieser Veranstaltung nicht eingeladen.",
-      backToOverview: "Zuruck zum Uberblick",
-      securedByLink: "Der Zugang ist durch deinen Einladungslink geschutzt.",
-      addToCalendar: "Zum Kalender hinzufugen",
-      eventDetails: "Veranstaltungsdetails",
-      dietaryRequirements: "Ernahrungswunsche",
+      backToOverview: "Zurück zur Einladung",
+      securedByLink: "Beware deinen Einladungslink gut auf.",
+      addToCalendar: "Zum Kalender hinzufügen",
+      dietaryRequirements: "Ernährungswünsche",
       phoneNumber: "Telefonnummer",
+      fullName: "Vollständiger Name",
+      personType: "Personentyp",
+      adult: "Erwachsen",
+      child: "Kind",
       yes: "Ja",
       no: "Nein",
       attending: "Dabei",
       notAttending: "Nicht dabei",
-      plusOne: "Begleitperson",
-      children: "Kinder",
-      bringPlusOne: "Begleitperson mitbringen",
-      bringChildren: "Kinder mitbringen",
-      childrenCount: "Anzahl der Kinder",
-      childName: "Name des Kindes",
       saveRsvp: "RSVP speichern",
       saved: "Deine RSVP wurde gespeichert.",
-      informationHidden:
-        "Gaste sehen nur Informationen zu den Veranstaltungen, fur die sie freigeschaltet sind.",
-      recoverLink: "Link wiederherstellen",
-      mainGuests: "Namentlich eingeladene Gaste",
-      plusOneName: "Name der Begleitperson",
-      invitedPerson: "Eingeladener Gast",
+      recoverLink: "Einladungslink finden",
+      primaryGuest: "Hauptgast",
+      householdMember: "Haushaltsmitglied",
       updateHint:
-        "Du kannst spater mit demselben Einladungslink zuruckkehren und jede Antwort andern.",
-      summaryLead:
-        "Deine Einladung umfasst Zugriff auf die folgenden Veranstaltungen.",
-      contactHeading: "Kontaktdaten fur teilnehmende Erwachsene",
+        "Mit dem Einladungs-Link kannst du deine Antworten jederzeit ändern.",
+      summaryLead: "Schön, dass du dabei bist.",
+      venue: "Ort",
+      address: "Adresse",
+      timing: "Zeit",
+      saveError: "Deine RSVP kann gerade nicht gespeichert werden.",
     },
     admin: {
       loginTitle: "Admin-Zugang",
       loginDescription:
-        "Nutze das gemeinsame Organisatoren-Passwort, um Einladungen und RSVP-Daten zu verwalten.",
-      passwordLabel: "Gemeinsames Passwort",
-      submit: "Dashboard offnen",
+        "Bitte gib das Passwort ein.",
     },
     errors: {
-      invalidLinkTitle: "Einladungslink nicht erkannt",
+      linkEyebrow: "Einladungslink",
+      invalidLinkTitle: "Dieser Einladungslink funktioniert nicht mehr",
       invalidLinkBody:
-        "Dieser Link ist ungultig oder wurde ersetzt. Fordere mit der hinterlegten E-Mail-Adresse einen neuen Link an.",
-      expiredLinkTitle: "Einladungszugang abgelaufen",
+        "Dieser Link ist nicht mehr gültig. Gib die E-Mail-Adresse deiner Einladung ein, dann schicken wir dir den aktuellen Link.",
+      expiredLinkTitle: "Diese Einladung ist geschlossen",
       expiredLinkBody:
-        "Diese Einladung ist nicht mehr aktiv, weil alle damit verbundenen Veranstaltungen bereits vorbei sind.",
+        "Dieser Einladungslink ist nicht mehr aktiv, weil die darin enthaltenen Feiern bereits vorbei sind.",
       setupTitle: "Konfiguration erforderlich",
       setupBody:
         "Der Anwendung fehlen eine oder mehrere erforderliche Umgebungsvariablen.",
     },
     emails: {
-      invitationSubject: "Dein Hochzeits-Einladungslink",
-      recoverySubject: "Dein Zugangslink zur Hochzeitseinladung",
-      confirmationSubject: {
-        event_1: "RSVP-Bestatigung fur Veranstaltung Eins",
-        event_2: "RSVP-Bestatigung fur Veranstaltung Zwei",
-      },
+      invitationSubject: "Deine Hochzeitseinladung",
+      recoverySubject: "Dein Link zur Hochzeitseinladung",
+      confirmationSubject: "Deine RSVP für die Hochzeitsfeier",
       greeting: "Hallo",
       invitationIntro:
-        "Deine personliche Einladungsseite ist bereit. Nutze den sicheren Link unten, um deine Einladungsdetails anzusehen und deine RSVP-Antwort zu senden oder zu aktualisieren.",
-      invitedTo: "Eingeladene Veranstaltungen",
-      manageRsvp: "RSVP verwalten",
+        "Nutze den Link unten, um deine Einladung zu öffnen, deine Details anzusehen und deine RSVP zu senden oder zu aktualisieren.",
+      manageRsvp: "Einladung öffnen",
       reminder:
-        "Derselbe Link bleibt gultig, damit du spater bei Anderungen erneut zuruckkehren kannst.",
+        "Behalte diese E-Mail, damit du mit demselben Link später wiederkommen kannst, falls sich deine Pläne ändern.",
       recoveryIntro:
-        "Es wurde eine Anfrage gestellt, deinen Einladungslink erneut zu senden. Nutze den sicheren Link unten, um wieder auf deinen privaten Bereich zuzugreifen.",
+        "Du hast deinen Einladungslink erneut angefordert. Mit dem Link unten kannst du deine Einladung wieder öffnen und antworten, wann immer es für dich passt.",
       confirmationIntro:
-        "Vielen Dank fur deine Zusage. Deine Veranstaltungsdetails und dein RSVP-Aktualisierungslink sind unten enthalten.",
+        "Danke für deine Antwort. Deine Details und dein Einladungslink stehen unten für dich bereit.",
     },
   },
 };
 
 export function getDictionary(locale?: string | null) {
-  return dictionaries[(locale as Locale) ?? defaultLocale] ?? dictionaries.en;
+  return dictionaries[(locale as Locale) ?? defaultLocale] ?? dictionaries[defaultLocale];
 }
