@@ -3,12 +3,12 @@
 import { redirect } from "next/navigation";
 
 import { parseInvitationCsv } from "@/src/lib/csv";
+import { defaultLocale } from "@/src/lib/constants";
 import { isAdminAuthConfigured, isDatabaseConfigured } from "@/src/lib/env";
 import { verifyAdminPassword } from "@/src/lib/crypto";
 import { clearAdminSession, setAdminSession } from "@/src/lib/session";
-import { adminInvitationSchema, namedGuestInputSchema } from "@/src/lib/validation";
+import { adminInvitationSchema } from "@/src/lib/validation";
 import { requireAdminSession } from "@/src/server/access";
-import type { EventKey } from "@/src/lib/constants";
 import {
   saveGuestRsvp,
   saveInvitation,
@@ -30,46 +30,18 @@ export type ImportPreviewState = {
     primaryEmail: string;
     invitationMode: string;
     locale: string;
-    people: Array<{
+    invitees: Array<{
       fullName: string;
       email: string | null;
       kind: string;
       isPrimary: boolean;
     }>;
-    event1Invited: boolean;
-    event2Invited: boolean;
-    event2PlusOneAllowed: boolean;
-    event2ChildrenAllowed: boolean;
-    event2MaxChildren: number;
   }>;
   errors?: string[];
 };
 
 function parseBoolean(value: FormDataEntryValue | null) {
   return value === "on" || value === "true" || value === "1" || value === "yes";
-}
-
-function parseNamedGuests(raw: string) {
-  const lines = raw
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return lines.map((line, index) => {
-    const [name, email = "", kind = "adult", primary = ""] = line
-      .split("|")
-      .map((part) => part.trim());
-
-    return namedGuestInputSchema.parse({
-      fullName: name,
-      email,
-      kind: kind || "adult",
-      isPrimary:
-        primary.toLowerCase() === "primary" ||
-        primary.toLowerCase() === "true" ||
-        index === 0,
-    });
-  });
 }
 
 export async function loginAdminAction(
@@ -108,26 +80,28 @@ export async function saveInvitationAction(
   let invitationId: string;
 
   try {
-    const namedGuests = parseNamedGuests(String(formData.get("namedGuests") ?? ""));
+    const invitees = JSON.parse(
+      String(formData.get("inviteesPayload") ?? "[]"),
+    ) as Array<{
+      fullName: string;
+      email?: string | null;
+      kind: "adult" | "child";
+      isPrimary: boolean;
+    }>;
     const validated = adminInvitationSchema.parse({
       primaryEmail: String(formData.get("primaryEmail") ?? ""),
       invitationMode: String(formData.get("invitationMode") ?? "individual"),
-      locale: String(formData.get("locale") ?? "en"),
-      namedGuests,
-      event1Invited: parseBoolean(formData.get("event1Invited")),
-      event2Invited: parseBoolean(formData.get("event2Invited")),
-      event2PlusOneAllowed: parseBoolean(formData.get("event2PlusOneAllowed")),
-      event2ChildrenAllowed: parseBoolean(formData.get("event2ChildrenAllowed")),
-      event2MaxChildren: Number(formData.get("event2MaxChildren") ?? 0),
+      locale: String(formData.get("locale") ?? defaultLocale),
+      invitees,
     });
 
     invitationId = await saveInvitation({
       id: String(formData.get("id") ?? "") || undefined,
       externalId: String(formData.get("externalId") ?? "") || null,
       ...validated,
-      namedGuests: validated.namedGuests.map((guest) => ({
-        ...guest,
-        email: guest.email || null,
+      invitees: validated.invitees.map((invitee) => ({
+        ...invitee,
+        email: invitee.email || null,
       })),
     });
   } catch (error) {
@@ -207,17 +181,12 @@ export async function commitImportAction(formData: FormData) {
       primaryEmail: group.primaryEmail,
       invitationMode: group.invitationMode as "individual" | "household",
       locale: group.locale as "en" | "de",
-      namedGuests: group.people.map((person) => ({
-        fullName: person.fullName,
-        email: person.email,
-        kind: person.kind as "adult" | "child",
-        isPrimary: person.isPrimary,
+      invitees: group.invitees.map((invitee) => ({
+        fullName: invitee.fullName,
+        email: invitee.email,
+        kind: invitee.kind as "adult" | "child",
+        isPrimary: invitee.isPrimary,
       })),
-      event1Invited: group.event1Invited,
-      event2Invited: group.event2Invited,
-      event2PlusOneAllowed: group.event2PlusOneAllowed,
-      event2ChildrenAllowed: group.event2ChildrenAllowed,
-      event2MaxChildren: group.event2MaxChildren,
     })),
   );
 
@@ -250,12 +219,10 @@ export async function saveAdminRsvpAction(
   await requireAdminSession();
 
   const invitationId = String(formData.get("invitationId") ?? "");
-  const eventKey = String(formData.get("eventKey") ?? "") as EventKey;
   const payload = JSON.parse(String(formData.get("payload") ?? "{}"));
 
   const result = await saveGuestRsvp({
     invitationId,
-    eventKey,
     payload,
     skipEmail: true,
   });

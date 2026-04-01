@@ -13,19 +13,19 @@ import { getDb } from "@/src/db";
 import {
   attendeeResponses,
   invitationActivity,
-  invitationEvents,
   invitations,
   invitees,
   recoveryRequests,
   rsvps,
 } from "@/src/db/schema";
 import {
+  normalizeInviteeInputs,
+  type HouseholdInviteeInput,
+} from "@/src/lib/household";
+import {
   type ActivityType,
-  type EventKey,
   type InvitationMode,
-  type InviteeKind,
   type Locale,
-  type RsvpStatus,
   recoveryMaxPerEmailPerHour,
   recoveryMaxPerIpPerHour,
 } from "@/src/lib/constants";
@@ -40,14 +40,12 @@ import { buildAttendeeRows } from "@/src/lib/csv-export";
 
 type InvitationRecord = typeof invitations.$inferSelect;
 type InviteeRecord = typeof invitees.$inferSelect;
-type InvitationEventRecord = typeof invitationEvents.$inferSelect;
 type RsvpRecord = typeof rsvps.$inferSelect;
 type AttendeeResponseRecord = typeof attendeeResponses.$inferSelect;
 
 export type InvitationBundle = {
   invitation: InvitationRecord;
   invitees: InviteeRecord[];
-  events: InvitationEventRecord[];
   rsvps: Array<
     RsvpRecord & {
       attendees: AttendeeResponseRecord[];
@@ -61,31 +59,24 @@ export type SaveInvitationInput = {
   primaryEmail: string;
   invitationMode: InvitationMode;
   locale: Locale;
-  namedGuests: Array<{
-    fullName: string;
-    email?: string | null;
-    kind: InviteeKind;
-    isPrimary: boolean;
-  }>;
-  event1Invited: boolean;
-  event2Invited: boolean;
-  event2PlusOneAllowed: boolean;
-  event2ChildrenAllowed: boolean;
-  event2MaxChildren: number;
+  invitees: HouseholdInviteeInput[];
 };
 
 export type DashboardFilters = {
   search?: string;
   status?: "all" | "pending" | "responded" | "opened";
-  event?: "all" | EventKey;
 };
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-function getInvitedEventKeys(bundle: InvitationBundle) {
-  return bundle.events.map((event) => event.eventKey);
+function normalizeInvitationInvitees(input: SaveInvitationInput) {
+  return normalizeInviteeInputs(input.invitees).map((invitee, index) => ({
+    ...invitee,
+    isPrimary: index === 0,
+    kind: index === 0 ? ("adult" as const) : invitee.kind,
+  }));
 }
 
 function getPrimaryGuest(bundle: InvitationBundle) {
@@ -96,35 +87,16 @@ function getPrimaryGuest(bundle: InvitationBundle) {
   );
 }
 
-function getRsvpForEvent(bundle: InvitationBundle, eventKey: EventKey) {
-  return bundle.rsvps.find((rsvp) => rsvp.eventKey === eventKey) ?? null;
-}
-
 function isInvitationExpired(bundle: InvitationBundle) {
-  return Date.now() > getInvitationExpiry(getInvitedEventKeys(bundle));
-}
-
-function getEventStatus(bundle: InvitationBundle, eventKey: EventKey): RsvpStatus | null {
-  if (!bundle.events.some((event) => event.eventKey === eventKey)) {
-    return null;
-  }
-
-  return getRsvpForEvent(bundle, eventKey)?.status ?? "pending";
+  return Date.now() > getInvitationExpiry();
 }
 
 function hasFullyResponded(bundle: InvitationBundle) {
-  const invitedEventKeys = getInvitedEventKeys(bundle);
-  return invitedEventKeys.every((eventKey) => getEventStatus(bundle, eventKey) !== "pending");
+  return bundle.rsvps.length > 0 && bundle.rsvps[0]?.status !== "pending";
 }
 
 function buildInvitationSummary(bundle: InvitationBundle) {
   const primaryGuest = getPrimaryGuest(bundle);
-  const eventStatuses = Object.fromEntries(
-    getInvitedEventKeys(bundle).map((eventKey) => [
-      eventKey,
-      getEventStatus(bundle, eventKey) ?? "pending",
-    ]),
-  ) as Record<EventKey, RsvpStatus>;
 
   return {
     id: bundle.invitation.id,
@@ -133,13 +105,12 @@ function buildInvitationSummary(bundle: InvitationBundle) {
     primaryGuestName: primaryGuest?.fullName ?? bundle.invitation.primaryEmail,
     invitationMode: bundle.invitation.invitationMode,
     locale: bundle.invitation.locale,
-    invitedEvents: getInvitedEventKeys(bundle),
     guestCount: bundle.invitees.length,
     accessCount: bundle.invitation.accessCount,
     firstOpenedAt: bundle.invitation.firstOpenedAt,
     lastOpenedAt: bundle.invitation.lastOpenedAt,
     sentAt: bundle.invitation.sentAt,
-    eventStatuses,
+    rsvpStatus: bundle.rsvps[0]?.status ?? "pending",
     responded: hasFullyResponded(bundle),
     pending: !hasFullyResponded(bundle),
   };
@@ -149,13 +120,11 @@ async function recordActivity(
   invitationId: string,
   type: ActivityType,
   metadata: Record<string, unknown> | null = null,
-  eventKey?: EventKey,
 ) {
   await getDb().insert(invitationActivity).values({
     invitationId,
     type,
     metadata,
-    eventKey,
   });
 }
 
@@ -175,18 +144,14 @@ async function loadBundlesByIds(invitationIds?: string[]) {
   }
 
   const ids = invitationRows.map((row) => row.id);
-  const [inviteeRows, eventRows, rsvpRows, attendeeRows] = await Promise.all([
+  const [inviteeRows, rsvpRows, attendeeRows] = await Promise.all([
     db.query.invitees.findMany({
       where: inArray(invitees.invitationId, ids),
-      orderBy: [desc(invitees.isPrimary), asc(invitees.fullName)],
-    }),
-    db.query.invitationEvents.findMany({
-      where: inArray(invitationEvents.invitationId, ids),
-      orderBy: asc(invitationEvents.eventKey),
+      orderBy: [desc(invitees.isPrimary), asc(invitees.createdAt), asc(invitees.fullName)],
     }),
     db.query.rsvps.findMany({
       where: inArray(rsvps.invitationId, ids),
-      orderBy: asc(rsvps.eventKey),
+      orderBy: asc(rsvps.updatedAt),
     }),
     db.query.attendeeResponses.findMany({
       orderBy: [asc(attendeeResponses.sortOrder), asc(attendeeResponses.fullName)],
@@ -203,11 +168,6 @@ async function loadBundlesByIds(invitationIds?: string[]) {
     inviteeMap.set(row.invitationId, [...(inviteeMap.get(row.invitationId) ?? []), row]);
   });
 
-  const eventMap = new Map<string, InvitationEventRecord[]>();
-  eventRows.forEach((row) => {
-    eventMap.set(row.invitationId, [...(eventMap.get(row.invitationId) ?? []), row]);
-  });
-
   const rsvpMap = new Map<string, InvitationBundle["rsvps"]>();
   rsvpRows.forEach((row) => {
     rsvpMap.set(row.invitationId, [
@@ -222,7 +182,6 @@ async function loadBundlesByIds(invitationIds?: string[]) {
   return invitationRows.map((invitation) => ({
     invitation,
     invitees: inviteeMap.get(invitation.id) ?? [],
-    events: eventMap.get(invitation.id) ?? [],
     rsvps: rsvpMap.get(invitation.id) ?? [],
   }));
 }
@@ -302,69 +261,49 @@ async function replaceInvitationStructure(
 ) {
   const db = getDb();
   const now = new Date();
-  const invitedEvents: Array<{
-    invitationId: string;
-    eventKey: EventKey;
-    plusOneAllowed: boolean;
-    childrenAllowed: boolean;
-    maxChildren: number;
-  }> = [];
+  const normalizedInvitees = normalizeInvitationInvitees(input);
 
-  if (input.event1Invited) {
-    invitedEvents.push({
-      invitationId,
-      eventKey: "event_1",
-      plusOneAllowed: false,
-      childrenAllowed: false,
-      maxChildren: 0,
-    });
-  }
-
-  if (input.event2Invited) {
-    invitedEvents.push({
-      invitationId,
-      eventKey: "event_2",
-      plusOneAllowed: input.event2PlusOneAllowed,
-      childrenAllowed: input.event2ChildrenAllowed,
-      maxChildren: input.event2ChildrenAllowed ? input.event2MaxChildren : 0,
-    });
-  }
-
-  const currentRsvps = await db.query.rsvps.findMany({
-    where: eq(rsvps.invitationId, invitationId),
+  const currentInvitees = await db.query.invitees.findMany({
+    where: eq(invitees.invitationId, invitationId),
+    orderBy: [desc(invitees.isPrimary), asc(invitees.createdAt), asc(invitees.fullName)],
   });
-  const allowedEventKeys = new Set(invitedEvents.map((event) => event.eventKey));
-  const obsoleteRsvpIds = currentRsvps
-    .filter((rsvp) => !allowedEventKeys.has(rsvp.eventKey))
-    .map((rsvp) => rsvp.id);
+  const keptInviteeIds = new Set<string>();
 
-  if (obsoleteRsvpIds.length > 0) {
-    await db
-      .delete(attendeeResponses)
-      .where(inArray(attendeeResponses.rsvpId, obsoleteRsvpIds));
-    await db.delete(rsvps).where(inArray(rsvps.id, obsoleteRsvpIds));
+  for (const [index, inviteeInput] of normalizedInvitees.entries()) {
+    const existingInvitee = currentInvitees[index];
+
+    if (existingInvitee) {
+      keptInviteeIds.add(existingInvitee.id);
+
+      await db
+        .update(invitees)
+        .set({
+          fullName: inviteeInput.fullName,
+          email: inviteeInput.email ? normalizeEmail(inviteeInput.email) : null,
+          kind: inviteeInput.kind,
+          isPrimary: inviteeInput.isPrimary,
+        })
+        .where(eq(invitees.id, existingInvitee.id));
+
+      continue;
+    }
+
+    await db.insert(invitees).values({
+      invitationId,
+      fullName: inviteeInput.fullName,
+      email: inviteeInput.email ? normalizeEmail(inviteeInput.email) : null,
+      kind: inviteeInput.kind,
+      isPrimary: inviteeInput.isPrimary,
+      createdAt: new Date(now.getTime() + index),
+    });
   }
 
-  await db.delete(invitees).where(eq(invitees.invitationId, invitationId));
-  await db
-    .delete(invitationEvents)
-    .where(eq(invitationEvents.invitationId, invitationId));
+  const deletedInviteeIds = currentInvitees
+    .filter((invitee) => !keptInviteeIds.has(invitee.id))
+    .map((invitee) => invitee.id);
 
-  if (input.namedGuests.length > 0) {
-    await db.insert(invitees).values(
-      input.namedGuests.map((guest, index) => ({
-        invitationId,
-        fullName: guest.fullName.trim(),
-        email: guest.email?.trim() ? normalizeEmail(guest.email) : null,
-        kind: guest.kind,
-        isPrimary:
-          guest.isPrimary || (!input.namedGuests.some((item) => item.isPrimary) && index === 0),
-      })),
-    );
-  }
-
-  if (invitedEvents.length > 0) {
-    await db.insert(invitationEvents).values(invitedEvents);
+  if (deletedInviteeIds.length > 0) {
+    await db.delete(invitees).where(inArray(invitees.id, deletedInviteeIds));
   }
 
   await db
@@ -441,10 +380,6 @@ export async function listDashboardData(filters: DashboardFilters = {}) {
   const rows = bundles
     .map(buildInvitationSummary)
     .filter((summary) => {
-      if (filters.event && filters.event !== "all" && !summary.invitedEvents.includes(filters.event)) {
-        return false;
-      }
-
       if (filters.status === "pending" && !summary.pending) {
         return false;
       }
@@ -509,7 +444,7 @@ export async function sendInvitationEmailForInvitation(
       bundle.invitation.id,
       bundle.invitation.tokenVersion,
     ),
-    invitedEvents: getInvitedEventKeys(bundle),
+    invitedEvents: [],
   });
 
   if (!("skipped" in result)) {
@@ -615,18 +550,11 @@ export async function sendRecoveryLinks(email: string, ipAddress?: string | null
 }
 
 function buildRsvpStatusFromPayload(parsed: GuestRsvpPayload) {
-  const namedGuestsAttending = parsed.invitees.some((invitee) => invitee.attending);
-  const plusOneAttending = parsed.plusOne?.attending ?? false;
-  const childrenAttending = parsed.children.length > 0;
-
-  return namedGuestsAttending || plusOneAttending || childrenAttending
-    ? "attending"
-    : "declined";
+  return parsed.invitees.some((invitee) => invitee.attending) ? "attending" : "declined";
 }
 
 export async function saveGuestRsvp(input: {
   invitationId: string;
-  eventKey: EventKey;
   payload: unknown;
   skipEmail?: boolean;
 }) {
@@ -636,15 +564,6 @@ export async function saveGuestRsvp(input: {
     return {
       ok: false as const,
       formError: "Invitation not found.",
-    };
-  }
-
-  const entitlement = bundle.events.find((event) => event.eventKey === input.eventKey);
-
-  if (!entitlement) {
-    return {
-      ok: false as const,
-      formError: "This event is not available for this invitation.",
     };
   }
 
@@ -660,13 +579,6 @@ export async function saveGuestRsvp(input: {
 
   const parsed = validation.data;
 
-  if (parsed.eventKey !== input.eventKey) {
-    return {
-      ok: false as const,
-      formError: "The submitted RSVP did not match the selected event.",
-    };
-  }
-
   const inviteeIds = new Set(bundle.invitees.map((invitee) => invitee.id));
   const payloadInviteeIds = new Set(parsed.invitees.map((invitee) => invitee.inviteeId));
 
@@ -680,42 +592,10 @@ export async function saveGuestRsvp(input: {
     };
   }
 
-  if (input.eventKey === "event_1") {
-    if (parsed.plusOne?.attending || parsed.children.length > 0) {
-      return {
-        ok: false as const,
-        formError: "Additional guests are not available for this event.",
-      };
-    }
-  }
-
-  if (input.eventKey === "event_2") {
-    if (!entitlement.plusOneAllowed && parsed.plusOne?.attending) {
-      return {
-        ok: false as const,
-        formError: "A plus one is not available for this invitation.",
-      };
-    }
-
-    if (!entitlement.childrenAllowed && parsed.children.length > 0) {
-      return {
-        ok: false as const,
-        formError: "Children are not available for this invitation.",
-      };
-    }
-
-    if (parsed.children.length > entitlement.maxChildren) {
-      return {
-        ok: false as const,
-        formError: "The submitted child count exceeds this invitation limit.",
-      };
-    }
-  }
-
   const inviteeLookup = new Map(bundle.invitees.map((invitee) => [invitee.id, invitee] as const));
   const status = buildRsvpStatusFromPayload(parsed);
   const now = new Date();
-  const existing = getRsvpForEvent(bundle, input.eventKey);
+  const existing = bundle.rsvps[0] ?? null;
 
   let rsvpId = existing?.id;
 
@@ -737,7 +617,6 @@ export async function saveGuestRsvp(input: {
       .insert(rsvps)
       .values({
         invitationId: bundle.invitation.id,
-        eventKey: input.eventKey,
         status,
         submittedAt: now,
         updatedAt: now,
@@ -745,6 +624,24 @@ export async function saveGuestRsvp(input: {
       .returning({ id: rsvps.id });
     rsvpId = created.id;
   }
+
+  await Promise.all(
+    parsed.invitees.map((response) => {
+      const invitee = inviteeLookup.get(response.inviteeId);
+
+      if (!invitee) {
+        return Promise.resolve();
+      }
+
+      return getDb()
+        .update(invitees)
+        .set({
+          fullName: response.fullName.trim(),
+          kind: invitee.isPrimary ? "adult" : response.kind,
+        })
+        .where(eq(invitees.id, invitee.id));
+    }),
+  );
 
   const attendeeRows: Array<typeof attendeeResponses.$inferInsert> = [];
   let sortOrder = 0;
@@ -759,45 +656,19 @@ export async function saveGuestRsvp(input: {
     attendeeRows.push({
       rsvpId,
       inviteeId: invitee.id,
-      attendeeType: invitee.kind === "child" ? "child" : "named_guest",
-      fullName: invitee.fullName,
+      attendeeType: response.kind === "child" ? "child" : "named_guest",
+      fullName: response.fullName.trim(),
       isAttending: response.attending,
       dietaryRequirements: response.attending
         ? response.dietaryRequirements?.trim() || null
         : null,
       phoneNumber:
-        response.attending && invitee.kind === "adult"
+        response.attending && response.kind === "adult"
           ? response.phoneNumber?.trim() || null
           : null,
       sortOrder: sortOrder++,
     });
   });
-
-  if (rsvpId && parsed.plusOne?.attending) {
-    attendeeRows.push({
-      rsvpId,
-      attendeeType: "plus_one",
-      fullName: parsed.plusOne.fullName?.trim() || "Plus one",
-      isAttending: true,
-      dietaryRequirements: parsed.plusOne.dietaryRequirements?.trim() || null,
-      phoneNumber: parsed.plusOne.phoneNumber?.trim() || null,
-      sortOrder: sortOrder++,
-    });
-  }
-
-  if (rsvpId) {
-    parsed.children.forEach((child) => {
-      attendeeRows.push({
-        rsvpId,
-        attendeeType: "child",
-        fullName: child.fullName.trim(),
-        isAttending: true,
-        dietaryRequirements: child.dietaryRequirements?.trim() || null,
-        phoneNumber: null,
-        sortOrder: sortOrder++,
-      });
-    });
-  }
 
   if (attendeeRows.length > 0) {
     await getDb().insert(attendeeResponses).values(attendeeRows);
@@ -810,7 +681,6 @@ export async function saveGuestRsvp(input: {
       status,
       attendeeCount: attendeeRows.filter((attendee) => attendee.isAttending).length,
     },
-    input.eventKey,
   );
 
   if (status === "attending" && !input.skipEmail) {
@@ -823,7 +693,7 @@ export async function saveGuestRsvp(input: {
         bundle.invitation.id,
         bundle.invitation.tokenVersion,
       ),
-      eventKey: input.eventKey,
+      eventKey: "event_2",
     });
   }
 
@@ -850,14 +720,12 @@ export async function buildInvitationStatusExportRows() {
       primaryGuest: summary.primaryGuestName,
       primaryEmail: summary.primaryEmail,
       invitationMode: summary.invitationMode,
-      invitedEvents: summary.invitedEvents.join("|"),
       accessCount: String(summary.accessCount),
       sentAt: summary.sentAt?.toISOString() ?? "",
       firstOpenedAt: summary.firstOpenedAt?.toISOString() ?? "",
       lastOpenedAt: summary.lastOpenedAt?.toISOString() ?? "",
       responded: summary.responded ? "yes" : "no",
-      event1Status: summary.eventStatuses.event_1 ?? "",
-      event2Status: summary.eventStatuses.event_2 ?? "",
+      rsvpStatus: summary.rsvpStatus,
     };
   });
 }

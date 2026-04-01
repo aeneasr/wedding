@@ -24,9 +24,12 @@ export async function submitRecoveryAction(
   _state: GuestActionState,
   formData: FormData,
 ): Promise<GuestActionState> {
+  const locale = await getStoredGuestLocale();
+  const dictionary = getDictionary(locale);
+
   if (!isDatabaseConfigured()) {
     return {
-      error: "The database is not configured yet.",
+      error: dictionary.errors.setupBody,
     };
   }
 
@@ -34,7 +37,7 @@ export async function submitRecoveryAction(
 
   if (!email) {
     return {
-      error: "Enter the email address associated with your invitation.",
+      error: dictionary.recover.missingEmail,
     };
   }
 
@@ -42,8 +45,7 @@ export async function submitRecoveryAction(
   await sendRecoveryLinks(email, getClientIp(headersList));
 
   return {
-    success:
-      "If that email address matches an existing invitation, a recovery message has been sent.",
+    success: dictionary.recover.neutralSuccess,
   };
 }
 
@@ -54,18 +56,16 @@ export async function saveGuestRsvpAction(
   const bundle = await requireGuestBundle();
   const locale = (await getStoredGuestLocale()) ?? bundle.invitation.locale;
   const dictionary = getDictionary(locale);
-  const eventKey = String(formData.get("eventKey") ?? "") as "event_1" | "event_2";
   const payload = JSON.parse(String(formData.get("payload") ?? "{}"));
 
   const result = await saveGuestRsvp({
     invitationId: bundle.invitation.id,
-    eventKey,
     payload,
   });
 
   if (!result.ok) {
     return {
-      error: result.formError ?? "Unable to save your RSVP right now.",
+      error: result.formError ?? dictionary.guest.saveError,
     };
   }
 
