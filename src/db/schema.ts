@@ -5,7 +5,6 @@ import {
   jsonb,
   pgEnum,
   pgTable,
-  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -19,7 +18,6 @@ export const invitationModeEnum = pgEnum("invitation_mode", [
 ]);
 export const localeEnum = pgEnum("locale", ["en", "de"]);
 export const inviteeKindEnum = pgEnum("invitee_kind", ["adult", "child"]);
-export const eventKeyEnum = pgEnum("event_key", ["event_1", "event_2"]);
 export const rsvpStatusEnum = pgEnum("rsvp_status", [
   "pending",
   "attending",
@@ -27,7 +25,6 @@ export const rsvpStatusEnum = pgEnum("rsvp_status", [
 ]);
 export const attendeeTypeEnum = pgEnum("attendee_type", [
   "named_guest",
-  "plus_one",
   "child",
 ]);
 export const activityTypeEnum = pgEnum("activity_type", [
@@ -46,7 +43,7 @@ export const invitations = pgTable(
     externalId: text("external_id").unique(),
     primaryEmail: text("primary_email").notNull(),
     invitationMode: invitationModeEnum("invitation_mode").notNull(),
-    locale: localeEnum("locale").notNull().default("en"),
+    locale: localeEnum("locale").notNull().default("de"),
     tokenVersion: integer("token_version").notNull().default(1),
     sentAt: timestamp("sent_at", { withTimezone: true }),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
@@ -78,26 +75,6 @@ export const invitees = pgTable(
   ],
 );
 
-export const invitationEvents = pgTable(
-  "invitation_events",
-  {
-    invitationId: uuid("invitation_id")
-      .notNull()
-      .references(() => invitations.id, { onDelete: "cascade" }),
-    eventKey: eventKeyEnum("event_key").notNull(),
-    plusOneAllowed: boolean("plus_one_allowed").notNull().default(false),
-    childrenAllowed: boolean("children_allowed").notNull().default(false),
-    maxChildren: integer("max_children").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [
-    primaryKey({
-      columns: [table.invitationId, table.eventKey],
-      name: "invitation_events_pk",
-    }),
-  ],
-);
-
 export const rsvps = pgTable(
   "rsvps",
   {
@@ -105,13 +82,12 @@ export const rsvps = pgTable(
     invitationId: uuid("invitation_id")
       .notNull()
       .references(() => invitations.id, { onDelete: "cascade" }),
-    eventKey: eventKeyEnum("event_key").notNull(),
     status: rsvpStatusEnum("status").notNull().default("pending"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    uniqueIndex("rsvps_invitation_event_idx").on(table.invitationId, table.eventKey),
+    uniqueIndex("rsvps_invitation_idx").on(table.invitationId),
   ],
 );
 
@@ -143,7 +119,6 @@ export const invitationActivity = pgTable(
     invitationId: uuid("invitation_id")
       .notNull()
       .references(() => invitations.id, { onDelete: "cascade" }),
-    eventKey: eventKeyEnum("event_key"),
     type: activityTypeEnum("type").notNull(),
     metadata: jsonb("metadata").$type<Record<string, unknown> | null>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -167,7 +142,6 @@ export const recoveryRequests = pgTable(
 
 export const invitationRelations = relations(invitations, ({ many }) => ({
   invitees: many(invitees),
-  events: many(invitationEvents),
   rsvps: many(rsvps),
   activity: many(invitationActivity),
 }));
@@ -175,13 +149,6 @@ export const invitationRelations = relations(invitations, ({ many }) => ({
 export const inviteeRelations = relations(invitees, ({ one }) => ({
   invitation: one(invitations, {
     fields: [invitees.invitationId],
-    references: [invitations.id],
-  }),
-}));
-
-export const invitationEventRelations = relations(invitationEvents, ({ one }) => ({
-  invitation: one(invitations, {
-    fields: [invitationEvents.invitationId],
     references: [invitations.id],
   }),
 }));

@@ -1,6 +1,6 @@
 {
-  "id": "42eb7a3e-b329-414c-ab55-8c69a4853353",
-  "prevId": "4110556a-5fec-400b-aad5-6946efb6117e",
+  "id": "5fb57542-9e1e-43fe-b30e-7b2153630e8f",
+  "prevId": "a0a9c1cf-109e-4e79-b901-30bd6ec165ce",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -142,13 +142,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "event_key": {
-          "name": "event_key",
-          "type": "event_key",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
         "type": {
           "name": "type",
           "type": "activity_type",
@@ -208,82 +201,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.invitation_events": {
-      "name": "invitation_events",
-      "schema": "",
-      "columns": {
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_key": {
-          "name": "event_key",
-          "type": "event_key",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "plus_one_allowed": {
-          "name": "plus_one_allowed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "children_allowed": {
-          "name": "children_allowed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "max_children": {
-          "name": "max_children",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "invitation_events_invitation_id_invitations_id_fk": {
-          "name": "invitation_events_invitation_id_invitations_id_fk",
-          "tableFrom": "invitation_events",
-          "tableTo": "invitations",
-          "columnsFrom": [
-            "invitation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "invitation_events_pk": {
-          "name": "invitation_events_pk",
-          "columns": [
-            "invitation_id",
-            "event_key"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.invitations": {
       "name": "invitations",
       "schema": "",
@@ -320,7 +237,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'en'"
+          "default": "'de'"
         },
         "token_version": {
           "name": "token_version",
@@ -599,13 +516,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "event_key": {
-          "name": "event_key",
-          "type": "event_key",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
           "type": "rsvp_status",
@@ -629,17 +539,11 @@
         }
       },
       "indexes": {
-        "rsvps_invitation_event_idx": {
-          "name": "rsvps_invitation_event_idx",
+        "rsvps_invitation_idx": {
+          "name": "rsvps_invitation_idx",
           "columns": [
             {
               "expression": "invitation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_key",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -691,16 +595,7 @@
       "schema": "public",
       "values": [
         "named_guest",
-        "plus_one",
         "child"
-      ]
-    },
-    "public.event_key": {
-      "name": "event_key",
-      "schema": "public",
-      "values": [
-        "event_1",
-        "event_2"
       ]
     },
     "public.invitation_mode": {
