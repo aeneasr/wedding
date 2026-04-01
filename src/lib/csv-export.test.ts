@@ -8,7 +8,6 @@ const now = new Date("2026-03-31T12:00:00Z");
 function makeBundle(
   overrides: Partial<{
     invitees: InvitationBundle["invitees"];
-    events: InvitationBundle["events"];
     rsvps: InvitationBundle["rsvps"];
   }> = {},
 ): InvitationBundle {
@@ -39,16 +38,6 @@ function makeBundle(
         createdAt: now,
       },
     ],
-    events: overrides.events ?? [
-      {
-        invitationId: "inv-1",
-        eventKey: "event_1",
-        plusOneAllowed: false,
-        childrenAllowed: false,
-        maxChildren: 0,
-        createdAt: now,
-      },
-    ],
     rsvps: overrides.rsvps ?? [],
   };
 }
@@ -65,7 +54,6 @@ describe("buildAttendeeRows", () => {
       externalId: "ext-1",
       primaryGuest: "Alice Smith",
       primaryEmail: "alice@example.com",
-      eventKey: "event_1",
       inviteeName: "Alice Smith",
       rsvpStatus: "pending",
       attending: "",
@@ -78,7 +66,6 @@ describe("buildAttendeeRows", () => {
         {
           id: "rsvp-1",
           invitationId: "inv-1",
-          eventKey: "event_1",
           status: "attending",
           submittedAt: now,
           updatedAt: now,
@@ -111,15 +98,34 @@ describe("buildAttendeeRows", () => {
     });
   });
 
-  it("includes plus-ones and children as extra rows", () => {
+  it("includes every household member as a roster row", () => {
     const bundle = makeBundle({
-      events: [
+      invitees: [
         {
+          id: "invitee-1",
           invitationId: "inv-1",
-          eventKey: "event_2",
-          plusOneAllowed: true,
-          childrenAllowed: true,
-          maxChildren: 2,
+          fullName: "Alice Smith",
+          email: "alice@example.com",
+          kind: "adult",
+          isPrimary: true,
+          createdAt: now,
+        },
+        {
+          id: "invitee-2",
+          invitationId: "inv-1",
+          fullName: "Bob Smith",
+          email: null,
+          kind: "adult",
+          isPrimary: false,
+          createdAt: now,
+        },
+        {
+          id: "invitee-3",
+          invitationId: "inv-1",
+          fullName: "Charlie Smith",
+          email: null,
+          kind: "child",
+          isPrimary: false,
           createdAt: now,
         },
       ],
@@ -127,7 +133,6 @@ describe("buildAttendeeRows", () => {
         {
           id: "rsvp-2",
           invitationId: "inv-1",
-          eventKey: "event_2",
           status: "attending",
           submittedAt: now,
           updatedAt: now,
@@ -147,9 +152,9 @@ describe("buildAttendeeRows", () => {
             {
               id: "att-2",
               rsvpId: "rsvp-2",
-              inviteeId: null,
-              attendeeType: "plus_one",
-              fullName: "Bob Jones",
+              inviteeId: "invitee-2",
+              attendeeType: "named_guest",
+              fullName: "Bob Smith",
               isAttending: true,
               dietaryRequirements: "gluten-free",
               phoneNumber: null,
@@ -159,7 +164,7 @@ describe("buildAttendeeRows", () => {
             {
               id: "att-3",
               rsvpId: "rsvp-2",
-              inviteeId: null,
+              inviteeId: "invitee-3",
               attendeeType: "child",
               fullName: "Charlie Smith",
               isAttending: true,
@@ -178,13 +183,13 @@ describe("buildAttendeeRows", () => {
     expect(rows).toHaveLength(3);
     expect(rows[0]?.inviteeName).toBe("Alice Smith");
     expect(rows[0]?.attendeeType).toBe("named_guest");
-    expect(rows[1]?.inviteeName).toBe("Bob Jones");
-    expect(rows[1]?.attendeeType).toBe("plus_one");
+    expect(rows[1]?.inviteeName).toBe("Bob Smith");
+    expect(rows[1]?.attendeeType).toBe("named_guest");
     expect(rows[2]?.inviteeName).toBe("Charlie Smith");
     expect(rows[2]?.attendeeType).toBe("child");
   });
 
-  it("produces rows for each invitee x event combination", () => {
+  it("produces a row for each invitee in the bundle", () => {
     const bundle = makeBundle({
       invitees: [
         {
@@ -206,36 +211,13 @@ describe("buildAttendeeRows", () => {
           createdAt: now,
         },
       ],
-      events: [
-        {
-          invitationId: "inv-1",
-          eventKey: "event_1",
-          plusOneAllowed: false,
-          childrenAllowed: false,
-          maxChildren: 0,
-          createdAt: now,
-        },
-        {
-          invitationId: "inv-1",
-          eventKey: "event_2",
-          plusOneAllowed: false,
-          childrenAllowed: false,
-          maxChildren: 0,
-          createdAt: now,
-        },
-      ],
     });
 
     const rows = buildAttendeeRows([bundle]);
 
-    expect(rows).toHaveLength(4);
-    const combinations = rows.map((r) => `${r.inviteeName}:${r.eventKey}`);
-    expect(combinations).toEqual([
-      "Alice Smith:event_1",
-      "Dan Smith:event_1",
-      "Alice Smith:event_2",
-      "Dan Smith:event_2",
-    ]);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.inviteeName).toBe("Alice Smith");
+    expect(rows[1]?.inviteeName).toBe("Dan Smith");
   });
 
   it("returns empty array for empty bundles", () => {

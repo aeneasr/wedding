@@ -1,47 +1,26 @@
+import { mapAttendeesToInvitees } from "@/src/lib/household";
 import type { InvitationBundle } from "@/src/server/invitations";
 
 export function buildAttendeeRows(bundles: InvitationBundle[]) {
   return bundles.flatMap((bundle) => {
     const primaryGuest = bundle.invitees.find((i) => i.isPrimary) ?? bundle.invitees[0];
+    const rsvp = bundle.rsvps[0] ?? null;
 
-    return bundle.events.flatMap((event) => {
-      const rsvp = bundle.rsvps.find((r) => r.eventKey === event.eventKey);
+    return mapAttendeesToInvitees(bundle.invitees, rsvp?.attendees ?? []).map((invitee) => {
+      const attendeeType = invitee.kind === "child" ? "child" : "named_guest";
 
-      const inviteeRows = bundle.invitees.map((invitee) => {
-        const attendee = rsvp?.attendees.find((a) => a.inviteeId === invitee.id);
-
-        return {
-          invitationId: bundle.invitation.id,
-          externalId: bundle.invitation.externalId ?? "",
-          primaryGuest: primaryGuest?.fullName ?? "",
-          primaryEmail: bundle.invitation.primaryEmail,
-          eventKey: event.eventKey,
-          rsvpStatus: rsvp?.status ?? "pending",
-          inviteeName: invitee.fullName,
-          attendeeType: invitee.kind === "child" ? "child" : "named_guest",
-          attending: attendee ? (attendee.isAttending ? "yes" : "no") : "",
-          dietaryRequirements: attendee?.dietaryRequirements ?? "",
-          phoneNumber: attendee?.phoneNumber ?? "",
-        };
-      });
-
-      const extraAttendees = (rsvp?.attendees ?? [])
-        .filter((a) => !a.inviteeId)
-        .map((attendee) => ({
-          invitationId: bundle.invitation.id,
-          externalId: bundle.invitation.externalId ?? "",
-          primaryGuest: primaryGuest?.fullName ?? "",
-          primaryEmail: bundle.invitation.primaryEmail,
-          eventKey: event.eventKey,
-          rsvpStatus: rsvp?.status ?? "pending",
-          inviteeName: attendee.fullName,
-          attendeeType: attendee.attendeeType,
-          attending: attendee.isAttending ? "yes" : "no",
-          dietaryRequirements: attendee.dietaryRequirements ?? "",
-          phoneNumber: attendee.phoneNumber ?? "",
-        }));
-
-      return [...inviteeRows, ...extraAttendees];
+      return {
+        invitationId: bundle.invitation.id,
+        externalId: bundle.invitation.externalId ?? "",
+        primaryGuest: primaryGuest?.fullName ?? "",
+        primaryEmail: bundle.invitation.primaryEmail,
+        rsvpStatus: rsvp?.status ?? "pending",
+        inviteeName: invitee.fullName,
+        attendeeType,
+        attending: rsvp ? (invitee.attending ? "yes" : "no") : "",
+        dietaryRequirements: rsvp ? invitee.dietaryRequirements : "",
+        phoneNumber: rsvp ? invitee.phoneNumber : "",
+      };
     });
   });
 }
