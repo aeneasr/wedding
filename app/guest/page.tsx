@@ -1,28 +1,35 @@
 import Link from "next/link";
 
 import { clearGuestSessionAction } from "@/src/app-actions/guest";
+import { LandingInvitationCard } from "@/src/components/landing-invitation-card";
+import { GuestLocaleProvider } from "@/src/components/locale-context";
+import { GuestRsvpForm } from "@/src/components/guest-rsvp-form";
 import {
-  LanguageSwitcher,
-  LocaleProvider,
-} from "@/src/components/locale-context";
-import {
+  DataList,
   Eyebrow,
   Heading,
-  PageBackground,
+  InkBadge,
   PageContainer,
-  Pill,
+  PaperPanel,
+  SectionTitle,
   SubtleText,
-  SurfaceCard,
-  buttonClassName,
+  WeddingShell,
+  inkButtonClassName,
 } from "@/src/components/ui";
-import { getStoredGuestLocale } from "@/src/lib/session";
-import { getEventContent, localizeEventText } from "@/src/lib/events";
+import {
+  eventContent,
+  formatEventDateBadge,
+  localizeEventText,
+} from "@/src/lib/events";
+import { mapAttendeesToInvitees } from "@/src/lib/household";
 import { getDictionary } from "@/src/lib/i18n";
+import { getStoredGuestLocale } from "@/src/lib/session";
+import { formatDateTime } from "@/src/lib/utils";
 import { requireGuestBundle } from "@/src/server/access";
 
 export const dynamic = "force-dynamic";
 
-export default async function GuestHubPage({
+export default async function GuestPage({
   searchParams,
 }: {
   searchParams: Promise<{ saved?: string }>;
@@ -34,93 +41,176 @@ export default async function GuestHubPage({
   const primaryGuest =
     bundle.invitees.find((invitee) => invitee.isPrimary) ?? bundle.invitees[0];
 
-  const statusLabels = {
-    pending: dictionary.guest.responsePending,
-    attending: dictionary.guest.responseAttending,
-    declined: dictionary.guest.responseDeclined,
-  } as const;
+  const existingRsvp = bundle.rsvps[0] ?? null;
+  const invitees = mapAttendeesToInvitees(
+    bundle.invitees,
+    existingRsvp?.attendees ?? [],
+  );
+  const status = existingRsvp?.status ?? "pending";
+  const statusLabel =
+    status === "attending"
+      ? dictionary.guest.responseAttending
+      : status === "declined"
+        ? dictionary.guest.responseDeclined
+        : dictionary.guest.responsePending;
 
   return (
-    <LocaleProvider initialLocale={locale}>
-      <PageBackground>
-        <PageContainer className="gap-6 py-6 sm:py-10">
-          <SurfaceCard className="space-y-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
-                <Heading>{primaryGuest?.fullName ?? bundle.invitation.primaryEmail}</Heading>
-                <SubtleText>{dictionary.guest.summaryLead}</SubtleText>
+    <GuestLocaleProvider initialLocale={locale}>
+      <WeddingShell>
+        <PageContainer className="gap-6 py-8 sm:py-12">
+          {/* Section 1: Invitation Card */}
+          <PaperPanel className="space-y-5">
+            <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-10">
+              <div className="w-full max-w-[16rem] shrink-0">
+                <LandingInvitationCard
+                  imageAlt={dictionary.landing.imageAlt}
+                  imageLabel={dictionary.landing.imageLabel}
+                />
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <LanguageSwitcher />
-                <form action={clearGuestSessionAction}>
-                  <button
-                    type="submit"
-                    className={buttonClassName({ secondary: true, compact: true })}
-                  >
-                    {dictionary.guest.logout}
-                  </button>
-                </form>
+              <div className="flex flex-col gap-5">
+                <div className="space-y-3">
+                  <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
+                  <Heading>
+                    {primaryGuest?.fullName ?? bundle.invitation.primaryEmail}
+                  </Heading>
+                  <SubtleText>{dictionary.guest.summaryLead}</SubtleText>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a href="#rsvp" className={inkButtonClassName()}>
+                    {status === "pending"
+                      ? dictionary.guest.rsvp
+                      : dictionary.guest.update}
+                  </a>
+                  <form action={clearGuestSessionAction}>
+                    <button
+                      type="submit"
+                      className={inkButtonClassName({
+                        variant: "secondary",
+                        compact: true,
+                      })}
+                    >
+                      {dictionary.guest.logout}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
-          </SurfaceCard>
+          </PaperPanel>
 
-          {saved === "1" ? (
-            <p className="rounded-2xl bg-[#e0ecde] px-4 py-3 text-sm text-[#355b39]">
-              {dictionary.guest.saved}
-            </p>
-          ) : null}
+          {/* Section 2: Event Details */}
+          <PaperPanel className="space-y-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-3">
+                <Eyebrow>{formatEventDateBadge(locale)}</Eyebrow>
+                <Heading>{localizeEventText(eventContent.name, locale)}</Heading>
+                <SubtleText>{localizeEventText(eventContent.hero, locale)}</SubtleText>
+              </div>
+              <InkBadge
+                tone={
+                  status === "attending"
+                    ? "success"
+                    : status === "declined"
+                      ? "muted"
+                      : "warm"
+                }
+              >
+                {statusLabel}
+              </InkBadge>
+            </div>
+            <DataList
+              items={[
+                {
+                  label: dictionary.guest.venue,
+                  value: localizeEventText(eventContent.venueName, locale),
+                },
+                {
+                  label: dictionary.guest.address,
+                  value: (
+                    <a
+                      href={eventContent.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      {localizeEventText(eventContent.address, locale)}
+                    </a>
+                  ),
+                },
+                {
+                  label: dictionary.guest.timing,
+                  value: `${formatDateTime(eventContent.startsAt, locale)} \u2013 ${formatDateTime(eventContent.endsAt, locale)}`,
+                },
+              ]}
+            />
+          </PaperPanel>
 
-          <div className="grid gap-5">
-            {bundle.events.map((eventAccess) => {
-              const event = getEventContent(eventAccess.eventKey);
-              const rsvp =
-                bundle.rsvps.find((entry) => entry.eventKey === eventAccess.eventKey) ??
-                null;
-              const status = rsvp?.status ?? "pending";
-
-              return (
-                <SurfaceCard key={eventAccess.eventKey} className="space-y-5">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="space-y-3">
-                      <Pill tone="warm">{localizeEventText(event.hero, locale)}</Pill>
-                      <Heading className="text-3xl sm:text-4xl">
-                        {localizeEventText(event.name, locale)}
-                      </Heading>
-                      <SubtleText>{localizeEventText(event.summary, locale)}</SubtleText>
-                    </div>
-                    <Pill tone={status === "attending" ? "success" : status === "declined" ? "muted" : "warm"}>
-                      {statusLabels[status]}
-                    </Pill>
+          <PaperPanel className="space-y-5">
+            <SectionTitle title={dictionary.guest.schedule} />
+            <div className="grid gap-3">
+              {eventContent.schedule.map((item) => (
+                <div
+                  key={item.time}
+                  className="grid gap-2 rounded-xl bg-cream p-4 sm:grid-cols-[120px_1fr]"
+                >
+                  <p className="text-sm font-medium uppercase tracking-wide text-sage">
+                    {item.time}
+                  </p>
+                  <div>
+                    <p className="font-medium text-ink">
+                      {localizeEventText(item.title, locale)}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-light">
+                      {localizeEventText(item.note, locale)}
+                    </p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </PaperPanel>
 
-                  <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-                    <SubtleText>
-                      {dictionary.guest.securedByLink} {dictionary.guest.updateHint}
-                    </SubtleText>
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <Link
-                        href={`/guest/event/${eventAccess.eventKey}`}
-                        className={buttonClassName({ secondary: true })}
-                      >
-                        {dictionary.guest.details}
-                      </Link>
-                      <Link
-                        href={`/guest/event/${eventAccess.eventKey}/rsvp`}
-                        className={buttonClassName()}
-                      >
-                        {status === "pending"
-                          ? dictionary.guest.rsvp
-                          : dictionary.guest.update}
-                      </Link>
-                    </div>
-                  </div>
-                </SurfaceCard>
-              );
-            })}
+          <PaperPanel className="space-y-5">
+            <SectionTitle title={dictionary.guest.logistics} />
+            <div className="grid gap-3">
+              {eventContent.logistics.map((item) => (
+                <div
+                  key={localizeEventText(item.label, locale)}
+                  className="rounded-xl bg-cream p-4"
+                >
+                  <p className="text-xs font-medium uppercase tracking-wide text-sage-muted">
+                    {localizeEventText(item.label, locale)}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink">
+                    {localizeEventText(item.value, locale)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </PaperPanel>
+
+          {/* Section 3: RSVP */}
+          <div id="rsvp" className="space-y-5">
+            {saved === "1" ? (
+              <p className="rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text">
+                {dictionary.guest.saved}
+              </p>
+            ) : null}
+
+            <GuestRsvpForm
+              invitationMode={bundle.invitation.invitationMode}
+              invitees={invitees}
+            />
+
+            {status === "attending" ? (
+              <Link
+                href="/guest/calendar"
+                className={inkButtonClassName({ variant: "secondary" })}
+              >
+                {dictionary.guest.addToCalendar}
+              </Link>
+            ) : null}
           </div>
         </PageContainer>
-      </PageBackground>
-    </LocaleProvider>
+      </WeddingShell>
+    </GuestLocaleProvider>
   );
 }
