@@ -5,7 +5,6 @@ import { buildCalendarFile } from "@/src/lib/calendar";
 describe("buildCalendarFile", () => {
   it("includes the RSVP link, one-month reminder alarm, and August 2026 timing", () => {
     const calendar = buildCalendarFile(
-      "event_2",
       "en",
       "https://example.com/invite/abc",
     );

@@ -1,6 +1,6 @@
 import { getDictionary } from "@/src/lib/i18n";
-import { getEventContent, localizeEventText } from "@/src/lib/events";
-import { type EventKey, type Locale } from "@/src/lib/constants";
+import { eventContent, localizeEventText } from "@/src/lib/events";
+import { type Locale } from "@/src/lib/constants";
 
 function escapeIcs(value: string) {
   return value
@@ -18,15 +18,13 @@ function toIcsTimestamp(value: string) {
 }
 
 export function buildCalendarFile(
-  eventKey: EventKey,
   locale: Locale,
   invitationLink: string,
 ) {
-  const event = getEventContent(eventKey);
   const dictionary = getDictionary(locale);
-  const summary = localizeEventText(event.name, locale);
+  const summary = localizeEventText(eventContent.name, locale);
   const description = [
-    localizeEventText(event.summary, locale),
+    localizeEventText(eventContent.summary, locale),
     "",
     `${dictionary.emails.manageRsvp}: ${invitationLink}`,
   ].join("\n");
@@ -38,13 +36,13 @@ export function buildCalendarFile(
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${eventKey}@wedding-rsvp`,
+    `UID:wedding@wedding-rsvp`,
     `DTSTAMP:${toIcsTimestamp(new Date().toISOString())}`,
-    `DTSTART:${toIcsTimestamp(event.startsAt)}`,
-    `DTEND:${toIcsTimestamp(event.endsAt)}`,
+    `DTSTART:${toIcsTimestamp(eventContent.startsAt)}`,
+    `DTEND:${toIcsTimestamp(eventContent.endsAt)}`,
     `SUMMARY:${escapeIcs(summary)}`,
     `DESCRIPTION:${escapeIcs(description)}`,
-    `LOCATION:${escapeIcs(localizeEventText(event.address, locale))}`,
+    `LOCATION:${escapeIcs(localizeEventText(eventContent.address, locale))}`,
     `URL:${escapeIcs(invitationLink)}`,
     "BEGIN:VALARM",
     "ACTION:DISPLAY",
