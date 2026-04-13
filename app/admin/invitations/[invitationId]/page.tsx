@@ -67,7 +67,7 @@ export default async function AdminInvitationDetailPage({
         <AdminPanel className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
-              <Eyebrow>Invitation detail</Eyebrow>
+              <Eyebrow>Einladungsdetails</Eyebrow>
               <Heading>
                 {bundle.invitees.find((invitee) => invitee.isPrimary)?.fullName ??
                   bundle.invitation.primaryEmail}
@@ -88,16 +88,16 @@ export default async function AdminInvitationDetailPage({
                   value={bundle.invitation.sentAt ? "true" : "false"}
                 />
                 <button type="submit" className={buttonClassName()}>
-                  {bundle.invitation.sentAt ? "Resend link" : "Send link"}
+                  {bundle.invitation.sentAt ? "Link erneut senden" : "Link senden"}
                 </button>
               </form>
               <Link href="/admin" className={buttonClassName({ secondary: true })}>
-                Back to dashboard
+                Zurück zur Übersicht
               </Link>
             </div>
           </div>
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-ink">Invitation link</span>
+            <span className="text-sm font-medium text-ink">Einladungslink</span>
             <input
               readOnly
               value={invitationLink}
@@ -112,9 +112,9 @@ export default async function AdminInvitationDetailPage({
           </AdminPanel>
           <div className="grid gap-6">
             <AdminPanel className="space-y-4">
-              <Eyebrow>Current RSVP state</Eyebrow>
+              <Eyebrow>Aktueller RSVP-Status</Eyebrow>
               {bundle.rsvps.length === 0 ? (
-                <SubtleText>No RSVP has been submitted yet.</SubtleText>
+                <SubtleText>Es wurde noch keine Antwort abgegeben.</SubtleText>
               ) : (
                 <div className="space-y-4">
                   {bundle.rsvps.map((rsvp) => (
@@ -128,7 +128,7 @@ export default async function AdminInvitationDetailPage({
                         {mapAttendeesToInvitees(bundle.invitees, rsvp.attendees).map((invitee) => (
                           <li key={invitee.inviteeId}>
                             {invitee.fullName} | {invitee.kind} |{" "}
-                            {invitee.attending ? "attending" : "not attending"}
+                            {invitee.attending ? "dabei" : "nicht dabei"}
                           </li>
                         ))}
                       </ul>
@@ -139,7 +139,7 @@ export default async function AdminInvitationDetailPage({
             </AdminPanel>
 
             <AdminPanel className="space-y-4">
-              <Eyebrow>Update RSVP</Eyebrow>
+              <Eyebrow>RSVP bearbeiten</Eyebrow>
               <AdminRsvpForm
                 invitationId={bundle.invitation.id}
                 locale={bundle.invitation.locale}
@@ -149,10 +149,10 @@ export default async function AdminInvitationDetailPage({
             </AdminPanel>
 
             <AdminPanel className="space-y-4">
-              <Eyebrow>Recent activity</Eyebrow>
+              <Eyebrow>Letzte Aktivität</Eyebrow>
               <div className="space-y-3">
                 {activity.length === 0 ? (
-                  <SubtleText>No activity recorded yet.</SubtleText>
+                  <SubtleText>Noch keine Aktivität vorhanden.</SubtleText>
                 ) : (
                   activity.map((item) => (
                     <div key={item.id} className="rounded-xl bg-cream p-4">

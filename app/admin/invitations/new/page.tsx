@@ -21,14 +21,14 @@ export default async function NewInvitationPage() {
     <AdminShell>
       <PageContainer className="gap-6 py-6 sm:py-10">
         <AdminPanel className="space-y-5">
-          <Eyebrow>New invitation</Eyebrow>
-          <Heading>Create an invitation</Heading>
+          <Eyebrow>Neue Einladung</Eyebrow>
+          <Heading>Einladung erstellen</Heading>
           <SubtleText>
-            Choose the guests, celebrations, and reply options before sending
-            the invitation link.
+            Wähle die Gäste, Feiern und Antwortoptionen, bevor du den
+            Einladungslink versendest.
           </SubtleText>
           <Link href="/admin" className={buttonClassName({ secondary: true })}>
-            Back to dashboard
+            Zurück zur Übersicht
           </Link>
         </AdminPanel>
         <AdminPanel>

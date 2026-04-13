@@ -12,7 +12,7 @@ export function AdminLoginForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <Field label="Shared password">
+      <Field label="Gemeinsames Passwort">
         <input
           type="password"
           name="password"
@@ -27,7 +27,7 @@ export function AdminLoginForm() {
         </p>
       ) : null}
       <button type="submit" className={buttonClassName()} disabled={pending}>
-        {pending ? "Checking..." : "Open dashboard"}
+        {pending ? "Prüfen …" : "Dashboard öffnen"}
       </button>
     </form>
   );

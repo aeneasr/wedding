@@ -99,18 +99,18 @@ export function AdminInvitationForm({
       {initial?.id ? <input type="hidden" name="id" value={initial.id} /> : null}
       <input type="hidden" name="inviteesPayload" value={serializedInvitees} />
 
-      <Field label="External ID">
+      <Field label="Externe ID">
         <input
           type="text"
           name="externalId"
           className={inputClassName()}
           defaultValue={initial?.externalId ?? ""}
-          placeholder="optional-import-key"
+          placeholder="optionaler-import-schlüssel"
         />
       </Field>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Primary email">
+        <Field label="Haupt-E-Mail">
           <input
             type="email"
             name="primaryEmail"
@@ -123,7 +123,7 @@ export function AdminInvitationForm({
       <input type="hidden" name="locale" value={defaultLocale} />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Invitation mode">
+        <Field label="Einladungsmodus">
           <select
             name="invitationMode"
             className={inputClassName()}
@@ -137,13 +137,13 @@ export function AdminInvitationForm({
               }
             }}
           >
-            <option value="individual">Individual</option>
-            <option value="household">Household</option>
+            <option value="individual">Einzelperson</option>
+            <option value="household">Haushalt</option>
           </select>
         </Field>
 
         {invitationMode === "household" ? (
-          <Field label="Additional household members">
+          <Field label="Weitere Haushaltsmitglieder">
             <select
               className={inputClassName()}
               value={String(additionalInviteeCount)}
@@ -167,20 +167,20 @@ export function AdminInvitationForm({
           <div key={`invitee-${index}`} className="rounded-xl bg-cream p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sage-muted">
-                {index === 0 ? "Primary person" : `Household member ${index}`}
+                {index === 0 ? "Hauptperson" : `Haushaltsmitglied ${index}`}
               </p>
               <span className="text-sm text-ink-light">
-                {index === 0 ? "Adult" : invitee.kind === "adult" ? "Adult" : "Child"}
+                {index === 0 ? "Erwachsen" : invitee.kind === "adult" ? "Erwachsen" : "Kind"}
               </span>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field
-                label="Full name"
+                label="Vollständiger Name"
                 hint={
                   index === 0
                     ? undefined
-                    : "Leave blank if the guest should fill this in later."
+                    : "Leer lassen, wenn der Gast dies später selbst ausfüllen soll."
                 }
               >
                 <input
@@ -199,7 +199,7 @@ export function AdminInvitationForm({
                 />
               </Field>
 
-              <Field label={index === 0 ? "Email" : "Email (optional)"}>
+              <Field label={index === 0 ? "E-Mail" : "E-Mail (optional)"}>
                 <input
                   type="email"
                   className={inputClassName()}
@@ -216,7 +216,7 @@ export function AdminInvitationForm({
               </Field>
 
               {index > 0 ? (
-                <Field label="Person type">
+                <Field label="Personentyp">
                   <select
                     className={inputClassName()}
                     value={invitee.kind}
@@ -229,8 +229,8 @@ export function AdminInvitationForm({
                       );
                     }}
                   >
-                    <option value="adult">Adult</option>
-                    <option value="child">Child</option>
+                    <option value="adult">Erwachsen</option>
+                    <option value="child">Kind</option>
                   </select>
                 </Field>
               ) : null}
@@ -245,7 +245,7 @@ export function AdminInvitationForm({
         </p>
       ) : null}
       <button type="submit" className={buttonClassName()} disabled={pending}>
-        {pending ? "Saving..." : "Save invitation"}
+        {pending ? "Speichern …" : "Einladung speichern"}
       </button>
     </form>
   );

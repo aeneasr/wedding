@@ -29,8 +29,8 @@ type EventContent = {
 };
 
 export const eventContent: EventContent = {
-  startsAt: "2026-08-22T14:30:00+02:00",
-  endsAt: "2026-08-23T00:30:00+02:00",
+  startsAt: "2026-08-22T16:00:00+02:00",
+  endsAt: "2026-08-23T01:00:00+02:00",
   hero: {
     de: "Feiert mit uns unseren großen Tag",
   },
@@ -41,82 +41,57 @@ export const eventContent: EventContent = {
     de: "Zeremonie, Abendessen und Tanz.",
   },
   venueName: {
-    de: "Garden Hall",
+    de: "TIVO",
   },
   address: {
-    de: "Piazza dei Fiori 8, Rom",
+    de: "Oettingenstraße 74, 80538 München",
   },
-  mapUrl: "https://maps.google.com/?q=Piazza+dei+Fiori+8+Rome",
+  mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
   schedule: [
     {
-      time: "14:30",
+      time: "16:00",
       title: {
-        de: "Ankunft der Gäste",
+        de: "Ankunft",
       },
       note: {
-        de: "Treffpunkt im Innenhof für Getränke zur Begrüßung.",
-      },
-    },
-    {
-      time: "15:30",
-      title: {
-        de: "Beginn der Zeremonie",
-      },
-      note: {
-        de: "Bitte zehn Minuten vor Beginn Platz nehmen.",
-      },
-    },
-    {
-      time: "17:00",
-      title: {
-        de: "Fotos und Aperitivo",
-      },
-      note: {
-        de: "Canapés und Getränke im Garten.",
+        de: "",
       },
     },
     {
       time: "19:00",
       title: {
-        de: "Beginn des Abendessens",
+        de: "Essen",
       },
       note: {
-        de: "Der Ablauf des Essens richtet sich nach der finalen RSVP-Anzahl.",
+        de: "",
       },
     },
     {
-      time: "21:30",
+      time: "21:00",
       title: {
-        de: "Torte und Tanz",
+        de: "Tanzen",
       },
       note: {
-        de: "Live-Musik und anschließend DJ-Set.",
+        de: "",
+      },
+    },
+    {
+      time: "01:00",
+      title: {
+        de: "Ende",
+      },
+      note: {
+        de: "",
       },
     },
   ],
   logistics: [
     {
       label: {
-        de: "Treffpunkt",
+        de: "Anreise",
       },
       value: {
-        de: "Eingang über den Innenhof auf der Nordseite der Location.",
-      },
-    },
-    {
-      label: {
-        de: "Essenszeiten",
-      },
-      value: {
-        de: "Das Abendessen beginnt gegen 19:00 Uhr, Kinder werden bei Bedarf zuerst bedient.",
-      },
-    },
-    {
-      label: {
-        de: "Transport",
-      },
-      value: {
-        de: "Details zum Shuttle werden später in der weiteren Kommunikation geteilt.",
+        de: "Am besten erreicht man das Tivo mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
       },
     },
   ],

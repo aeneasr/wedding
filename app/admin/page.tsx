@@ -70,35 +70,35 @@ export default async function AdminPage({
         <AdminPanel className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
-              <Eyebrow>Admin dashboard</Eyebrow>
-              <Heading>Invitation state at a glance</Heading>
+              <Eyebrow>Admin-Übersicht</Eyebrow>
+              <Heading>Einladungen auf einen Blick</Heading>
               <SubtleText>
-                See who has opened their invitation, replied, and still needs a
-                follow-up.
+                Sieh, wer die Einladung geöffnet, geantwortet hat oder noch eine
+                Erinnerung braucht.
               </SubtleText>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/admin/invitations/new" className={buttonClassName()}>
-                New invitation
+                Neue Einladung
               </Link>
               <Link
                 href="/admin/import"
                 className={buttonClassName({ secondary: true })}
               >
-                Import CSV
+                CSV importieren
               </Link>
               <Link
                 href="/admin/export?type=attendees"
                 className={buttonClassName({ secondary: true })}
               >
-                Export attendees
+                Teilnehmer exportieren
               </Link>
               <form action={logoutAdminAction}>
                 <button
                   type="submit"
                   className={buttonClassName({ secondary: true })}
                 >
-                  Logout
+                  Abmelden
                 </button>
               </form>
             </div>
@@ -106,10 +106,10 @@ export default async function AdminPage({
         </AdminPanel>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard label="Invitations" value={stats.invitations} />
-          <StatCard label="People" value={stats.guests} />
-          <StatCard label="Opened" value={stats.opened} />
-          <StatCard label="Waiting" value={stats.waiting} />
+          <StatCard label="Einladungen" value={stats.invitations} />
+          <StatCard label="Personen" value={stats.guests} />
+          <StatCard label="Geöffnet" value={stats.opened} />
+          <StatCard label="Ausstehend" value={stats.waiting} />
         </div>
 
         <AdminPanel className="space-y-4">
@@ -118,7 +118,7 @@ export default async function AdminPage({
               type="search"
               name="search"
               defaultValue={filters.search ?? ""}
-              placeholder="Search guest, email, or external ID"
+              placeholder="Gast, E-Mail oder externe ID suchen"
               className={inputClassName()}
             />
             <select
@@ -126,13 +126,13 @@ export default async function AdminPage({
               defaultValue={filters.status ?? "all"}
               className={inputClassName()}
             >
-              <option value="all">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="responded">Fully responded</option>
-              <option value="opened">Opened</option>
+              <option value="all">Alle Status</option>
+              <option value="pending">Ausstehend</option>
+              <option value="responded">Vollständig beantwortet</option>
+              <option value="opened">Geöffnet</option>
             </select>
             <button type="submit" className={buttonClassName()}>
-              Filter
+              Filtern
             </button>
           </form>
         </AdminPanel>
@@ -152,8 +152,8 @@ export default async function AdminPage({
                   </div>
                 </div>
                 <div className="grid gap-2 text-sm text-ink-light">
-                  <p>Access count: {row.accessCount}</p>
-                  <p>Sent: {row.sentAt ? row.sentAt.toLocaleString() : "Not yet"}</p>
+                  <p>Zugriffe: {row.accessCount}</p>
+                  <p>Gesendet: {row.sentAt ? row.sentAt.toLocaleString() : "Noch nicht"}</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -161,7 +161,7 @@ export default async function AdminPage({
                   href={`/admin/invitations/${row.id}`}
                   className={buttonClassName({ secondary: true })}
                 >
-                  Manage invitation
+                  Einladung verwalten
                 </Link>
                 <form action={sendInvitationAction}>
                   <input type="hidden" name="invitationId" value={row.id} />
@@ -172,7 +172,7 @@ export default async function AdminPage({
                     value={row.sentAt ? "true" : "false"}
                   />
                   <button type="submit" className={buttonClassName()}>
-                    {row.sentAt ? "Resend link" : "Send link"}
+                    {row.sentAt ? "Link erneut senden" : "Link senden"}
                   </button>
                 </form>
               </div>

@@ -27,10 +27,10 @@ export function AdminImportForm() {
   return (
     <div className="space-y-6">
       <form action={formAction} className="space-y-5">
-        <Field label="CSV file">
+        <Field label="CSV-Datei">
           <input type="file" name="csvFile" accept=".csv,text/csv" className={inputClassName()} />
         </Field>
-        <Field label="Or paste CSV content">
+        <Field label="Oder CSV-Inhalt einfügen">
           <textarea
             name="csvText"
             className={textAreaClassName()}
@@ -43,7 +43,7 @@ export function AdminImportForm() {
           </p>
         ) : null}
         <button type="submit" className={buttonClassName()} disabled={pending}>
-          {pending ? "Parsing..." : "Preview import"}
+          {pending ? "Verarbeiten …" : "Import-Vorschau"}
         </button>
       </form>
 
@@ -55,7 +55,7 @@ export function AdminImportForm() {
 
       {state.errors && state.errors.length > 0 ? (
         <SurfaceCard className="space-y-3">
-          <h3 className="font-serif text-2xl text-ink">Validation issues</h3>
+          <h3 className="font-serif text-2xl text-ink">Validierungsfehler</h3>
           <ul className="space-y-2 text-sm text-error-text">
             {state.errors.map((error) => (
               <li key={error}>{error}</li>
@@ -67,11 +67,11 @@ export function AdminImportForm() {
       {state.preview && state.preview.length > 0 ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h3 className="font-serif text-2xl text-ink">Preview</h3>
+            <h3 className="font-serif text-2xl text-ink">Vorschau</h3>
             <form action={commitImportAction}>
               <input type="hidden" name="previewPayload" value={state.previewPayload ?? ""} />
               <button type="submit" className={buttonClassName()}>
-                Commit import
+                Import übernehmen
               </button>
             </form>
           </div>
@@ -90,7 +90,7 @@ export function AdminImportForm() {
                       {person.fullName}
                       {person.email ? ` | ${person.email}` : ""}
                       {` | ${person.kind}`}
-                      {person.isPrimary ? " | primary" : ""}
+                      {person.isPrimary ? " | Hauptperson" : ""}
                     </li>
                   ))}
                 </ul>

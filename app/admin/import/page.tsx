@@ -21,17 +21,17 @@ export default async function AdminImportPage() {
     <AdminShell>
       <PageContainer className="gap-6 py-6 sm:py-10">
         <AdminPanel className="space-y-5">
-          <Eyebrow>CSV import</Eyebrow>
-          <Heading>Preview grouped invitation imports before committing</Heading>
+          <Eyebrow>CSV-Import</Eyebrow>
+          <Heading>Gruppierte Einladungen vor dem Importieren prüfen</Heading>
           <SubtleText>
-            Use one row per named invitee and share the same
+            Verwende eine Zeile pro benanntem Gast und nutze dieselbe
             <code className="mx-1 rounded bg-cream-dark px-2 py-1 text-xs">
               invitation_external_id
             </code>
-            for guests that belong to the same invitation group.
+            für Gäste, die zur selben Einladungsgruppe gehören.
           </SubtleText>
           <Link href="/admin" className={buttonClassName({ secondary: true })}>
-            Back to dashboard
+            Zurück zur Übersicht
           </Link>
         </AdminPanel>
         <AdminPanel>
