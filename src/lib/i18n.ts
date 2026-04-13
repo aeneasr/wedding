@@ -58,6 +58,7 @@ type Dictionary = {
     recoverLink: string;
     updateHint: string;
     summaryLead: string;
+    welcomeSubtitle: string;
     venue: string;
     address: string;
     timing: string;
@@ -161,7 +162,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       recoverLink: "Einladungslink finden",
       updateHint:
         "Mit dem Einladungs-Link kannst du deine Antworten jederzeit ändern.",
-      summaryLead: "Willkommen, {name}",
+      summaryLead: "{name}",
+      welcomeSubtitle:
+        "Wir freuen uns, diesen besonderen Tag mit dir zu feiern.",
       venue: "Ort",
       address: "Adresse",
       timing: "Zeit",

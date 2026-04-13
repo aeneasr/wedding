@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { clearGuestSessionAction } from "@/src/app-actions/guest";
+import { LandingInvitationCard } from "@/src/components/landing-invitation-card";
 import { GuestLocaleProvider } from "@/src/components/locale-context";
 import { GuestRsvpForm } from "@/src/components/guest-rsvp-form";
 import {
@@ -47,18 +48,24 @@ export default async function GuestPage({
   const status = existingRsvp?.status ?? "pending";
 
   const guestName = primaryGuest?.fullName ?? bundle.invitation.primaryEmail;
-  const greeting = dictionary.guest.summaryLead.replace("{name}", guestName);
 
   return (
     <GuestLocaleProvider initialLocale={locale}>
       <WeddingShell>
         <PageContainer className="gap-6 py-8 sm:py-12">
 
+          {/* Hero invitation image */}
+          <LandingInvitationCard
+            imageAlt={dictionary.landing.imageAlt}
+            imageLabel={dictionary.landing.imageLabel}
+          />
+
           {/* Section 1: Compact greeting + key info */}
           <PaperPanel className="space-y-4">
             <div className="space-y-1">
               <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
-              <Heading>{greeting}</Heading>
+              <Heading>{guestName}</Heading>
+              <SubtleText>{dictionary.guest.welcomeSubtitle}</SubtleText>
             </div>
             <DataList
               items={[
