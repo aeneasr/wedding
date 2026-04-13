@@ -62,7 +62,7 @@ cat .e2e-tmp/e2e-manifest.json
 
 The manifest contains:
 
-- **Invitation URLs** for several test personas (event-1-only, event-2-only, both events, household with plus-one and children)
+- **Invitation URLs** for several test personas (event-1-only, event-2-only, both events, household roster)
 - **Admin dashboard** at `http://localhost:3100/admin` with password `playwright-admin-password`
 
 Emails are silently skipped since no email provider is configured. Press `Ctrl+C` to tear everything down.
@@ -75,7 +75,7 @@ Install dependencies:
 
 ```bash
 npm install
-```
+```ƒ
 
 Generate the initial migration if you change the schema:
 
@@ -118,12 +118,13 @@ npm run seed
 
 ## CSV Import Shape
 
-The importer expects one row per named guest. Group rows into one invitation with the same `invitation_external_id`.
+The importer expects one row per invited person. Group rows into one invitation with the same `invitation_external_id`.
 
 ```csv
-invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited,event_2_plus_one_allowed,event_2_children_allowed,event_2_max_children
-family-one,alex@example.com,household,en,Alex Rivera,alex@example.com,adult,true,true,true,false,true,2
-family-one,alex@example.com,household,en,Sam Rivera,sam@example.com,adult,false,true,true,false,true,2
+invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited
+family-one,alex@example.com,household,en,Alex Rivera,alex@example.com,adult,true,true,true
+family-one,alex@example.com,household,en,Sam Rivera,sam@example.com,adult,false,true,true
+family-one,alex@example.com,household,en,Mia Rivera,,child,false,true,true
 ```
 
 ## Notes

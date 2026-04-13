@@ -13,6 +13,7 @@ import { saveGuestRsvp, sendRecoveryLinks } from "@/src/server/invitations";
 export type GuestActionState = {
   error?: string;
   success?: string;
+  fieldErrors?: Record<string, string[]>;
 };
 
 function getClientIp(headersList: Headers) {
@@ -66,6 +67,7 @@ export async function saveGuestRsvpAction(
   if (!result.ok) {
     return {
       error: result.formError ?? dictionary.guest.saveError,
+      fieldErrors: result.fieldErrors,
     };
   }
 

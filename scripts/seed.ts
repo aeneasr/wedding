@@ -7,7 +7,7 @@ async function main() {
       externalId: "demo-household",
       primaryEmail: "alex@example.com",
       invitationMode: "household",
-      locale: "en",
+      locale: "de",
       invitees: [
         {
           fullName: "Alex Rivera",

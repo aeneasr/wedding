@@ -18,7 +18,7 @@ export function buildAttendeeRows(bundles: InvitationBundle[]) {
         inviteeName: invitee.fullName,
         attendeeType,
         attending: rsvp ? (invitee.attending ? "yes" : "no") : "",
-        dietaryRequirements: rsvp ? invitee.dietaryRequirements : "",
+        mealPreference: rsvp ? invitee.dietaryRequirements : "",
         phoneNumber: rsvp ? invitee.phoneNumber : "",
       };
     });

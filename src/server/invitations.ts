@@ -569,9 +569,16 @@ export async function saveGuestRsvp(input: {
   const validation = validateGuestRsvpPayload(input.payload);
 
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {};
+    for (const issue of validation.error.issues) {
+      if (issue.path.length > 0) {
+        const key = issue.path.join(".");
+        (fieldErrors[key] ??= []).push(issue.message);
+      }
+    }
     return {
       ok: false as const,
-      fieldErrors: validation.error.flatten(),
+      fieldErrors,
       formError: "Please review the highlighted fields.",
     };
   }

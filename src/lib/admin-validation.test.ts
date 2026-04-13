@@ -6,7 +6,7 @@ function validInvitation(overrides: Record<string, unknown> = {}) {
   return {
     primaryEmail: "test@example.com",
     invitationMode: "household",
-    locale: "en",
+    locale: "de",
     invitees: [
       { fullName: "Alice", email: "", kind: "adult", isPrimary: true },
       { fullName: "", email: "", kind: "adult", isPrimary: false },

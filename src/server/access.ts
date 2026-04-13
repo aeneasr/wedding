@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 
 import { getInvitationFromGuestSession } from "@/src/server/invitations";
 import {
-  clearGuestSession,
   getAdminSession,
   getGuestSession,
 } from "@/src/lib/session";
@@ -40,7 +39,6 @@ export async function requireGuestBundle() {
   const invitation = await getInvitationFromGuestSession(session);
 
   if (!invitation) {
-    await clearGuestSession();
     redirect("/recover");
   }
 

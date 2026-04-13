@@ -3,13 +3,15 @@ import Link from "next/link";
 import {
   Eyebrow,
   Heading,
-  PageBackground,
   PageContainer,
+  PaperPanel,
   SubtleText,
-  SurfaceCard,
-  buttonClassName,
+  WeddingShell,
+  inkButtonClassName,
 } from "@/src/components/ui";
+import { defaultLocale } from "@/src/lib/constants";
 import { getDictionary } from "@/src/lib/i18n";
+import { getStoredGuestLocale } from "@/src/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -19,14 +21,15 @@ export default async function InviteErrorPage({
   searchParams: Promise<{ reason?: string }>;
 }) {
   const { reason } = await searchParams;
-  const dictionary = getDictionary("en");
+  const locale = (await getStoredGuestLocale()) ?? defaultLocale;
+  const dictionary = getDictionary(locale);
   const isExpired = reason === "expired";
 
   return (
-    <PageBackground>
-      <PageContainer className="items-center justify-center py-8 sm:py-14">
-        <SurfaceCard className="w-full max-w-3xl space-y-5">
-          <Eyebrow>Invitation access</Eyebrow>
+    <WeddingShell>
+      <PageContainer className="items-center justify-center py-10 sm:py-16">
+        <PaperPanel className="w-full max-w-3xl space-y-5">
+          <Eyebrow>{dictionary.errors.linkEyebrow}</Eyebrow>
           <Heading className="text-4xl">
             {isExpired
               ? dictionary.errors.expiredLinkTitle
@@ -38,15 +41,15 @@ export default async function InviteErrorPage({
               : dictionary.errors.invalidLinkBody}
           </SubtleText>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/recover" className={buttonClassName()}>
-              Recover invitation
+            <Link href="/recover" className={inkButtonClassName()}>
+              {dictionary.guest.recoverLink}
             </Link>
-            <Link href="/" className={buttonClassName({ secondary: true })}>
-              Back to home
+            <Link href="/" className={inkButtonClassName({ variant: "secondary" })}>
+              {dictionary.guest.backToOverview}
             </Link>
           </div>
-        </SurfaceCard>
+        </PaperPanel>
       </PageContainer>
-    </PageBackground>
+    </WeddingShell>
   );
 }

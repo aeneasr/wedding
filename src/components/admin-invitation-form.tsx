@@ -119,17 +119,8 @@ export function AdminInvitationForm({
             required
           />
         </Field>
-        <Field label="Locale">
-          <select
-            name="locale"
-            className={inputClassName()}
-            defaultValue={initial?.locale ?? defaultLocale}
-          >
-            <option value="en">English</option>
-            <option value="de">German</option>
-          </select>
-        </Field>
       </div>
+      <input type="hidden" name="locale" value={defaultLocale} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Invitation mode">

@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import { saveGuestRsvpAction, type GuestActionState } from "@/src/app-actions/guest";
 import {
   GuestRsvpFields,
-  type ChildState,
   type InviteeState,
-  type PlusOneState,
   type RsvpFormProps,
 } from "@/src/components/guest-rsvp-fields";
 
@@ -22,6 +20,7 @@ export function GuestRsvpForm(props: GuestRsvpFormProps) {
 
   useEffect(() => {
     if (state.success) {
+      router.refresh();
       router.push("/guest?saved=1");
     }
   }, [state.success, router]);
@@ -38,8 +37,6 @@ export function GuestRsvpForm(props: GuestRsvpFormProps) {
 }
 
 export type {
-  ChildState,
   InviteeState,
-  PlusOneState,
   RsvpFormProps,
 };

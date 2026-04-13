@@ -9,7 +9,6 @@ export const e2eDbName = "wedding_playwright";
 export const e2eDbUrl = `postgres://postgres@${e2eDbHost}:${e2eDbPort}/${e2eDbName}`;
 
 export const e2eTmpDir = path.join(process.cwd(), ".e2e-tmp");
-export const e2ePostgresDataDir = path.join(e2eTmpDir, "postgres-data");
 export const e2eManifestPath = path.join(e2eTmpDir, "e2e-manifest.json");
 export const e2eMigrationsDir = path.join(process.cwd(), "drizzle");
 

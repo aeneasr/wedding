@@ -17,7 +17,7 @@ function makeBundle(
       externalId: "ext-1",
       primaryEmail: "alice@example.com",
       invitationMode: "individual",
-      locale: "en",
+      locale: "de",
       tokenVersion: 1,
       sentAt: null,
       lastSentAt: null,
@@ -93,7 +93,7 @@ describe("buildAttendeeRows", () => {
     expect(rows[0]).toMatchObject({
       rsvpStatus: "attending",
       attending: "yes",
-      dietaryRequirements: "vegan",
+      mealPreference: "vegan",
       phoneNumber: "+1234567890",
     });
   });

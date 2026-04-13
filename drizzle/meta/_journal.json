@@ -8,6 +8,13 @@
       "when": 1775075343661,
       "tag": "0003_broad_cammi",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775100000000,
+      "tag": "0004_remove_en_locale",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { env } from "@/src/lib/env";
 import { setGuestSession } from "@/src/lib/session";
 import {
   getInvitationForAccess,
@@ -19,7 +20,7 @@ export async function GET(
 
   if (!result.ok) {
     return NextResponse.redirect(
-      new URL(`/invite/error?reason=${result.reason}`, _request.url),
+      new URL(`/invite/error?reason=${result.reason}`, env.APP_URL),
     );
   }
 
@@ -29,5 +30,5 @@ export async function GET(
   );
   await markInvitationOpened(result.bundle.invitation.id);
 
-  return NextResponse.redirect(new URL("/guest", _request.url));
+  return NextResponse.redirect(new URL("/guest", env.APP_URL));
 }

@@ -16,7 +16,7 @@ export const invitationModeEnum = pgEnum("invitation_mode", [
   "individual",
   "household",
 ]);
-export const localeEnum = pgEnum("locale", ["en", "de"]);
+export const localeEnum = pgEnum("locale", ["de"]);
 export const inviteeKindEnum = pgEnum("invitee_kind", ["adult", "child"]);
 export const rsvpStatusEnum = pgEnum("rsvp_status", [
   "pending",

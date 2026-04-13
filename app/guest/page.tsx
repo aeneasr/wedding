@@ -1,20 +1,18 @@
 import Link from "next/link";
 
 import { clearGuestSessionAction } from "@/src/app-actions/guest";
-import { LandingInvitationCard } from "@/src/components/landing-invitation-card";
 import { GuestLocaleProvider } from "@/src/components/locale-context";
 import { GuestRsvpForm } from "@/src/components/guest-rsvp-form";
 import {
   DataList,
   Eyebrow,
   Heading,
-  InkBadge,
+  inkButtonClassName,
   PageContainer,
   PaperPanel,
   SectionTitle,
   SubtleText,
   WeddingShell,
-  inkButtonClassName,
 } from "@/src/components/ui";
 import {
   eventContent,
@@ -47,78 +45,27 @@ export default async function GuestPage({
     existingRsvp?.attendees ?? [],
   );
   const status = existingRsvp?.status ?? "pending";
-  const statusLabel =
-    status === "attending"
-      ? dictionary.guest.responseAttending
-      : status === "declined"
-        ? dictionary.guest.responseDeclined
-        : dictionary.guest.responsePending;
+
+  const guestName = primaryGuest?.fullName ?? bundle.invitation.primaryEmail;
+  const greeting = dictionary.guest.summaryLead.replace("{name}", guestName);
 
   return (
     <GuestLocaleProvider initialLocale={locale}>
       <WeddingShell>
         <PageContainer className="gap-6 py-8 sm:py-12">
-          {/* Section 1: Invitation Card */}
-          <PaperPanel className="space-y-5">
-            <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-10">
-              <div className="w-full max-w-[16rem] shrink-0">
-                <LandingInvitationCard
-                  imageAlt={dictionary.landing.imageAlt}
-                  imageLabel={dictionary.landing.imageLabel}
-                />
-              </div>
-              <div className="flex flex-col gap-5">
-                <div className="space-y-3">
-                  <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
-                  <Heading>
-                    {primaryGuest?.fullName ?? bundle.invitation.primaryEmail}
-                  </Heading>
-                  <SubtleText>{dictionary.guest.summaryLead}</SubtleText>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <a href="#rsvp" className={inkButtonClassName()}>
-                    {status === "pending"
-                      ? dictionary.guest.rsvp
-                      : dictionary.guest.update}
-                  </a>
-                  <form action={clearGuestSessionAction}>
-                    <button
-                      type="submit"
-                      className={inkButtonClassName({
-                        variant: "secondary",
-                        compact: true,
-                      })}
-                    >
-                      {dictionary.guest.logout}
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </PaperPanel>
 
-          {/* Section 2: Event Details */}
-          <PaperPanel className="space-y-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <Eyebrow>{formatEventDateBadge(locale)}</Eyebrow>
-                <Heading>{localizeEventText(eventContent.name, locale)}</Heading>
-                <SubtleText>{localizeEventText(eventContent.hero, locale)}</SubtleText>
-              </div>
-              <InkBadge
-                tone={
-                  status === "attending"
-                    ? "success"
-                    : status === "declined"
-                      ? "muted"
-                      : "warm"
-                }
-              >
-                {statusLabel}
-              </InkBadge>
+          {/* Section 1: Compact greeting + key info */}
+          <PaperPanel className="space-y-4">
+            <div className="space-y-1">
+              <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
+              <Heading>{greeting}</Heading>
             </div>
             <DataList
               items={[
+                {
+                  label: formatEventDateBadge(locale),
+                  value: localizeEventText(eventContent.name, locale),
+                },
                 {
                   label: dictionary.guest.venue,
                   value: localizeEventText(eventContent.venueName, locale),
@@ -144,6 +91,21 @@ export default async function GuestPage({
             />
           </PaperPanel>
 
+          {/* Section 2 + 3: RSVP form + Save button (inside GuestRsvpForm/GuestRsvpFields) */}
+          <div id="rsvp" className="space-y-4">
+            {saved === "1" ? (
+              <p className="rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text">
+                {dictionary.guest.saved}
+              </p>
+            ) : null}
+
+            <GuestRsvpForm
+              invitationMode={bundle.invitation.invitationMode}
+              invitees={invitees}
+            />
+          </div>
+
+          {/* Section 6: Schedule card */}
           <PaperPanel className="space-y-5">
             <SectionTitle title={dictionary.guest.schedule} />
             <div className="grid gap-3">
@@ -168,6 +130,7 @@ export default async function GuestPage({
             </div>
           </PaperPanel>
 
+          {/* Section 7: Practical information card */}
           <PaperPanel className="space-y-5">
             <SectionTitle title={dictionary.guest.logistics} />
             <div className="grid gap-3">
@@ -187,19 +150,8 @@ export default async function GuestPage({
             </div>
           </PaperPanel>
 
-          {/* Section 3: RSVP */}
-          <div id="rsvp" className="space-y-5">
-            {saved === "1" ? (
-              <p className="rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text">
-                {dictionary.guest.saved}
-              </p>
-            ) : null}
-
-            <GuestRsvpForm
-              invitationMode={bundle.invitation.invitationMode}
-              invitees={invitees}
-            />
-
+          {/* Section 8: Secondary actions */}
+          <div className="flex flex-col items-center gap-4 pb-4">
             {status === "attending" ? (
               <Link
                 href="/guest/calendar"
@@ -208,7 +160,17 @@ export default async function GuestPage({
                 {dictionary.guest.addToCalendar}
               </Link>
             ) : null}
+
+            <form action={clearGuestSessionAction}>
+              <button
+                type="submit"
+                className={inkButtonClassName({ variant: "ghost" })}
+              >
+                {dictionary.guest.logout}
+              </button>
+            </form>
           </div>
+
         </PageContainer>
       </WeddingShell>
     </GuestLocaleProvider>

@@ -2,87 +2,53 @@ import { test, expect } from "@playwright/experimental-ct-react";
 
 import { EventCheckboxes } from "./fixtures/event-checkboxes";
 
-test("disables plus-one and children checkboxes when Event Two is unchecked", async ({
+test("hides household-only controls for individual invitations", async ({
   mount,
 }) => {
   const component = await mount(
-    <EventCheckboxes initialEvent2Invited={false} />,
+    <EventCheckboxes initialInvitationMode="individual" />,
   );
 
-  await expect(
-    component.getByRole("checkbox", { name: "Event Two: plus one allowed" }),
-  ).toBeDisabled();
-  await expect(
-    component.getByRole("checkbox", { name: "Event Two: children allowed" }),
-  ).toBeDisabled();
+  await expect(component.getByLabel("Additional household members")).toHaveCount(0);
+  await expect(component.getByLabel("Person type")).toHaveCount(0);
 });
 
-test("enables plus-one and children checkboxes when Event Two is checked", async ({
+test("shows household count control for household invitations", async ({
   mount,
 }) => {
   const component = await mount(
-    <EventCheckboxes initialEvent2Invited={true} />,
+    <EventCheckboxes initialInvitationMode="household" />,
   );
 
-  await expect(
-    component.getByRole("checkbox", { name: "Event Two: plus one allowed" }),
-  ).toBeEnabled();
-  await expect(
-    component.getByRole("checkbox", { name: "Event Two: children allowed" }),
-  ).toBeEnabled();
+  await expect(component.getByLabel("Additional household members")).toBeVisible();
 });
 
-test("toggles disabled state when Event Two checkbox is clicked", async ({
+test("adds structured household rows when the additional-member count changes", async ({
   mount,
 }) => {
   const component = await mount(
-    <EventCheckboxes initialEvent2Invited={true} />,
+    <EventCheckboxes initialInvitationMode="household" initialAdditionalMembers={1} />,
   );
 
-  const event2 = component.getByRole("checkbox", { name: "Invite to Event Two" });
-  const plusOne = component.getByRole("checkbox", { name: "Event Two: plus one allowed" });
-  const children = component.getByRole("checkbox", { name: "Event Two: children allowed" });
+  await expect(component.getByLabel("Person type")).toHaveCount(1);
 
-  await expect(plusOne).toBeEnabled();
-  await expect(children).toBeEnabled();
+  await component.getByLabel("Additional household members").selectOption("3");
+  await expect(component.getByLabel("Person type")).toHaveCount(3);
 
-  await event2.uncheck();
-  await expect(plusOne).toBeDisabled();
-  await expect(children).toBeDisabled();
-
-  await event2.check();
-  await expect(plusOne).toBeEnabled();
-  await expect(children).toBeEnabled();
+  await component.getByLabel("Additional household members").selectOption("1");
+  await expect(component.getByLabel("Person type")).toHaveCount(1);
 });
 
-test("applies opacity-40 to labels when Event Two unchecked", async ({
+test("switching back to individual removes extra household rows", async ({
   mount,
 }) => {
   const component = await mount(
-    <EventCheckboxes initialEvent2Invited={false} />,
+    <EventCheckboxes initialInvitationMode="household" initialAdditionalMembers={2} />,
   );
 
-  const plusOneLabel = component
-    .getByRole("checkbox", { name: "Event Two: plus one allowed" })
-    .locator("..");
-  const childrenLabel = component
-    .getByRole("checkbox", { name: "Event Two: children allowed" })
-    .locator("..");
+  await expect(component.getByLabel("Person type")).toHaveCount(2);
 
-  await expect(plusOneLabel).toHaveClass(/opacity-40/);
-  await expect(childrenLabel).toHaveClass(/opacity-40/);
-});
-
-test("removes opacity-40 from labels when Event Two checked", async ({
-  mount,
-}) => {
-  const component = await mount(
-    <EventCheckboxes initialEvent2Invited={true} />,
-  );
-
-  const plusOneLabel = component
-    .getByRole("checkbox", { name: "Event Two: plus one allowed" })
-    .locator("..");
-
-  await expect(plusOneLabel).not.toHaveClass(/opacity-40/);
+  await component.getByLabel("Invitation mode").selectOption("individual");
+  await expect(component.getByLabel("Additional household members")).toHaveCount(0);
+  await expect(component.getByLabel("Person type")).toHaveCount(0);
 });

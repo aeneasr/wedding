@@ -1,10 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { buttonClassName } from "@/src/components/ui";
-import { locales, type Locale } from "@/src/lib/constants";
-import { getDictionary } from "@/src/lib/i18n";
+import { type Locale } from "@/src/lib/constants";
 
 type LocaleContextValue = {
   locale: Locale;
@@ -13,40 +12,87 @@ type LocaleContextValue = {
 
 export const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function persistGuestLocale(locale: Locale) {
+async function persistGuestLocale(locale: Locale) {
   const search = new URLSearchParams({ locale });
 
-  void fetch(`/guest/locale?${search.toString()}`, {
+  const response = await fetch(`/guest/locale?${search.toString()}`, {
     cache: "no-store",
     credentials: "same-origin",
     keepalive: true,
-  }).catch(() => undefined);
+  });
+
+  if (!response.ok) {
+    throw new Error(`Unable to persist locale ${locale}.`);
+  }
 }
 
 export function LocaleProvider({
   children,
   initialLocale,
+  onLocalePersistedAction,
 }: {
   children?: React.ReactNode;
   initialLocale: Locale;
+  onLocalePersistedAction?: () => void;
 }) {
   const [locale, setLocaleState] = useState(initialLocale);
+  const localeRef = useRef(locale);
+
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
+
+  useEffect(() => {
+    setLocaleState(initialLocale);
+  }, [initialLocale]);
 
   function setLocale(nextLocale: Locale) {
-    setLocaleState((currentLocale) => {
-      if (currentLocale === nextLocale) {
-        return currentLocale;
-      }
+    const previousLocale = localeRef.current;
 
-      persistGuestLocale(nextLocale);
-      return nextLocale;
-    });
+    if (previousLocale === nextLocale) {
+      return;
+    }
+
+    setLocaleState(nextLocale);
+
+    void persistGuestLocale(nextLocale)
+      .then(() => {
+        if (localeRef.current === nextLocale) {
+          onLocalePersistedAction?.();
+        }
+      })
+      .catch(() => {
+        if (localeRef.current === nextLocale) {
+          setLocaleState(previousLocale);
+        }
+      });
   }
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
       {children}
     </LocaleContext.Provider>
+  );
+}
+
+export function GuestLocaleProvider({
+  children,
+  initialLocale,
+}: {
+  children?: React.ReactNode;
+  initialLocale: Locale;
+}) {
+  const router = useRouter();
+
+  return (
+    <LocaleProvider
+      initialLocale={initialLocale}
+      onLocalePersistedAction={() => {
+        router.refresh();
+      }}
+    >
+      {children}
+    </LocaleProvider>
   );
 }
 
@@ -58,28 +104,4 @@ export function useLocale() {
   }
 
   return context;
-}
-
-export function LanguageSwitcher() {
-  const { locale, setLocale } = useLocale();
-  const dictionary = getDictionary(locale);
-
-  return (
-    <div className="flex items-center gap-2">
-      {locales.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={buttonClassName({
-            secondary: option !== locale,
-            compact: true,
-          })}
-          aria-pressed={option === locale}
-          onClick={() => setLocale(option)}
-        >
-          {dictionary.switchTo[option]}
-        </button>
-      ))}
-    </div>
-  );
 }

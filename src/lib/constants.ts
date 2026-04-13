@@ -1,4 +1,4 @@
-export const locales = ["en", "de"] as const;
+export const locales = ["de"] as const;
 export const invitationModes = ["individual", "household"] as const;
 export const inviteeKinds = ["adult", "child"] as const;
 export const rsvpStatuses = ["pending", "attending", "declined"] as const;

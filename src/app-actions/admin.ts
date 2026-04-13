@@ -180,7 +180,7 @@ export async function commitImportAction(formData: FormData) {
       externalId: group.externalId,
       primaryEmail: group.primaryEmail,
       invitationMode: group.invitationMode as "individual" | "household",
-      locale: group.locale as "en" | "de",
+      locale: group.locale as "de",
       invitees: group.invitees.map((invitee) => ({
         fullName: invitee.fullName,
         email: invitee.email,

@@ -19,7 +19,7 @@ export const adminInvitationSchema = z
   .object({
     primaryEmail: z.email("A valid primary email is required."),
     invitationMode: z.enum(["individual", "household"] satisfies [InvitationMode, ...InvitationMode[]]),
-    locale: z.enum(["en", "de"] satisfies [Locale, ...Locale[]]),
+    locale: z.enum(["de"] satisfies [Locale, ...Locale[]]),
     invitees: z
       .array(inviteeInputSchema)
       .min(1, "Add at least one person.")
@@ -83,7 +83,7 @@ const guestResponseSchema = z.object({
   kind: z.enum(["adult", "child"] satisfies [InviteeKind, ...InviteeKind[]]),
   isPrimary: z.boolean(),
   attending: z.boolean(),
-  dietaryRequirements: z.string().trim().max(500).optional(),
+  dietaryRequirements: z.enum(["", "meat", "vegetarian"]).optional(),
   phoneNumber: z.string().trim().max(50).optional(),
 });
 
@@ -104,7 +104,7 @@ export function validateGuestRsvpPayload(payload: unknown) {
         });
       }
 
-      if (invitee.attending && invitee.kind === "adult") {
+      if (invitee.isPrimary && invitee.attending) {
         if (!invitee.phoneNumber?.trim()) {
           ctx.addIssue({
             code: "custom",

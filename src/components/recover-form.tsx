@@ -3,11 +3,17 @@
 import { useActionState } from "react";
 
 import { submitRecoveryAction, type GuestActionState } from "@/src/app-actions/guest";
-import { buttonClassName, Field, inputClassName } from "@/src/components/ui";
+import { inkButtonClassName, Field, inputClassName } from "@/src/components/ui";
 
 const initialState: GuestActionState = {};
 
-export function RecoverForm({ label }: { label: string }) {
+export function RecoverForm({
+  label,
+  submitLabel,
+}: {
+  label: string;
+  submitLabel: string;
+}) {
   const [state, formAction, pending] = useActionState(
     submitRecoveryAction,
     initialState,
@@ -25,17 +31,17 @@ export function RecoverForm({ label }: { label: string }) {
         />
       </Field>
       {state.error ? (
-        <p className="rounded-2xl bg-[#f7dfd9] px-4 py-3 text-sm text-[#8a3f34]">
+        <p className="rounded-xl bg-error-bg px-4 py-3 text-sm text-error-text">
           {state.error}
         </p>
       ) : null}
       {state.success ? (
-        <p className="rounded-2xl bg-[#e0ecde] px-4 py-3 text-sm text-[#355b39]">
+        <p className="rounded-xl bg-success-bg px-4 py-3 text-sm text-success-text">
           {state.success}
         </p>
       ) : null}
-      <button type="submit" className={buttonClassName()} disabled={pending}>
-        {pending ? "Sending..." : "Send recovery email"}
+      <button type="submit" className={inkButtonClassName()} disabled={pending}>
+        {pending ? `${submitLabel}...` : submitLabel}
       </button>
     </form>
   );

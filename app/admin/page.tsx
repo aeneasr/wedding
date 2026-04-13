@@ -29,7 +29,7 @@ export default async function AdminPage({
     search?: string;
   }>;
 }) {
-  const dictionary = getDictionary("en");
+  const dictionary = getDictionary("de");
 
   if (!isDatabaseConfigured() || !isAdminAuthConfigured()) {
     return (

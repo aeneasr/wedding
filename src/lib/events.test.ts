@@ -14,7 +14,6 @@ describe("event content", () => {
 
   it("formats the guest-facing date badges using the selected locale", () => {
     expect(formatEventDateBadge()).toBe("22 Aug. 2026");
-    expect(formatEventDateBadge("en")).toBe("22 Aug 2026");
     expect(formatEventDateBadge("de")).toBe("22 Aug. 2026");
   });
 

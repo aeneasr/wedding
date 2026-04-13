@@ -21,7 +21,7 @@ const csvRowSchema = z.object({
   invitation_external_id: z.string().trim().min(1),
   primary_email: z.email(),
   invitation_mode: z.enum(["individual", "household"]).default("individual"),
-  locale: z.enum(["en", "de"]).default(defaultLocale),
+  locale: z.enum(["de"]).default(defaultLocale),
   person_name: z.string().trim().min(1),
   person_email: z.string().trim().optional(),
   person_type: z.enum(["adult", "child"]).default("adult"),

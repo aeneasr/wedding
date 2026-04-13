@@ -12,13 +12,14 @@ import {
   e2eDbPort,
   e2eManifestPath,
   e2eMigrationsDir,
-  e2ePostgresDataDir,
   e2eTmpDir,
   getE2eAppEnv,
 } from "./e2e-env";
 
 const trackedChildren = new Set<ChildProcess>();
 let shuttingDown = false;
+
+const dockerContainerName = "wedding-e2e-postgres";
 
 function withAppEnv() {
   return {
@@ -134,29 +135,28 @@ async function setupDatabase() {
   await rm(e2eTmpDir, { recursive: true, force: true });
   await mkdir(e2eTmpDir, { recursive: true });
 
-  await runCommand("initdb", "initdb", [
-    "-D",
-    e2ePostgresDataDir,
-    "-U",
-    "postgres",
-    "-A",
-    "trust",
-  ]);
+  // Remove any leftover container from a previous run.
+  await commandSucceeds("docker", ["rm", "-f", dockerContainerName]);
 
   trackChild(
     "postgres",
     spawn(
-      "postgres",
+      "docker",
       [
-        "-D",
-        e2ePostgresDataDir,
+        "run",
+        "--rm",
+        "--name",
+        dockerContainerName,
+        "-e",
+        "POSTGRES_HOST_AUTH_METHOD=trust",
+        "-e",
+        "POSTGRES_USER=postgres",
         "-p",
-        String(e2eDbPort),
-        "-c",
-        `listen_addresses=${e2eDbHost}`,
+        `${e2eDbHost}:${e2eDbPort}:5432`,
+        "postgres:16",
       ],
       {
-        env: withAppEnv(),
+        env: process.env,
         stdio: "inherit",
       },
     ),
@@ -164,24 +164,20 @@ async function setupDatabase() {
 
   await waitForPostgres();
 
-  await runCommand("create database", "psql", [
-    "-h",
-    e2eDbHost,
-    "-p",
-    String(e2eDbPort),
+  await runCommand("create database", "docker", [
+    "exec",
+    dockerContainerName,
+    "psql",
     "-U",
-    "postgres",
-    "-d",
     "postgres",
     "-c",
     `CREATE DATABASE ${e2eDbName};`,
   ]);
 
-  await runCommand("enable pgcrypto", "psql", [
-    "-h",
-    e2eDbHost,
-    "-p",
-    String(e2eDbPort),
+  await runCommand("enable pgcrypto", "docker", [
+    "exec",
+    dockerContainerName,
+    "psql",
     "-U",
     "postgres",
     "-d",
@@ -218,7 +214,7 @@ async function startApp() {
         "dev",
         "--",
         "--hostname",
-        e2eDbHost,
+        "0.0.0.0",
         "--port",
         String(e2eAppPort),
       ],

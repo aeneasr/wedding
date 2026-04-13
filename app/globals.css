@@ -10,6 +10,24 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
   --font-serif: var(--font-heading);
+  --font-accent: var(--font-accent);
+
+  --color-cream: #faf7f2;
+  --color-cream-dark: #f0ebe3;
+  --color-paper: #fffdf8;
+  --color-sage: #6b7c5e;
+  --color-sage-light: #e4ebe0;
+  --color-sage-muted: #8b9485;
+  --color-forest: #3d4f35;
+  --color-ink: #2c3527;
+  --color-ink-light: #5a6655;
+  --color-border: #d4cfc5;
+  --color-border-sage: #b8c4ae;
+  --color-champagne: #f0ebe3;
+  --color-success-bg: #e0ecde;
+  --color-success-text: #355b39;
+  --color-error-bg: #f7dfd9;
+  --color-error-text: #8a3f34;
 }
 
 @layer base {
@@ -18,7 +36,7 @@
   }
 
   html {
-    background: #f8f3ed;
+    background: var(--color-cream);
   }
 
   body {
@@ -32,11 +50,14 @@
     text-decoration: none;
   }
 
-  button {
+  button,
+  a {
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {
-    background: rgba(171, 133, 102, 0.25);
+    background: rgba(107, 124, 94, 0.2);
   }
 }

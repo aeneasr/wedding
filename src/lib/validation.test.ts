@@ -30,7 +30,7 @@ describe("validateGuestRsvpPayload", () => {
           kind: "adult",
           isPrimary: true,
           attending: true,
-          dietaryRequirements: "Vegetarian",
+          dietaryRequirements: "vegetarian",
           phoneNumber: "+49 123 456789",
         },
         {
@@ -48,7 +48,7 @@ describe("validateGuestRsvpPayload", () => {
           kind: "child",
           isPrimary: false,
           attending: true,
-          dietaryRequirements: "No nuts",
+          dietaryRequirements: "meat",
           phoneNumber: "",
         },
       ],

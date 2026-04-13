@@ -22,7 +22,7 @@ export function AdminLoginForm() {
         />
       </Field>
       {state.error ? (
-        <p className="rounded-2xl bg-[#f7dfd9] px-4 py-3 text-sm text-[#8a3f34]">
+        <p className="rounded-xl bg-error-bg px-4 py-3 text-sm text-error-text">
           {state.error}
         </p>
       ) : null}

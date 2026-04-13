@@ -24,10 +24,8 @@ export type E2eManifest = {
   baseUrl: string;
   unknownRecoveryEmail: string;
   invitations: {
-    eventOneOnly: ManifestInvitation;
-    eventTwoOnly: ManifestInvitation;
-    bothEvents: ManifestInvitation;
-    familyEventTwo: ManifestInvitation;
+    individual: ManifestInvitation;
+    family: ManifestInvitation;
     adminOpenedOnly: ManifestInvitation;
     adminRespondedFamily: ManifestInvitation;
   };
@@ -35,57 +33,13 @@ export type E2eManifest = {
 
 const invitationInputs = [
   {
-    key: "eventOneOnly",
-    input: {
-      externalId: "event-one-only",
-      primaryEmail: "sky@example.com",
-      invitationMode: "individual" as const,
-      locale: "en" as const,
-      namedGuests: [
-        {
-          fullName: "Sky Event",
-          email: "sky@example.com",
-          kind: "adult" as const,
-          isPrimary: true,
-        },
-      ],
-      event1Invited: true,
-      event2Invited: false,
-      event2PlusOneAllowed: false,
-      event2ChildrenAllowed: false,
-      event2MaxChildren: 0,
-    },
-  },
-  {
-    key: "eventTwoOnly",
-    input: {
-      externalId: "event-two-only",
-      primaryEmail: "jordan@example.com",
-      invitationMode: "individual" as const,
-      locale: "en" as const,
-      namedGuests: [
-        {
-          fullName: "Jordan Event",
-          email: "jordan@example.com",
-          kind: "adult" as const,
-          isPrimary: true,
-        },
-      ],
-      event1Invited: false,
-      event2Invited: true,
-      event2PlusOneAllowed: false,
-      event2ChildrenAllowed: false,
-      event2MaxChildren: 0,
-    },
-  },
-  {
-    key: "bothEvents",
+    key: "individual",
     input: {
       externalId: "both-events",
       primaryEmail: "alex@example.com",
       invitationMode: "individual" as const,
-      locale: "en" as const,
-      namedGuests: [
+      locale: "de" as const,
+      invitees: [
         {
           fullName: "Alex Both",
           email: "alex@example.com",
@@ -93,33 +47,41 @@ const invitationInputs = [
           isPrimary: true,
         },
       ],
-      event1Invited: true,
-      event2Invited: true,
-      event2PlusOneAllowed: false,
-      event2ChildrenAllowed: false,
-      event2MaxChildren: 0,
     },
   },
   {
-    key: "familyEventTwo",
+    key: "family",
     input: {
       externalId: "family-event-two",
       primaryEmail: "taylor@example.com",
       invitationMode: "household" as const,
-      locale: "en" as const,
-      namedGuests: [
+      locale: "de" as const,
+      invitees: [
         {
           fullName: "Taylor Family",
           email: "taylor@example.com",
           kind: "adult" as const,
           isPrimary: true,
         },
+        {
+          fullName: "",
+          email: null,
+          kind: "adult" as const,
+          isPrimary: false,
+        },
+        {
+          fullName: "",
+          email: null,
+          kind: "child" as const,
+          isPrimary: false,
+        },
+        {
+          fullName: "",
+          email: null,
+          kind: "child" as const,
+          isPrimary: false,
+        },
       ],
-      event1Invited: false,
-      event2Invited: true,
-      event2PlusOneAllowed: true,
-      event2ChildrenAllowed: true,
-      event2MaxChildren: 2,
     },
   },
   {
@@ -128,8 +90,8 @@ const invitationInputs = [
       externalId: "admin-opened-only",
       primaryEmail: "opened@example.com",
       invitationMode: "individual" as const,
-      locale: "en" as const,
-      namedGuests: [
+      locale: "de" as const,
+      invitees: [
         {
           fullName: "Morgan Opened",
           email: "opened@example.com",
@@ -137,11 +99,6 @@ const invitationInputs = [
           isPrimary: true,
         },
       ],
-      event1Invited: false,
-      event2Invited: true,
-      event2PlusOneAllowed: false,
-      event2ChildrenAllowed: false,
-      event2MaxChildren: 0,
     },
   },
   {
@@ -150,20 +107,33 @@ const invitationInputs = [
       externalId: "admin-responded-family",
       primaryEmail: "admin-family@example.com",
       invitationMode: "household" as const,
-      locale: "en" as const,
-      namedGuests: [
+      locale: "de" as const,
+      invitees: [
         {
           fullName: "Riley Response",
           email: "admin-family@example.com",
           kind: "adult" as const,
           isPrimary: true,
         },
+        {
+          fullName: "",
+          email: null,
+          kind: "adult" as const,
+          isPrimary: false,
+        },
+        {
+          fullName: "",
+          email: null,
+          kind: "child" as const,
+          isPrimary: false,
+        },
+        {
+          fullName: "",
+          email: null,
+          kind: "child" as const,
+          isPrimary: false,
+        },
       ],
-      event1Invited: false,
-      event2Invited: true,
-      event2PlusOneAllowed: true,
-      event2ChildrenAllowed: true,
-      event2MaxChildren: 2,
     },
   },
 ] as const;
@@ -190,7 +160,7 @@ export async function seedPlaywrightData() {
   for (const { input } of invitationInputs) {
     await saveInvitation({
       ...input,
-      namedGuests: input.namedGuests.map((guest) => ({ ...guest })),
+      invitees: input.invitees.map((invitee) => ({ ...invitee })),
     });
   }
 
@@ -199,10 +169,8 @@ export async function seedPlaywrightData() {
     baseUrl: e2eBaseUrl,
     unknownRecoveryEmail: "missing@example.com",
     invitations: {
-      eventOneOnly: await getManifestInvitation("event-one-only"),
-      eventTwoOnly: await getManifestInvitation("event-two-only"),
-      bothEvents: await getManifestInvitation("both-events"),
-      familyEventTwo: await getManifestInvitation("family-event-two"),
+      individual: await getManifestInvitation("both-events"),
+      family: await getManifestInvitation("family-event-two"),
       adminOpenedOnly: await getManifestInvitation("admin-opened-only"),
       adminRespondedFamily: await getManifestInvitation("admin-responded-family"),
     },

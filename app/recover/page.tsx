@@ -4,42 +4,45 @@ import { RecoverForm } from "@/src/components/recover-form";
 import {
   Eyebrow,
   Heading,
-  PageBackground,
   PageContainer,
+  PaperPanel,
   SubtleText,
-  SurfaceCard,
-  buttonClassName,
+  WeddingShell,
+  inkButtonClassName,
 } from "@/src/components/ui";
+import { defaultLocale } from "@/src/lib/constants";
 import { getDictionary } from "@/src/lib/i18n";
+import { getStoredGuestLocale } from "@/src/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default function RecoverPage() {
-  const dictionary = getDictionary("en");
+export default async function RecoverPage() {
+  const locale = (await getStoredGuestLocale()) ?? defaultLocale;
+  const dictionary = getDictionary(locale);
 
   return (
-    <PageBackground>
-      <PageContainer className="justify-center py-8 sm:py-14">
-        <div className="mx-auto grid w-full max-w-4xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <SurfaceCard className="space-y-5">
+    <WeddingShell>
+      <PageContainer className="items-center justify-center py-10 sm:py-16">
+        <div className="mx-auto grid w-full max-w-4xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <PaperPanel className="space-y-5">
             <Eyebrow>{dictionary.guest.recoverLink}</Eyebrow>
-            <Heading className="text-4xl">{dictionary.recover.title}</Heading>
+            <Heading className="text-2xl sm:text-3xl">{dictionary.recover.title}</Heading>
             <SubtleText>{dictionary.recover.description}</SubtleText>
-            <RecoverForm label={dictionary.recover.emailLabel} />
-            <Link href="/" className={buttonClassName({ secondary: true })}>
-              Back to home
+            <RecoverForm
+              label={dictionary.recover.emailLabel}
+              submitLabel={dictionary.recover.submit}
+            />
+            <Link href="/" className={inkButtonClassName({ variant: "ghost" })}>
+              {dictionary.guest.backToOverview}
             </Link>
-          </SurfaceCard>
-          <SurfaceCard className="space-y-4">
-            <Eyebrow>Private access</Eyebrow>
-            <Heading className="text-3xl">{dictionary.guest.informationHidden}</Heading>
-            <SubtleText>
-              Recovery works only for email addresses that already belong to an
-              invitation on file. No new guest records are created here.
-            </SubtleText>
-          </SurfaceCard>
+          </PaperPanel>
+          <PaperPanel className="space-y-4 bg-cream">
+            <Eyebrow>{dictionary.recover.helpEyebrow}</Eyebrow>
+            <Heading className="text-2xl sm:text-3xl">{dictionary.recover.helpTitle}</Heading>
+            <SubtleText>{dictionary.recover.helpBody}</SubtleText>
+          </PaperPanel>
         </div>
       </PageContainer>
-    </PageBackground>
+    </WeddingShell>
   );
 }
