@@ -279,7 +279,7 @@ async function replaceInvitationStructure(
         .update(invitees)
         .set({
           fullName: inviteeInput.fullName,
-          email: inviteeInput.email ? normalizeEmail(inviteeInput.email) : null,
+          email: null,
           kind: inviteeInput.kind,
           isPrimary: inviteeInput.isPrimary,
         })
@@ -291,7 +291,7 @@ async function replaceInvitationStructure(
     await db.insert(invitees).values({
       invitationId,
       fullName: inviteeInput.fullName,
-      email: inviteeInput.email ? normalizeEmail(inviteeInput.email) : null,
+      email: null,
       kind: inviteeInput.kind,
       isPrimary: inviteeInput.isPrimary,
       createdAt: new Date(now.getTime() + index),
@@ -668,10 +668,7 @@ export async function saveGuestRsvp(input: {
       dietaryRequirements: response.attending
         ? response.dietaryRequirements?.trim() || null
         : null,
-      phoneNumber:
-        response.attending && response.kind === "adult"
-          ? response.phoneNumber?.trim() || null
-          : null,
+      phoneNumber: null,
       sortOrder: sortOrder++,
     });
   });

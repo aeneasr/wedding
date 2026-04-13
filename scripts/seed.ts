@@ -11,25 +11,21 @@ async function main() {
       invitees: [
         {
           fullName: "Alex Rivera",
-          email: "alex@example.com",
           kind: "adult",
           isPrimary: true,
         },
         {
           fullName: "Sam Rivera",
-          email: "sam@example.com",
           kind: "adult",
           isPrimary: false,
         },
         {
           fullName: "",
-          email: null,
           kind: "child",
           isPrimary: false,
         },
         {
           fullName: "",
-          email: null,
           kind: "child",
           isPrimary: false,
         },
@@ -43,7 +39,6 @@ async function main() {
       invitees: [
         {
           fullName: "Maria Keller",
-          email: "maria@example.com",
           kind: "adult",
           isPrimary: true,
         },

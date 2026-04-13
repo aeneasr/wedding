@@ -94,7 +94,6 @@ describe("buildAttendeeRows", () => {
       rsvpStatus: "attending",
       attending: "yes",
       mealPreference: "vegan",
-      phoneNumber: "+1234567890",
     });
   });
 

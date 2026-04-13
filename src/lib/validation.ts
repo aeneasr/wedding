@@ -10,7 +10,6 @@ import {
 
 export const inviteeInputSchema = z.object({
   fullName: z.string().trim().max(120),
-  email: z.email().optional().or(z.literal("")),
   kind: z.enum(["adult", "child"]).default("adult"),
   isPrimary: z.boolean().default(false),
 });
@@ -84,7 +83,6 @@ const guestResponseSchema = z.object({
   isPrimary: z.boolean(),
   attending: z.boolean(),
   dietaryRequirements: z.enum(["", "meat", "vegetarian"]).optional(),
-  phoneNumber: z.string().trim().max(50).optional(),
 });
 
 export const guestRsvpSchema = z.object({
@@ -102,16 +100,6 @@ export function validateGuestRsvpPayload(payload: unknown) {
           path: ["invitees", index, "kind"],
           message: "The primary person must remain an adult.",
         });
-      }
-
-      if (invitee.isPrimary && invitee.attending) {
-        if (!invitee.phoneNumber?.trim()) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["invitees", index, "phoneNumber"],
-            message: "Phone number is required for attending adults.",
-          });
-        }
       }
 
       if (!invitee.fullName.trim()) {

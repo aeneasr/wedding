@@ -19,7 +19,6 @@ export function buildAttendeeRows(bundles: InvitationBundle[]) {
         attendeeType,
         attending: rsvp ? (invitee.attending ? "yes" : "no") : "",
         mealPreference: rsvp ? invitee.dietaryRequirements : "",
-        phoneNumber: rsvp ? invitee.phoneNumber : "",
       };
     });
   });

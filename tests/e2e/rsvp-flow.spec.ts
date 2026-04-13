@@ -25,7 +25,6 @@ async function fillPrimaryAdultAttendance(
   options: {
     name: string;
     mealPreference?: "meat" | "vegetarian";
-    phoneNumber: string;
   },
 ) {
   await toggleAttendanceRow(page, options.name);
@@ -34,15 +33,12 @@ async function fillPrimaryAdultAttendance(
     await page.getByLabel("Essenswunsch").first().click();
     await page.getByRole("option", { name: mealLabel[options.mealPreference] }).click();
   }
-
-  await page.getByLabel("Telefonnummer").first().fill(options.phoneNumber);
 }
 
 async function submitHouseholdEventTwoRsvp(page: Page) {
   await fillPrimaryAdultAttendance(page, {
     name: "Taylor Family",
     mealPreference: "vegetarian",
-    phoneNumber: "+39 333 111 222",
   });
 
   await toggleAttendanceRow(page, "Household member 1");
@@ -56,7 +52,6 @@ async function submitHouseholdEventTwoRsvp(page: Page) {
 async function submitAdminRespondedFamilyRsvp(page: Page) {
   await fillPrimaryAdultAttendance(page, {
     name: "Riley Response",
-    phoneNumber: "+39 333 111 222",
   });
 
   await toggleAttendanceRow(page, "Household member 1");
@@ -144,8 +139,6 @@ test.describe("Name-change + attending regression", () => {
     if (!isChecked) {
       await toggleAttendanceRow(page, "Taylor Family");
     }
-    await page.getByLabel("Telefonnummer").first().fill("+39 111 222 333");
-
     await page.getByRole("button", { name: "Antwort speichern" }).click();
 
     // Wait for the post-save navigation to complete (/guest?saved=1).
@@ -177,7 +170,6 @@ test.describe("Desktop guest and admin flows", () => {
     await fillPrimaryAdultAttendance(page, {
       name: "Alex Both",
       mealPreference: "meat",
-      phoneNumber: "+39 333 444 555",
     });
     await page.getByRole("button", { name: "Antwort speichern" }).click();
     await expect(page.getByText("Deine Antwort wurde gespeichert.").first()).toBeVisible();

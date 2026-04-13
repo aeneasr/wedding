@@ -24,7 +24,6 @@ async function readPayload(component: Locator) {
       isPrimary: boolean;
       attending: boolean;
       dietaryRequirements: string;
-      phoneNumber: string;
     }>;
   };
 }
@@ -49,7 +48,6 @@ function buildProps(
         isPrimary: true,
         attending: false,
         dietaryRequirements: "",
-        phoneNumber: "",
       },
       {
         inviteeId: "22222222-2222-4222-8222-222222222222",
@@ -58,7 +56,6 @@ function buildProps(
         isPrimary: false,
         attending: false,
         dietaryRequirements: "",
-        phoneNumber: "",
       },
       {
         inviteeId: "33333333-3333-4333-8333-333333333333",
@@ -67,7 +64,6 @@ function buildProps(
         isPrimary: false,
         attending: false,
         dietaryRequirements: "",
-        phoneNumber: "",
       },
     ],
     ...overrides,
@@ -84,8 +80,6 @@ test("checklist rows toggle attendance and serialize correctly", async ({
   );
 
   await toggleAttendanceRow(component, "Taylor Family");
-  await component.getByLabel("Telefonnummer").first().fill("+39 333 111 222");
-
   await toggleAttendanceRow(component, "Household member 1");
   await toggleAttendanceRow(component, "Child 1");
 
@@ -96,7 +90,6 @@ test("checklist rows toggle attendance and serialize correctly", async ({
         {
           fullName: "Taylor Family",
           attending: true,
-          phoneNumber: "+39 333 111 222",
         },
         {
           fullName: "Household member 1",
@@ -127,7 +120,6 @@ test("checklist hydrates existing attendance responses", async ({
               isPrimary: true,
               attending: true,
               dietaryRequirements: "vegetarian",
-              phoneNumber: "+39 333 111 222",
             },
             {
               inviteeId: "22222222-2222-4222-8222-222222222222",
@@ -136,8 +128,7 @@ test("checklist hydrates existing attendance responses", async ({
               isPrimary: false,
               attending: true,
               dietaryRequirements: "",
-              phoneNumber: "",
-            },
+                  },
             {
               inviteeId: "33333333-3333-4333-8333-333333333333",
               fullName: "Ava Family",
@@ -145,8 +136,7 @@ test("checklist hydrates existing attendance responses", async ({
               isPrimary: false,
               attending: true,
               dietaryRequirements: "meat",
-              phoneNumber: "",
-            },
+                  },
           ],
         })}
       />
@@ -196,8 +186,7 @@ test("individual mode shows single checklist row", async ({
               isPrimary: true,
               attending: false,
               dietaryRequirements: "",
-              phoneNumber: "",
-            },
+                  },
           ],
         })}
       />
@@ -208,7 +197,6 @@ test("individual mode shows single checklist row", async ({
   await expect(component.getByRole("checkbox", { name: "Taylor Family" })).not.toBeChecked();
 
   await toggleAttendanceRow(component, "Taylor Family");
-  await component.getByLabel("Telefonnummer").first().fill("+39 333 555 444");
 
   await expect
     .poll(async () => readPayload(component))
@@ -217,7 +205,6 @@ test("individual mode shows single checklist row", async ({
         {
           fullName: "Taylor Family",
           attending: true,
-          phoneNumber: "+39 333 555 444",
         },
       ],
     });
@@ -236,16 +223,13 @@ test("unchecking attendance hides detail fields", async ({
   // Mark attending and verify detail fields appear
   await toggleAttendanceRow(component, "Taylor Family");
   await expect(component.getByLabel("Essenswunsch")).toHaveCount(1);
-  await expect(component.getByLabel("Telefonnummer")).toHaveCount(1);
 
-  await component.getByLabel("Telefonnummer").first().fill("+39 999 888 777");
   await selectMealOption(component, page, 0, "Vegetarisch");
 
   // Uncheck and verify fields disappear
   await toggleAttendanceRow(component, "Taylor Family");
 
   await expect(component.getByLabel("Essenswunsch")).toHaveCount(0);
-  await expect(component.getByLabel("Telefonnummer")).toHaveCount(0);
 
   // State is preserved in payload
   await expect
@@ -255,7 +239,6 @@ test("unchecking attendance hides detail fields", async ({
         {
           fullName: "Taylor Family",
           attending: false,
-          phoneNumber: "+39 999 888 777",
           dietaryRequirements: "vegetarian",
         },
         { fullName: "Household member 1", attending: false },
@@ -264,7 +247,7 @@ test("unchecking attendance hides detail fields", async ({
     });
 });
 
-test("non-primary attending guest shows meal preference but no phone number", async ({
+test("non-primary attending guest shows meal preference", async ({
   mount,
   page,
 }) => {
@@ -278,7 +261,6 @@ test("non-primary attending guest shows meal preference but no phone number", as
   await toggleAttendanceRow(component, "Child 1");
 
   await expect(component.getByLabel("Essenswunsch")).toHaveCount(1);
-  await expect(component.getByLabel("Telefonnummer")).toHaveCount(0);
 
   await selectMealOption(component, page, 0, "Fleisch");
 
@@ -308,7 +290,6 @@ test("old free-text dietary values are sanitized to empty on load", async ({
               isPrimary: true,
               attending: true,
               dietaryRequirements: "vegan", // old free-text value
-              phoneNumber: "+39 111 222 333",
             },
           ],
         })}
@@ -322,96 +303,6 @@ test("old free-text dietary values are sanitized to empty on load", async ({
     .toMatchObject({
       invitees: [{ dietaryRequirements: "" }],
     });
-});
-
-test("shows phone number error message when fieldErrors targets invitee phone", async ({
-  mount,
-}) => {
-  const component = await mount(
-    <form className="space-y-6">
-      <GuestRsvpFields
-        {...buildProps({
-          invitees: [
-            {
-              inviteeId: "11111111-1111-4111-8111-111111111111",
-              fullName: "Taylor Family",
-              kind: "adult",
-              isPrimary: true,
-              attending: true,
-              dietaryRequirements: "",
-              phoneNumber: "",
-            },
-          ],
-        })}
-        state={{
-          error: "Please review the highlighted fields.",
-          fieldErrors: { "invitees.0.phoneNumber": ["Phone number is required."] },
-        }}
-      />
-    </form>,
-  );
-
-  await expect(component.getByText("Phone number is required.")).toBeVisible();
-});
-
-test("highlights phone number input with aria-invalid when field error present", async ({
-  mount,
-}) => {
-  const component = await mount(
-    <form className="space-y-6">
-      <GuestRsvpFields
-        {...buildProps({
-          invitees: [
-            {
-              inviteeId: "11111111-1111-4111-8111-111111111111",
-              fullName: "Taylor Family",
-              kind: "adult",
-              isPrimary: true,
-              attending: true,
-              dietaryRequirements: "",
-              phoneNumber: "",
-            },
-          ],
-        })}
-        state={{
-          error: "Please review the highlighted fields.",
-          fieldErrors: { "invitees.0.phoneNumber": ["Phone number is required."] },
-        }}
-      />
-    </form>,
-  );
-
-  await expect(component.getByLabel("Telefonnummer")).toHaveAttribute("aria-invalid", "true");
-});
-
-test("does not mark meal preference field as invalid when only phone has an error", async ({
-  mount,
-}) => {
-  const component = await mount(
-    <form className="space-y-6">
-      <GuestRsvpFields
-        {...buildProps({
-          invitees: [
-            {
-              inviteeId: "11111111-1111-4111-8111-111111111111",
-              fullName: "Taylor Family",
-              kind: "adult",
-              isPrimary: true,
-              attending: true,
-              dietaryRequirements: "",
-              phoneNumber: "",
-            },
-          ],
-        })}
-        state={{
-          error: "Please review the highlighted fields.",
-          fieldErrors: { "invitees.0.phoneNumber": ["Phone number is required."] },
-        }}
-      />
-    </form>,
-  );
-
-  await expect(component.getByLabel("Essenswunsch")).not.toHaveAttribute("aria-invalid");
 });
 
 test("meal preference select saves chosen value in payload", async ({
@@ -430,7 +321,6 @@ test("meal preference select saves chosen value in payload", async ({
               isPrimary: true,
               attending: true,
               dietaryRequirements: "",
-              phoneNumber: "+39 100 200 300",
             },
           ],
         })}
@@ -465,7 +355,6 @@ test("household detail fields appear for each attending guest", async ({
 
   // Mark primary attending
   await toggleAttendanceRow(component, "Taylor Family");
-  await component.getByLabel("Telefonnummer").first().fill("+39 100 200 300");
   await selectMealOption(component, page, 0, "Fleisch");
 
   // Mark household member attending
@@ -486,7 +375,6 @@ test("household detail fields appear for each attending guest", async ({
           kind: "adult",
           isPrimary: true,
           attending: true,
-          phoneNumber: "+39 100 200 300",
           dietaryRequirements: "meat",
         },
         {
@@ -495,8 +383,7 @@ test("household detail fields appear for each attending guest", async ({
           kind: "adult",
           isPrimary: false,
           attending: true,
-          phoneNumber: "",
-          dietaryRequirements: "vegetarian",
+            dietaryRequirements: "vegetarian",
         },
         {
           inviteeId: "33333333-3333-4333-8333-333333333333",
@@ -504,8 +391,7 @@ test("household detail fields appear for each attending guest", async ({
           kind: "child",
           isPrimary: false,
           attending: true,
-          phoneNumber: "",
-          dietaryRequirements: "meat",
+            dietaryRequirements: "meat",
         },
       ],
     });

@@ -46,7 +46,6 @@ type Dictionary = {
     mealSelectPlaceholder: string;
     mealMeat: string;
     mealVegetarian: string;
-    phoneNumber: string;
     fullName: string;
     adult: string;
     child: string;
@@ -150,7 +149,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       mealSelectPlaceholder: "Bitte wählen …",
       mealMeat: "Fleisch",
       mealVegetarian: "Vegetarisch",
-      phoneNumber: "Telefonnummer",
       fullName: "Vollständiger Name",
       adult: "Erwachsen",
       child: "Kind",

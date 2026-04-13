@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { validateGuestRsvpPayload } from "@/src/lib/validation";
 
 describe("validateGuestRsvpPayload", () => {
-  it("requires contact fields for attending adults", () => {
+  it("accepts attending adult without phone number", () => {
     const result = validateGuestRsvpPayload({
       invitees: [
         {
@@ -13,12 +13,11 @@ describe("validateGuestRsvpPayload", () => {
           isPrimary: true,
           attending: true,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
       ],
     });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts a full household response", () => {
@@ -31,7 +30,6 @@ describe("validateGuestRsvpPayload", () => {
           isPrimary: true,
           attending: true,
           dietaryRequirements: "vegetarian",
-          phoneNumber: "+49 123 456789",
         },
         {
           inviteeId: "11111111-1111-4111-8111-111111111111",
@@ -40,7 +38,6 @@ describe("validateGuestRsvpPayload", () => {
           isPrimary: false,
           attending: true,
           dietaryRequirements: "",
-          phoneNumber: "+49 123 456780",
         },
         {
           inviteeId: "22222222-2222-4222-8222-222222222222",
@@ -49,7 +46,6 @@ describe("validateGuestRsvpPayload", () => {
           isPrimary: false,
           attending: true,
           dietaryRequirements: "meat",
-          phoneNumber: "",
         },
       ],
     });

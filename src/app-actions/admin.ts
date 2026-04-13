@@ -84,7 +84,6 @@ export async function saveInvitationAction(
       String(formData.get("inviteesPayload") ?? "[]"),
     ) as Array<{
       fullName: string;
-      email?: string | null;
       kind: "adult" | "child";
       isPrimary: boolean;
     }>;
@@ -101,7 +100,7 @@ export async function saveInvitationAction(
       ...validated,
       invitees: validated.invitees.map((invitee) => ({
         ...invitee,
-        email: invitee.email || null,
+        email: null,
       })),
     });
   } catch (error) {

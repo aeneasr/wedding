@@ -10,7 +10,6 @@ const initialState: AdminActionState = {};
 
 type InvitationInviteeFormValue = {
   fullName: string;
-  email: string;
   kind: "adult" | "child";
   isPrimary: boolean;
 };
@@ -27,7 +26,6 @@ type InvitationFormValues = {
 function createPrimaryInvitee(): InvitationInviteeFormValue {
   return {
     fullName: "",
-    email: "",
     kind: "adult",
     isPrimary: true,
   };
@@ -36,7 +34,6 @@ function createPrimaryInvitee(): InvitationInviteeFormValue {
 function createAdditionalInvitee(): InvitationInviteeFormValue {
   return {
     fullName: "",
-    email: "",
     kind: "adult",
     isPrimary: false,
   };
@@ -84,7 +81,6 @@ export function AdminInvitationForm({
     return JSON.stringify(
       normalizedInvitees.map((invitee, index) => ({
         fullName: invitee.fullName,
-        email: invitee.email,
         kind: index === 0 ? "adult" : invitee.kind,
         isPrimary: index === 0,
       })),
@@ -193,22 +189,6 @@ export function AdminInvitationForm({
                     setInvitees((current) =>
                       current.map((entry, currentIndex) =>
                         currentIndex === index ? { ...entry, fullName } : entry,
-                      ),
-                    );
-                  }}
-                />
-              </Field>
-
-              <Field label={index === 0 ? "E-Mail" : "E-Mail (optional)"}>
-                <input
-                  type="email"
-                  className={inputClassName()}
-                  value={invitee.email}
-                  onChange={(event) => {
-                    const email = event.target.value;
-                    setInvitees((current) =>
-                      current.map((entry, currentIndex) =>
-                        currentIndex === index ? { ...entry, email } : entry,
                       ),
                     );
                   }}

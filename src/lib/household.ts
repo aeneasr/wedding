@@ -2,7 +2,6 @@ import { type AttendeeType, type InviteeKind } from "@/src/lib/constants";
 
 export type HouseholdInviteeInput = {
   fullName: string;
-  email?: string | null;
   kind: InviteeKind;
   isPrimary: boolean;
 };
@@ -20,7 +19,6 @@ export type HouseholdAttendee = {
   fullName: string;
   isAttending: boolean;
   dietaryRequirements: string | null;
-  phoneNumber: string | null;
   sortOrder: number;
 };
 
@@ -31,7 +29,6 @@ export type HouseholdRsvpMember = {
   isPrimary: boolean;
   attending: boolean;
   dietaryRequirements: string;
-  phoneNumber: string;
 };
 
 const householdMemberPlaceholderPattern = /^Household member \d+$/;
@@ -62,7 +59,6 @@ export function normalizeInviteeInputs(invitees: HouseholdInviteeInput[]) {
       fullName:
         normalizedName ||
         buildPlaceholderName(kind, kind === "child" ? childOrdinal++ : adultOrdinal++),
-      email: invitee.email?.trim() || null,
       kind,
       isPrimary,
     };
@@ -106,7 +102,6 @@ export function mapAttendeesToInvitees(
       isPrimary: invitee.isPrimary,
       attending: attendee?.isAttending ?? false,
       dietaryRequirements: attendee?.dietaryRequirements ?? "",
-      phoneNumber: attendee?.phoneNumber ?? "",
     } satisfies HouseholdRsvpMember;
   });
 }

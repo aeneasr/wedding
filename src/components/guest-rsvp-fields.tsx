@@ -10,7 +10,6 @@ import {
   PaperPanel,
   Eyebrow,
 } from "@/src/components/ui";
-import { inputClassName } from "@/src/components/ui";
 import { cn } from "@/src/lib/utils";
 import { type InviteeKind, type InvitationMode, type Locale } from "@/src/lib/constants";
 import { getDictionary } from "@/src/lib/i18n";
@@ -22,7 +21,6 @@ type InviteeState = {
   isPrimary: boolean;
   attending: boolean;
   dietaryRequirements: string;
-  phoneNumber: string;
 };
 
 type RsvpFormProps = {
@@ -222,33 +220,6 @@ export function GuestRsvpFields({
                         </StyledSelect>
                       </Field>
 
-                      {invitee.isPrimary ? (
-                        <Field
-                          label={dictionary.guest.phoneNumber}
-                          error={fieldError(`invitees.${index}.phoneNumber`)}
-                        >
-                          <input
-                            type="tel"
-                            className={inputClassName({
-                              error: !!fieldError(`invitees.${index}.phoneNumber`),
-                            })}
-                            aria-invalid={
-                              fieldError(`invitees.${index}.phoneNumber`)
-                                ? true
-                                : undefined
-                            }
-                            value={invitee.phoneNumber}
-                            onChange={(event) => {
-                              const phoneNumber = event.target.value;
-                              setInvitees((current) =>
-                                current.map((entry, i) =>
-                                  i === index ? { ...entry, phoneNumber } : entry,
-                                ),
-                              );
-                            }}
-                          />
-                        </Field>
-                      ) : null}
                     </div>
                   </div>
                 );

@@ -43,7 +43,6 @@ test("renders invitationId hidden field", async ({ mount }) => {
           isPrimary: true,
           attending: false,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
       ]}
     />,
@@ -70,14 +69,12 @@ test("admin can set attendance and fill contact details for an individual guest"
           isPrimary: true,
           attending: false,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
       ]}
     />,
   );
 
   await toggleAttendanceRow(component, "Elderly Guest");
-  await component.getByLabel("Telefonnummer").first().fill("+49 170 1234567");
   await selectMealOption(component, page, 0, "Fleisch");
 
   await expect
@@ -110,7 +107,6 @@ test("admin can set attendance for a household roster", async ({ mount }) => {
           isPrimary: true,
           attending: false,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
         {
           inviteeId: "44444444-4444-4444-8444-444444444444",
@@ -119,7 +115,6 @@ test("admin can set attendance for a household roster", async ({ mount }) => {
           isPrimary: false,
           attending: false,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
         {
           inviteeId: "55555555-5555-4555-8555-555555555555",
@@ -128,15 +123,12 @@ test("admin can set attendance for a household roster", async ({ mount }) => {
           isPrimary: false,
           attending: false,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
       ]}
     />,
   );
 
   await toggleAttendanceRow(component, "Main Guest");
-  await component.getByLabel("Telefonnummer").first().fill("+49 170 0000000");
-
   await toggleAttendanceRow(component, "Household member 1");
   await toggleAttendanceRow(component, "Child 1");
 
@@ -174,7 +166,6 @@ test("admin can pre-populate existing household RSVP data", async ({ mount }) =>
           isPrimary: true,
           attending: true,
           dietaryRequirements: "vegetarian",
-          phoneNumber: "+49 170 5555555",
         },
         {
           inviteeId: "77777777-7777-4777-8777-777777777777",
@@ -183,7 +174,6 @@ test("admin can pre-populate existing household RSVP data", async ({ mount }) =>
           isPrimary: false,
           attending: true,
           dietaryRequirements: "",
-          phoneNumber: "",
         },
         {
           inviteeId: "88888888-8888-4888-8888-888888888888",
@@ -193,7 +183,6 @@ test("admin can pre-populate existing household RSVP data", async ({ mount }) =>
           attending: true,
           // Old free-text value — should be sanitized to ""
           dietaryRequirements: "No nuts",
-          phoneNumber: "",
         },
       ]}
     />,
