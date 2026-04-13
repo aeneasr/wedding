@@ -89,6 +89,9 @@ type Dictionary = {
     reminder: string;
     recoveryIntro: string;
     confirmationIntro: string;
+    coupleNames: string;
+    closing: string;
+    headerLabel: string;
   };
 };
 
@@ -197,6 +200,9 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Du hast deinen Einladungslink erneut angefordert. Mit dem Link unten kannst du deine Einladung wieder öffnen und antworten, wann immer es für dich passt.",
       confirmationIntro:
         "Danke für deine Antwort. Deine Details und dein Einladungslink stehen unten für dich bereit.",
+      coupleNames: "Anna & Aeneas",
+      closing: "Mit Liebe,",
+      headerLabel: "Hochzeitseinladung",
     },
   },
 };
