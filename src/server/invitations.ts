@@ -55,7 +55,6 @@ export type InvitationBundle = {
 
 export type SaveInvitationInput = {
   id?: string;
-  externalId?: string | null;
   primaryEmail: string;
   invitationMode: InvitationMode;
   locale: Locale;
@@ -100,7 +99,6 @@ function buildInvitationSummary(bundle: InvitationBundle) {
 
   return {
     id: bundle.invitation.id,
-    externalId: bundle.invitation.externalId,
     primaryEmail: bundle.invitation.primaryEmail,
     primaryGuestName: primaryGuest?.fullName ?? bundle.invitation.primaryEmail,
     invitationMode: bundle.invitation.invitationMode,
@@ -312,7 +310,6 @@ async function replaceInvitationStructure(
       primaryEmail: normalizeEmail(input.primaryEmail),
       invitationMode: input.invitationMode,
       locale: input.locale,
-      externalId: input.externalId?.trim() || null,
       updatedAt: now,
     })
     .where(eq(invitations.id, invitationId));
@@ -333,7 +330,6 @@ export async function saveInvitation(input: SaveInvitationInput) {
   const [created] = await db
     .insert(invitations)
     .values({
-      externalId: input.externalId?.trim() || null,
       primaryEmail: normalizeEmail(input.primaryEmail),
       invitationMode: input.invitationMode,
       locale: input.locale,
@@ -346,31 +342,25 @@ export async function saveInvitation(input: SaveInvitationInput) {
 }
 
 export async function upsertInvitationsFromImport(
-  imports: Array<
-    SaveInvitationInput & {
-      externalId: string;
-    }
-  >,
+  imports: Array<SaveInvitationInput>,
 ) {
   if (imports.length === 0) {
     return;
   }
 
   const db = getDb();
+  const normalizedEmails = imports.map((item) => normalizeEmail(item.primaryEmail));
   const existing = await db.query.invitations.findMany({
-    where: inArray(
-      invitations.externalId,
-      imports.map((item) => item.externalId),
-    ),
+    where: inArray(invitations.primaryEmail, normalizedEmails),
   });
   const existingMap = new Map(
-    existing.map((item) => [item.externalId, item.id] as const),
+    existing.map((item) => [item.primaryEmail, item.id] as const),
   );
 
   for (const item of imports) {
     await saveInvitation({
       ...item,
-      id: existingMap.get(item.externalId) ?? undefined,
+      id: existingMap.get(normalizeEmail(item.primaryEmail)) ?? undefined,
     });
   }
 }
@@ -393,11 +383,7 @@ export async function listDashboardData(filters: DashboardFilters = {}) {
       }
 
       if (filters.search?.trim()) {
-        const haystack = [
-          summary.primaryGuestName,
-          summary.primaryEmail,
-          summary.externalId ?? "",
-        ]
+        const haystack = [summary.primaryGuestName, summary.primaryEmail]
           .join(" ")
           .toLowerCase();
         return haystack.includes(filters.search.toLowerCase());
@@ -718,7 +704,6 @@ export async function buildInvitationStatusExportRows() {
 
     return {
       invitationId: summary.id,
-      externalId: summary.externalId ?? "",
       primaryGuest: summary.primaryGuestName,
       primaryEmail: summary.primaryEmail,
       invitationMode: summary.invitationMode,
@@ -736,14 +721,3 @@ export async function getInvitationForAdmin(invitationId: string) {
   return getInvitationBundle(invitationId);
 }
 
-export async function getInvitationByExternalId(externalId: string) {
-  const invitation = await getDb().query.invitations.findFirst({
-    where: eq(invitations.externalId, externalId),
-  });
-
-  if (!invitation) {
-    return null;
-  }
-
-  return getInvitationBundle(invitation.id);
-}

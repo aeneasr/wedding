@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { parseInvitationCsv } from "@/src/lib/csv";
 
 describe("parseInvitationCsv", () => {
-  it("groups rows by invitation_external_id", () => {
+  it("groups rows by primary_email", () => {
     const csv = [
-      "invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary",
-      "family-one,alex@example.com,household,de,Alex,alex@example.com,adult,true",
-      "family-one,alex@example.com,household,de,Sam,sam@example.com,adult,false",
+      "primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary",
+      "alex@example.com,household,de,Alex,alex@example.com,adult,true",
+      "alex@example.com,household,de,Sam,sam@example.com,adult,false",
     ].join("\n");
 
     const result = parseInvitationCsv(csv);
@@ -19,9 +19,9 @@ describe("parseInvitationCsv", () => {
 
   it("reports inconsistent shared group fields", () => {
     const csv = [
-      "invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary",
-      "family-one,alex@example.com,household,de,Alex,alex@example.com,adult,true",
-      "family-one,other@example.com,household,de,Sam,sam@example.com,adult,false",
+      "primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary",
+      "alex@example.com,household,de,Alex,alex@example.com,adult,true",
+      "alex@example.com,individual,de,Sam,sam@example.com,adult,false",
     ].join("\n");
 
     const result = parseInvitationCsv(csv);

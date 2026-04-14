@@ -118,7 +118,7 @@ export default async function AdminPage({
               type="search"
               name="search"
               defaultValue={filters.search ?? ""}
-              placeholder="Gast, E-Mail oder externe ID suchen"
+              placeholder="Gast oder E-Mail suchen"
               className={inputClassName()}
             />
             <select
@@ -143,10 +143,7 @@ export default async function AdminPage({
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
                   <Heading className="text-3xl">{row.primaryGuestName}</Heading>
-                  <SubtleText>
-                    {row.primaryEmail}
-                    {row.externalId ? ` | ${row.externalId}` : ""}
-                  </SubtleText>
+                  <SubtleText>{row.primaryEmail}</SubtleText>
                   <div className="flex flex-wrap gap-2">
                     <InkBadge tone={row.rsvpStatus === "attending" ? "success" : row.rsvpStatus === "declined" ? "muted" : "neutral"}>{row.rsvpStatus}</InkBadge>
                   </div>

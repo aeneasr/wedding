@@ -14,7 +14,6 @@ function makeBundle(
   return {
     invitation: {
       id: "inv-1",
-      externalId: "ext-1",
       primaryEmail: "alice@example.com",
       invitationMode: "individual",
       locale: "de",
@@ -51,7 +50,6 @@ describe("buildAttendeeRows", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       invitationId: "inv-1",
-      externalId: "ext-1",
       primaryGuest: "Alice Smith",
       primaryEmail: "alice@example.com",
       inviteeName: "Alice Smith",

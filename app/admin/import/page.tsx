@@ -26,7 +26,7 @@ export default async function AdminImportPage() {
           <SubtleText>
             Verwende eine Zeile pro benanntem Gast und nutze dieselbe
             <code className="mx-1 rounded bg-cream-dark px-2 py-1 text-xs">
-              invitation_external_id
+              primary_email
             </code>
             für Gäste, die zur selben Einladungsgruppe gehören.
           </SubtleText>

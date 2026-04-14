@@ -34,7 +34,7 @@ export function AdminImportForm() {
           <textarea
             name="csvText"
             className={textAreaClassName()}
-            placeholder="invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited"
+            placeholder="primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary"
           />
         </Field>
         {state.error ? (
@@ -77,16 +77,15 @@ export function AdminImportForm() {
           </div>
           <div className="grid gap-4">
             {state.preview.map((group) => (
-              <SurfaceCard key={group.externalId} className="space-y-4">
+              <SurfaceCard key={group.primaryEmail} className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Pill>{group.externalId}</Pill>
-                  <Pill tone="muted">{group.primaryEmail}</Pill>
+                  <Pill>{group.primaryEmail}</Pill>
                   <Pill tone="warm">{group.invitationMode}</Pill>
                   <Pill tone="neutral">{group.locale}</Pill>
                 </div>
                 <ul className="space-y-2 text-sm text-ink">
                   {group.invitees.map((person) => (
-                    <li key={`${group.externalId}-${person.fullName}`}>
+                    <li key={`${group.primaryEmail}-${person.fullName}`}>
                       {person.fullName}
                       {person.email ? ` | ${person.email}` : ""}
                       {` | ${person.kind}`}

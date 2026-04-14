@@ -18,7 +18,6 @@ function parseBooleanCell(value: string | undefined) {
 }
 
 const csvRowSchema = z.object({
-  invitation_external_id: z.string().trim().min(1),
   primary_email: z.email(),
   invitation_mode: z.enum(["individual", "household"]).default("individual"),
   locale: z.enum(["de"]).default(defaultLocale),
@@ -29,7 +28,6 @@ const csvRowSchema = z.object({
 });
 
 type InvitationCsvGroup = {
-  externalId: string;
   primaryEmail: string;
   invitationMode: InvitationMode;
   locale: Locale;
@@ -53,7 +51,6 @@ export function parseInvitationCsv(content: string) {
 
   records.forEach((record, index) => {
     const parsedRow = csvRowSchema.safeParse({
-      invitation_external_id: record.invitation_external_id,
       primary_email: record.primary_email,
       invitation_mode: record.invitation_mode,
       locale: record.locale || defaultLocale,
@@ -73,16 +70,16 @@ export function parseInvitationCsv(content: string) {
     }
 
     const row = parsedRow.data;
-    const existing = groups.get(row.invitation_external_id);
+    const groupKey = row.primary_email.trim().toLowerCase();
+    const existing = groups.get(groupKey);
 
     if (
       existing &&
-      (existing.primaryEmail !== row.primary_email ||
-        existing.invitationMode !== row.invitation_mode ||
+      (existing.invitationMode !== row.invitation_mode ||
         existing.locale !== row.locale)
     ) {
       errors.push(
-        `Row ${index + 2}: invitation group ${row.invitation_external_id} has inconsistent shared fields.`,
+        `Row ${index + 2}: invitation group ${row.primary_email} has inconsistent shared fields.`,
       );
       return;
     }
@@ -90,7 +87,6 @@ export function parseInvitationCsv(content: string) {
     const group =
       existing ??
       ({
-        externalId: row.invitation_external_id,
         primaryEmail: row.primary_email,
         invitationMode: row.invitation_mode,
         locale: row.locale,
@@ -104,7 +100,7 @@ export function parseInvitationCsv(content: string) {
       isPrimary: row.is_primary || group.invitees.length === 0,
     });
 
-    groups.set(row.invitation_external_id, group);
+    groups.set(groupKey, group);
   });
 
   const preview = [...groups.values()];

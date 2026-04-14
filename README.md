@@ -118,13 +118,13 @@ npm run seed
 
 ## CSV Import Shape
 
-The importer expects one row per invited person. Group rows into one invitation with the same `invitation_external_id`.
+The importer expects one row per invited person. Rows that share the same `primary_email` are grouped into a single invitation, and re-importing the same email upserts the existing invitation.
 
 ```csv
-invitation_external_id,primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary,event_1_invited,event_2_invited
-family-one,alex@example.com,household,en,Alex Rivera,alex@example.com,adult,true,true,true
-family-one,alex@example.com,household,en,Sam Rivera,sam@example.com,adult,false,true,true
-family-one,alex@example.com,household,en,Mia Rivera,,child,false,true,true
+primary_email,invitation_mode,locale,person_name,person_email,person_type,is_primary
+alex@example.com,household,de,Alex Rivera,alex@example.com,adult,true
+alex@example.com,household,de,Sam Rivera,sam@example.com,adult,false
+alex@example.com,household,de,Mia Rivera,,child,false
 ```
 
 ## Notes

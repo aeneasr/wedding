@@ -11,7 +11,6 @@ export function buildAttendeeRows(bundles: InvitationBundle[]) {
 
       return {
         invitationId: bundle.invitation.id,
-        externalId: bundle.invitation.externalId ?? "",
         primaryGuest: primaryGuest?.fullName ?? "",
         primaryEmail: bundle.invitation.primaryEmail,
         rsvpStatus: rsvp?.status ?? "pending",

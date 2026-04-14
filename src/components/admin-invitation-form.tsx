@@ -16,7 +16,6 @@ type InvitationInviteeFormValue = {
 
 type InvitationFormValues = {
   id?: string;
-  externalId?: string | null;
   primaryEmail: string;
   invitationMode: "individual" | "household";
   locale: Locale;
@@ -94,16 +93,6 @@ export function AdminInvitationForm({
     <form action={formAction} className="space-y-5">
       {initial?.id ? <input type="hidden" name="id" value={initial.id} /> : null}
       <input type="hidden" name="inviteesPayload" value={serializedInvitees} />
-
-      <Field label="Externe ID">
-        <input
-          type="text"
-          name="externalId"
-          className={inputClassName()}
-          defaultValue={initial?.externalId ?? ""}
-          placeholder="optionaler-import-schlüssel"
-        />
-      </Field>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Haupt-E-Mail">

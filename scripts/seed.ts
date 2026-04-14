@@ -4,7 +4,6 @@ import { upsertInvitationsFromImport } from "../src/server/invitations";
 async function main() {
   await upsertInvitationsFromImport([
     {
-      externalId: "demo-household",
       primaryEmail: "alex@example.com",
       invitationMode: "household",
       locale: "de",
@@ -32,7 +31,6 @@ async function main() {
       ],
     },
     {
-      externalId: "demo-individual",
       primaryEmail: "maria@example.com",
       invitationMode: "individual",
       locale: "de",

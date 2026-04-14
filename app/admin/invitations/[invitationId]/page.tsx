@@ -44,7 +44,6 @@ export default async function AdminInvitationDetailPage({
   const activity = await getInvitationActivity(invitationId);
   const formValues: InvitationFormValues = {
     id: bundle.invitation.id,
-    externalId: bundle.invitation.externalId,
     primaryEmail: bundle.invitation.primaryEmail,
     invitationMode: bundle.invitation.invitationMode,
     locale: bundle.invitation.locale,

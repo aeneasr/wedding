@@ -15,6 +15,13 @@
       "when": 1775100000000,
       "tag": "0004_remove_en_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776160455114,
+      "tag": "0005_aromatic_captain_stacy",
+      "breakpoints": true
     }
   ]
 }

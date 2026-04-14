@@ -26,7 +26,6 @@ export type ImportPreviewState = {
   info?: string;
   previewPayload?: string;
   preview?: Array<{
-    externalId: string;
     primaryEmail: string;
     invitationMode: string;
     locale: string;
@@ -96,7 +95,6 @@ export async function saveInvitationAction(
 
     invitationId = await saveInvitation({
       id: String(formData.get("id") ?? "") || undefined,
-      externalId: String(formData.get("externalId") ?? "") || null,
       ...validated,
       invitees: validated.invitees.map((invitee) => ({
         ...invitee,
@@ -176,7 +174,6 @@ export async function commitImportAction(formData: FormData) {
 
   await upsertInvitationsFromImport(
     payload.map((group) => ({
-      externalId: group.externalId,
       primaryEmail: group.primaryEmail,
       invitationMode: group.invitationMode as "individual" | "household",
       locale: group.locale as "de",
