@@ -43,6 +43,14 @@ type InviteeRecord = typeof invitees.$inferSelect;
 type RsvpRecord = typeof rsvps.$inferSelect;
 type AttendeeResponseRecord = typeof attendeeResponses.$inferSelect;
 
+// Accepts either the top-level db instance or a transaction object passed
+// from db.transaction(). The transaction callback parameter type is inferred
+// from the db type so we don't have to repeat the schema generics manually.
+type TransactionCallback = Parameters<ReturnType<typeof getDb>["transaction"]>[0];
+type DbOrTx = TransactionCallback extends (tx: infer Tx) => Promise<unknown>
+  ? ReturnType<typeof getDb> | Tx
+  : ReturnType<typeof getDb>;
+
 export type InvitationBundle = {
   invitation: InvitationRecord;
   invitees: InviteeRecord[];
@@ -118,8 +126,9 @@ async function recordActivity(
   invitationId: string,
   type: ActivityType,
   metadata: Record<string, unknown> | null = null,
+  db: DbOrTx = getDb(),
 ) {
-  await getDb().insert(invitationActivity).values({
+  await db.insert(invitationActivity).values({
     invitationId,
     type,
     metadata,
@@ -739,62 +748,82 @@ export async function createInvitationFromRegistration(
   const invitationMode: InvitationMode =
     input.roster.length === 1 ? "individual" : "household";
 
-  const [invitation] = await db
-    .insert(invitations)
-    .values({
-      primaryEmail: normalizeEmail(input.primaryEmail),
-      contactPhone: input.contactPhone.trim() || null,
-      invitationMode,
-      locale: "de",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning({ id: invitations.id });
+  return db.transaction(async (tx) => {
+    const [invitation] = await tx
+      .insert(invitations)
+      .values({
+        primaryEmail: normalizeEmail(input.primaryEmail),
+        contactPhone: input.contactPhone.trim() || null,
+        invitationMode,
+        locale: "de",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: invitations.id });
 
-  const inviteeRows = input.roster.map((entry, index) => ({
-    invitationId: invitation.id,
-    fullName: entry.fullName.trim(),
-    email: null,
-    kind: index === 0 ? ("adult" as const) : entry.kind,
-    isPrimary: index === 0,
-    createdAt: new Date(now.getTime() + index),
-  }));
+    if (!invitation) throw new Error("Failed to insert invitation row");
 
-  const insertedInvitees = await db
-    .insert(invitees)
-    .values(inviteeRows)
-    .returning({ id: invitees.id, isPrimary: invitees.isPrimary });
-
-  const [rsvpRow] = await db
-    .insert(rsvps)
-    .values({
+    const inviteeRows = input.roster.map((entry, index) => ({
       invitationId: invitation.id,
-      status: "attending",
-      submittedAt: now,
-      updatedAt: now,
-    })
-    .returning({ id: rsvps.id });
+      fullName: entry.fullName.trim(),
+      email: null,
+      kind: index === 0 ? ("adult" as const) : entry.kind,
+      isPrimary: index === 0,
+      createdAt: new Date(now.getTime() + index),
+    }));
 
-  const attendeeRows = input.roster.map((entry, index) => ({
-    rsvpId: rsvpRow.id,
-    inviteeId: insertedInvitees[index].id,
-    attendeeType: (entry.kind === "child" ? "child" : "named_guest") as
-      | "named_guest"
-      | "child",
-    fullName: entry.fullName.trim(),
-    isAttending: true,
-    dietaryRequirements: entry.dietaryRequirements || null,
-    phoneNumber: null,
-    sortOrder: index,
-  }));
+    const insertedInvitees = await tx
+      .insert(invitees)
+      .values(inviteeRows)
+      .returning({ id: invitees.id, isPrimary: invitees.isPrimary });
 
-  await db.insert(attendeeResponses).values(attendeeRows);
+    if (insertedInvitees.length !== input.roster.length) {
+      throw new Error(
+        `Expected ${input.roster.length} invitee rows, got ${insertedInvitees.length}`,
+      );
+    }
 
-  await recordActivity(invitation.id, "rsvp_updated", {
-    status: "attending",
-    attendeeCount: attendeeRows.length,
+    const [rsvpRow] = await tx
+      .insert(rsvps)
+      .values({
+        invitationId: invitation.id,
+        status: "attending",
+        submittedAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: rsvps.id });
+
+    if (!rsvpRow) throw new Error("Failed to insert rsvp row");
+
+    const attendeeRows = input.roster.map((entry, index) => {
+      const resolvedKind = index === 0 ? "adult" : entry.kind;
+      return {
+        rsvpId: rsvpRow.id,
+        inviteeId: insertedInvitees[index]!.id,
+        attendeeType: (resolvedKind === "child" ? "child" : "named_guest") as
+          | "named_guest"
+          | "child",
+        fullName: entry.fullName.trim(),
+        isAttending: true,
+        dietaryRequirements: entry.dietaryRequirements || null,
+        phoneNumber: null,
+        sortOrder: index,
+      };
+    });
+
+    await tx.insert(attendeeResponses).values(attendeeRows);
+
+    await recordActivity(
+      invitation.id,
+      "rsvp_updated",
+      {
+        status: "attending",
+        attendeeCount: attendeeRows.length,
+      },
+      tx,
+    );
+
+    return { invitationId: invitation.id };
   });
-
-  return { invitationId: invitation.id };
 }
 
