@@ -109,6 +109,7 @@ export default async function GuestPage({
             <GuestRsvpForm
               invitationMode={bundle.invitation.invitationMode}
               invitees={invitees}
+              contactPhone={bundle.invitation.contactPhone}
             />
           </div>
 

@@ -6,6 +6,7 @@ import { LocaleContext } from "@/src/components/locale-context";
 import { StyledSelect, StyledSelectItem } from "@/src/components/styled-select";
 import {
   inkButtonClassName,
+  inputClassName,
   Field,
   PaperPanel,
   Eyebrow,
@@ -27,6 +28,7 @@ type RsvpFormProps = {
   locale?: Locale;
   invitationMode: InvitationMode;
   invitees: InviteeState[];
+  contactPhone?: string | null;
 };
 
 type GuestRsvpFieldsProps = RsvpFormProps & {
@@ -48,6 +50,7 @@ export function GuestRsvpFields({
   locale,
   invitationMode,
   invitees: initialInvitees,
+  contactPhone: initialContactPhone,
   state,
   pending = false,
 }: GuestRsvpFieldsProps) {
@@ -69,9 +72,11 @@ export function GuestRsvpFields({
     })),
   );
 
+  const [contactPhone, setContactPhone] = useState(initialContactPhone ?? "");
+
   const fieldError = (path: string) => state?.fieldErrors?.[path]?.[0];
 
-  const payload = JSON.stringify({ invitees });
+  const payload = JSON.stringify({ invitees, contactPhone });
 
   const toggleAttendance = (index: number) => {
     setInvitees((current) =>
@@ -88,6 +93,20 @@ export function GuestRsvpFields({
       <input type="hidden" name="payload" value={payload} />
 
       <PaperPanel className="space-y-5">
+        {/* Contact phone */}
+        <Field
+          label={dictionary.guest.contactPhoneLabel}
+          hint={dictionary.guest.contactPhoneHint}
+        >
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            className={inputClassName()}
+            autoComplete="tel"
+          />
+        </Field>
+
         {/* Attendance checklist */}
         <div className="space-y-1">
           <Eyebrow>{dictionary.guest.status}</Eyebrow>
