@@ -551,6 +551,7 @@ export async function saveGuestRsvp(input: {
   invitationId: string;
   payload: unknown;
   skipEmail?: boolean;
+  contactPhone?: string | null;
 }) {
   const bundle = await getInvitationBundle(input.invitationId);
 
@@ -670,6 +671,22 @@ export async function saveGuestRsvp(input: {
 
   if (attendeeRows.length > 0) {
     await getDb().insert(attendeeResponses).values(attendeeRows);
+  }
+
+  if (input.contactPhone !== undefined) {
+    const next =
+      input.contactPhone === null
+        ? null
+        : input.contactPhone.trim().length > 0
+          ? input.contactPhone.trim()
+          : null;
+    await getDb()
+      .update(invitations)
+      .set({
+        contactPhone: next,
+        updatedAt: now,
+      })
+      .where(eq(invitations.id, bundle.invitation.id));
   }
 
   await recordActivity(

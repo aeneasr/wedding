@@ -87,6 +87,7 @@ const guestResponseSchema = z.object({
 
 export const guestRsvpSchema = z.object({
   invitees: z.array(guestResponseSchema).min(1),
+  contactPhone: z.string().max(40).optional(),
 });
 
 export type GuestRsvpPayload = z.infer<typeof guestRsvpSchema>;

@@ -57,11 +57,30 @@ export async function saveGuestRsvpAction(
   const bundle = await requireGuestBundle();
   const locale = (await getStoredGuestLocale()) ?? bundle.invitation.locale;
   const dictionary = getDictionary(locale);
-  const payload = JSON.parse(String(formData.get("payload") ?? "{}"));
+
+  const payloadText = String(formData.get("payload") ?? "{}");
+  let payloadJson: Record<string, unknown>;
+  try {
+    payloadJson = JSON.parse(payloadText);
+  } catch {
+    return { error: "Invalid form payload." };
+  }
+
+  const contactPhoneProvided = Object.prototype.hasOwnProperty.call(
+    payloadJson,
+    "contactPhone",
+  );
+
+  const contactPhone = contactPhoneProvided
+    ? typeof payloadJson.contactPhone === "string"
+      ? payloadJson.contactPhone
+      : null
+    : undefined;
 
   const result = await saveGuestRsvp({
     invitationId: bundle.invitation.id,
-    payload,
+    payload: payloadJson,
+    contactPhone,
   });
 
   if (!result.ok) {
