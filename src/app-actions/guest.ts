@@ -1,6 +1,6 @@
 "use server";
 
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeEqual, createHmac } from "node:crypto";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -117,11 +117,14 @@ export type RegisterActionState = {
   fieldErrors?: Record<string, string[]>;
 };
 
+const REGISTRATION_CODE_DIGEST_KEY = Buffer.from("registration-code-comparison");
+
+function digestCode(value: string) {
+  return createHmac("sha256", REGISTRATION_CODE_DIGEST_KEY).update(value).digest();
+}
+
 function codesMatch(input: string, expected: string) {
-  const a = Buffer.from(input);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  return timingSafeEqual(digestCode(input), digestCode(expected));
 }
 
 export async function registerGuestAction(
@@ -175,7 +178,11 @@ export async function registerGuestAction(
     roster: parsed.roster,
   });
 
-  await sendInvitationEmailForInvitation(invitationId, "invite_sent");
+  try {
+    await sendInvitationEmailForInvitation(invitationId, "invite_sent");
+  } catch (err) {
+    console.error("Failed to send invitation email for new registration", err);
+  }
 
   redirect("/register/thanks");
 }
