@@ -29,6 +29,32 @@ type Dictionary = {
     helpTitle: string;
     helpBody: string;
   };
+  register: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    codeLabel: string;
+    codeSubmit: string;
+    codeError: string;
+    primarySectionTitle: string;
+    yourNameLabel: string;
+    yourEmailLabel: string;
+    phoneLabel: string;
+    phoneHint: string;
+    dietaryLabel: string;
+    dietaryNone: string;
+    dietaryMeat: string;
+    dietaryVegetarian: string;
+    additionalSectionTitle: string;
+    addPerson: string;
+    removePerson: string;
+    adult: string;
+    child: string;
+    submit: string;
+    formError: string;
+    thanksTitle: string;
+    thanksBody: string;
+  };
   guest: {
     details: string;
     update: string;
@@ -65,6 +91,8 @@ type Dictionary = {
     saveError: string;
     status: string;
     attendingGuestDetails: string;
+    contactPhoneLabel: string;
+    contactPhoneHint: string;
   };
   admin: {
     loginTitle: string;
@@ -132,6 +160,34 @@ const dictionaries: Record<Locale, Dictionary> = {
       helpBody:
         "Wenn die E-Mail-Adresse bereits auf der Gästeliste steht, schicken wir denselben Einladungslink erneut.",
     },
+    register: {
+      eyebrow: "Anmeldung",
+      title: "Sag uns Bescheid",
+      description:
+        "Trag dich und deine Begleitung ein. Wir schicken dir anschließend einen Einladungslink an die angegebene E-Mail-Adresse.",
+      codeLabel: "Einladungscode",
+      codeSubmit: "Weiter",
+      codeError: "Der Code stimmt leider nicht.",
+      primarySectionTitle: "Deine Angaben",
+      yourNameLabel: "Dein vollständiger Name",
+      yourEmailLabel: "Deine E-Mail",
+      phoneLabel: "Telefonnummer (optional)",
+      phoneHint: "Nur für kurzfristige Rücksprachen am Hochzeitstag.",
+      dietaryLabel: "Essenswunsch",
+      dietaryNone: "Keine Angabe",
+      dietaryMeat: "Fleisch",
+      dietaryVegetarian: "Vegetarisch",
+      additionalSectionTitle: "Weitere Personen",
+      addPerson: "Weitere Person hinzufügen",
+      removePerson: "Entfernen",
+      adult: "Erwachsen",
+      child: "Kind",
+      submit: "Anmeldung absenden",
+      formError: "Bitte überprüfe die markierten Felder.",
+      thanksTitle: "Danke!",
+      thanksBody:
+        "Wir haben dir einen Einladungslink per E-Mail geschickt. Öffne deinen Posteingang, um deine Angaben anzusehen oder zu ändern.",
+    },
     guest: {
       details: "Details",
       update: "Antwort ändern",
@@ -170,6 +226,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       timing: "Zeit",
       saveError: "Deine Antwort kann gerade nicht gespeichert werden.",
       attendingGuestDetails: "Angaben der Teilnehmenden",
+      contactPhoneLabel: "Telefonnummer (optional)",
+      contactPhoneHint: "Nur für kurzfristige Rücksprachen.",
     },
     admin: {
       loginTitle: "Admin-Zugang",
