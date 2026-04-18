@@ -37,7 +37,7 @@ This spec adds an additional entry point: a public `/register` page where guests
 | Q3 | Auto-send invitation email on successful registration; **admin CSV upload stays** | Small trusted audience; admin still needs bulk path |
 | Q4 | Optional phone number lives on the **invitation**, not per-attendee | Respects 2026-04-13 cleanup that removed per-person phone |
 | Q5 | `invitation_mode` is **auto-inferred** (1 person = individual, 2+ = household) | Guests don't need to see internal concepts |
-| Q6 | **Shared secret code** `anna+aeneas`, **no rate limiting** | Simpler than rate limits; older guests shouldn't hit them |
+| Q6 | **Shared secret code** `anna+aeneas`, **no rate limiting on the `/register` gate itself**. The silent-recovery branch still goes through `sendRecoveryLinks`, which inherits the existing per-email and per-IP recovery rate limits (`recoveryMaxPerEmailPerHour=3`, `recoveryMaxPerIpPerHour=10`). | Simpler than rate limits on the front door; older guests shouldn't hit them. Recovery limiter still protects the silent-recovery branch from being used as a mass-email oracle. |
 | Q7 | On submit: **redirect to `/register/thanks`**, invitation email sent, no session | Email is the canonical entry for editing later |
 
 ## Data model
@@ -61,7 +61,10 @@ ALTER TABLE "invitations" ADD COLUMN "contact_phone" text;
 No backfill. Existing rows get `NULL`.
 
 **Tables unchanged:** `invitees`, `rsvps`, `attendee_responses`, `invitation_activity`, `recovery_requests`.
-`attendee_responses.phone_number` remains nullable and unused (it was emptied out in the Apr 13 cleanup).
+
+`attendee_responses.phone_number` remains nullable and unused (emptied out in the 2026-04-13 cleanup). Left in place intentionally for this spec — its removal is a separate concern and not in scope here.
+
+`invitees.email` is **always written as `null`** for self-registered invitations, matching how the admin path writes `invitees.email = null` (see `replaceInvitationStructure` in `src/server/invitations.ts`). The only stored email is `invitations.primary_email`.
 
 ## Routes
 
@@ -90,6 +93,8 @@ Add one editable field: optional phone number bound to `invitations.contact_phon
 - Continue button
 - Error text below input on mismatch
 
+The gate is a UX affordance only — the server is authoritative. `registerGuestAction` re-verifies the code on every submit regardless of any client-side state, so revealing the form client-side without the code never leaks invitation creation.
+
 **Form step (revealed after correct code):**
 
 Primary person (you), required, always adult:
@@ -107,8 +112,8 @@ Submit button at bottom.
 **Validation display:** inline, per-field, using the same `fieldErrors` pattern as `saveGuestRsvpAction` (`Record<string, string[]>`).
 
 **Components:**
-- New `RegistrationForm` client component under `src/components/register/`. Mirrors the existing admin invitation-form roster pattern.
-- Reuses dietary selector and kind toggle styles from existing RSVP/admin forms.
+- New `RegistrationForm` client component at `src/components/registration-form.tsx`. Roster row UX mirrors `src/components/admin-invitation-form.tsx` (same add/remove affordances, same kind toggle).
+- Reuses dietary selector and kind toggle styles from existing RSVP/admin forms (see `src/components/guest-rsvp-fields.tsx`).
 
 ## Server flow
 
@@ -143,7 +148,8 @@ export async function registerGuestAction(
 4. createInvitationFromRegistration (new helper in src/server/invitations.ts):
    a. Insert invitations { primaryEmail, contactPhone, invitationMode, locale: "de" }
       where invitationMode = roster.length === 1 ? "individual" : "household".
-   b. Insert invitees rows (first = isPrimary=true + adult; rest from form).
+   b. Insert invitees rows — always with email: null (matches existing admin path);
+      first row = isPrimary=true, kind="adult"; subsequent rows use the kind from the form.
    c. Insert rsvps row { status: "attending", submittedAt: now }.
    d. Insert attendee_responses rows { isAttending: true, dietaryRequirements: value || null,
       phoneNumber: null, sortOrder: index } — one per invitee.
@@ -156,7 +162,8 @@ export async function registerGuestAction(
 ```
 
 ### Reused primitives (no duplication)
-- `normalizeEmail`, `normalizeInviteeInputs` from `src/lib/household.ts`.
+- `normalizeInviteeInputs` from `src/lib/household.ts`.
+- `normalizeEmail` from `src/server/invitations.ts`. It is currently a private helper there — export it as part of this change so both `saveInvitation` and `createInvitationFromRegistration` can share it. No other callsites.
 - `sendRecoveryLinks`, `sendInvitationEmailForInvitation` from `src/server/invitations.ts`.
 - Activity recording patterns from `src/server/invitations.ts`.
 - `fieldErrors` flattening pattern from `saveGuestRsvp`.
@@ -165,7 +172,14 @@ export async function registerGuestAction(
 - `REGISTRATION_CODE` (default `"anna+aeneas"`) in `src/lib/env.ts` and `.env.example`.
 
 ### Invitation page server action
-`saveGuestRsvpAction` (existing) is extended to accept an optional `contactPhone` in its payload. When present, `saveGuestRsvp` updates `invitations.contact_phone` inside its existing transaction block. Empty string or omitted = no change (or explicit clear via a distinct empty-string submission — TBD in plan).
+`saveGuestRsvpAction` (existing) is extended to accept an optional `contactPhone` in its payload. When the field is present on the payload, `saveGuestRsvp` issues an additional `getDb().update(invitations).set({ contactPhone: ... })` call alongside its existing sequential writes (no new transaction; `saveGuestRsvp` today is not transactional and changing that is out of scope).
+
+**Clearing semantics:**
+- Payload field **omitted** → column unchanged.
+- Payload field present and **non-empty** → column set to the trimmed value.
+- Payload field present and **empty string** → column set to `NULL` (explicit clear).
+
+This matches the Open Questions default and removes the prior TBD.
 
 ## Coexistence with existing flows
 
@@ -214,7 +228,7 @@ export async function registerGuestAction(
 - Validation errors render per-field on invalid submit.
 
 ### Seed updates (`scripts/seed.ts`)
-- Add one self-registered-shaped fixture invitation with `contact_phone` populated, to exercise phone display paths in dev.
+- Add one fixture invitation with `contact_phone` populated to exercise phone display paths in dev. (No source flag distinguishes self-registered vs admin-created — see Q3.)
 
 ## Implementation notes
 
@@ -225,4 +239,3 @@ export async function registerGuestAction(
 ## Open questions
 
 - Should the admin invitation detail page display `contact_phone` as a read-only row? **Default in this spec: no, out of scope.** Flag if you want it.
-- Should the invitation page RSVP form allow *clearing* an existing phone (explicit empty submit)? **Default: yes, empty string clears; omitted field leaves unchanged.** Revisit during implementation if this gets awkward.
