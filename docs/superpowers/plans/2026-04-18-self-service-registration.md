@@ -461,6 +461,8 @@ export async function createInvitationFromRegistration(
       contactPhone: input.contactPhone.trim() || null,
       invitationMode,
       locale: "de",
+      createdAt: now,
+      updatedAt: now,
     })
     .returning({ id: invitations.id });
 
@@ -544,27 +546,76 @@ export const guestRsvpSchema = z.object({
 });
 ```
 
-- [ ] **Step 2: Wire `contactPhone` into `saveGuestRsvp`**
+- [ ] **Step 2: Wire `contactPhone` into `saveGuestRsvp` via an explicit parameter**
 
-In `src/server/invitations.ts`, inside `saveGuestRsvp`, after the `validation.data` is available and before the final `return { ok: true as const, status }`, add a block:
+Zod's `.optional()` behavior is unreliable for presence-vs-empty discrimination: `z.string().optional()` strips undefined keys from the output, erasing the omitted/empty distinction. The robust approach is to perform the presence check on the raw JSON object **before** validation, then pass an explicit tri-state value (undefined/null/string) into `saveGuestRsvp`.
+
+In `src/server/invitations.ts`, extend the `saveGuestRsvp` signature with a `contactPhone?: string | null` parameter — `undefined` = leave column unchanged, `null` = clear to null, `string` = trim and set (empty string after trim also clears to null):
 
 ```ts
-if (Object.prototype.hasOwnProperty.call(parsed, "contactPhone")) {
-  const raw = parsed.contactPhone;
-  const trimmed = typeof raw === "string" ? raw.trim() : "";
-  await getDb()
-    .update(invitations)
-    .set({
-      contactPhone: trimmed.length > 0 ? trimmed : null,
-      updatedAt: now,
-    })
-    .where(eq(invitations.id, bundle.invitation.id));
+export async function saveGuestRsvp(params: {
+  // ...existing fields...
+  contactPhone?: string | null;
+}): Promise<{ ok: true; status: RsvpStatus } | { ok: false; error: string }> {
+  // ...existing logic, compute `bundle` and `now`...
+
+  if (params.contactPhone !== undefined) {
+    const next =
+      params.contactPhone === null
+        ? null
+        : params.contactPhone.trim().length > 0
+          ? params.contactPhone.trim()
+          : null;
+    await getDb()
+      .update(invitations)
+      .set({
+        contactPhone: next,
+        updatedAt: now,
+      })
+      .where(eq(invitations.id, bundle.invitation.id));
+  }
+
+  // ...existing return...
 }
 ```
 
-**Rationale:** The payload-field-present check uses `hasOwnProperty` to distinguish "omitted" (no change) from "present-and-empty" (explicit clear). `parsed` comes from Zod's `safeParse`, which preserves the distinction.
+Then in `src/app-actions/guest.ts`, update `saveGuestRsvpAction` to:
+1. Parse the raw JSON payload first (already done).
+2. Run `hasOwnProperty` on the **raw** JSON object (pre-validation) to determine presence.
+3. Pass `contactPhone: hasKey ? (parsed.data.contactPhone ?? "") : undefined` into `saveGuestRsvp`.
 
-**Watch-out:** If Zod's `.optional()` strips the key entirely when undefined, switch to using the pre-validation `payload` object (already parsed as JSON in `saveGuestRsvpAction`) for the presence check; `parsed.contactPhone` is only used for the value. If that refactor is needed, do it in a follow-up step.
+Concretely, inside `saveGuestRsvpAction` (adjust to match existing names — the surrounding variables may be `payload`, `parsed`, etc.):
+
+```ts
+const payloadText = String(formData.get("payload") ?? "{}");
+let payloadJson: Record<string, unknown>;
+try {
+  payloadJson = JSON.parse(payloadText);
+} catch {
+  return { error: "Invalid form payload." };
+}
+
+const contactPhoneProvided = Object.prototype.hasOwnProperty.call(
+  payloadJson,
+  "contactPhone",
+);
+
+const validation = guestRsvpSchema.safeParse(payloadJson);
+// ...existing error handling...
+
+const contactPhone = contactPhoneProvided
+  ? typeof payloadJson.contactPhone === "string"
+    ? payloadJson.contactPhone
+    : null
+  : undefined;
+
+const result = await saveGuestRsvp({
+  // ...existing fields from validation.data...
+  contactPhone,
+});
+```
+
+**Rationale:** The raw JSON `payloadJson` preserves the original keys; presence there is ground truth. `parsed.data` may silently drop undefined optionals, so using it for presence detection is unsound.
 
 - [ ] **Step 3: Add a unit test covering the round-trip**
 
@@ -611,14 +662,13 @@ git commit -m "feat(rsvp): allow saveGuestRsvp to update contactPhone"
 
 - [ ] **Step 1: Add the action**
 
-At the top of `src/app-actions/guest.ts`, extend imports:
+At the top of `src/app-actions/guest.ts`, extend imports (only add symbols not already imported — check the current import block first and merge; do NOT duplicate or shadow):
 
 ```ts
 import { timingSafeEqual } from "node:crypto";
 
 import {
   createInvitationFromRegistration,
-  getInvitationBundle,
   normalizeEmail,
   sendInvitationEmailForInvitation,
   sendRecoveryLinks,
@@ -629,6 +679,8 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/src/db";
 import { invitations } from "@/src/db/schema";
 ```
+
+**Note:** `registerGuestAction` does not use `getInvitationBundle` — only the helpers listed above. If that symbol isn't already imported elsewhere in the file, leave it out.
 
 Add after `clearGuestSessionAction`:
 
@@ -797,7 +849,19 @@ register: {
 },
 ```
 
-Also add a phone label to `guest`:
+Also add a phone label to `guest`. **Two edits required** — the type and the value must stay in lockstep:
+
+1. Extend the `guest` member of the `Dictionary` type. Find the `guest: { ... }` block inside the `Dictionary` type declaration and add the two new string fields:
+
+```ts
+guest: {
+  // ...existing fields...
+  contactPhoneLabel: string;
+  contactPhoneHint: string;
+};
+```
+
+2. Extend the `de.guest` dictionary value with the matching keys:
 
 ```ts
 guest: {
@@ -807,7 +871,7 @@ guest: {
 },
 ```
 
-And extend the `Dictionary["guest"]` type with both keys.
+If the type and the value drift out of sync, TypeScript surfaces it in Step 3's build — that's intentional. Do not silence the error by casting the `de` object.
 
 - [ ] **Step 3: Build check**
 
@@ -828,6 +892,10 @@ git commit -m "feat(i18n): add register namespace and contactPhone labels"
 
 **Files:**
 - Create: `src/components/registration-form.tsx`
+
+**Important binding facts from `src/components/ui.tsx`:**
+- `inputClassName` and `buttonClassName` are **functions**, called as `inputClassName()` / `buttonClassName()` (or `inkButtonClassName({ variant, compact })`). Do NOT pass them bare — `className={inputClassName}` will fail TypeScript.
+- `Field` has NO `htmlFor` prop. It renders its children inside a `<label>` wrapper, so label-association happens via nesting. Do NOT add `htmlFor`; drop the `id` when the purpose is label-binding (keep it only if a test selector genuinely needs an id, but see below — we use `getByLabel` in tests, which works through the wrapping `<label>`).
 
 - [ ] **Step 1: Write the component**
 
@@ -877,7 +945,6 @@ export function RegistrationForm() {
   );
   const [codeRevealed, setCodeRevealed] = useState(false);
   const [codeValue, setCodeValue] = useState("");
-  const [localCodeError, setLocalCodeError] = useState<string | null>(null);
 
   const [primaryEmail, setPrimaryEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -918,7 +985,6 @@ export function RegistrationForm() {
         onSubmit={(event) => {
           event.preventDefault();
           setCodeRevealed(true);
-          setLocalCodeError(null);
         }}
       >
         <PaperPanel className="space-y-4">
@@ -927,20 +993,16 @@ export function RegistrationForm() {
           <p className="text-base leading-relaxed">
             {dictionary.register.description}
           </p>
-          <Field label={dictionary.register.codeLabel} htmlFor="registration-code">
+          <Field label={dictionary.register.codeLabel}>
             <input
-              id="registration-code"
               type="text"
               autoComplete="off"
-              className={inputClassName}
+              className={inputClassName()}
               value={codeValue}
               onChange={(event) => setCodeValue(event.target.value)}
             />
           </Field>
-          {localCodeError ? (
-            <p className="text-sm text-red-600">{localCodeError}</p>
-          ) : null}
-          <button type="submit" className={buttonClassName}>
+          <button type="submit" className={buttonClassName()}>
             {dictionary.register.codeSubmit}
           </button>
         </PaperPanel>
@@ -957,13 +1019,11 @@ export function RegistrationForm() {
         <Eyebrow>{dictionary.register.primarySectionTitle}</Eyebrow>
         <Field
           label={dictionary.register.yourNameLabel}
-          htmlFor="reg-primary-name"
           error={fieldError("roster.0.fullName")}
         >
           <input
-            id="reg-primary-name"
             type="text"
-            className={inputClassName}
+            className={inputClassName({ error: Boolean(fieldError("roster.0.fullName")) })}
             value={roster[0].fullName}
             onChange={(event) =>
               updateRoster(0, { fullName: event.target.value })
@@ -972,37 +1032,32 @@ export function RegistrationForm() {
         </Field>
         <Field
           label={dictionary.register.yourEmailLabel}
-          htmlFor="reg-primary-email"
           error={fieldError("primaryEmail")}
         >
           <input
-            id="reg-primary-email"
             type="email"
             autoComplete="email"
-            className={inputClassName}
+            className={inputClassName({ error: Boolean(fieldError("primaryEmail")) })}
             value={primaryEmail}
             onChange={(event) => setPrimaryEmail(event.target.value)}
           />
         </Field>
         <Field
           label={dictionary.register.phoneLabel}
-          htmlFor="reg-primary-phone"
           hint={dictionary.register.phoneHint}
           error={fieldError("contactPhone")}
         >
           <input
-            id="reg-primary-phone"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            className={inputClassName}
+            className={inputClassName({ error: Boolean(fieldError("contactPhone")) })}
             value={contactPhone}
             onChange={(event) => setContactPhone(event.target.value)}
           />
         </Field>
         <Field
           label={dictionary.register.dietaryLabel}
-          htmlFor="reg-primary-diet"
           error={fieldError("roster.0.dietaryRequirements")}
         >
           <StyledSelect
@@ -1035,23 +1090,18 @@ export function RegistrationForm() {
             <div key={index} className="space-y-3 border-t pt-3">
               <Field
                 label={dictionary.register.yourNameLabel}
-                htmlFor={`reg-name-${index}`}
                 error={fieldError(`roster.${index}.fullName`)}
               >
                 <input
-                  id={`reg-name-${index}`}
                   type="text"
-                  className={inputClassName}
+                  className={inputClassName({ error: Boolean(fieldError(`roster.${index}.fullName`)) })}
                   value={entry.fullName}
                   onChange={(event) =>
                     updateRoster(index, { fullName: event.target.value })
                   }
                 />
               </Field>
-              <Field
-                label={dictionary.register.dietaryLabel}
-                htmlFor={`reg-kind-${index}`}
-              >
+              <Field label={dictionary.register.adult + " / " + dictionary.register.child}>
                 <StyledSelect
                   value={entry.kind}
                   onValueChange={(value) =>
@@ -1066,10 +1116,7 @@ export function RegistrationForm() {
                   </StyledSelectItem>
                 </StyledSelect>
               </Field>
-              <Field
-                label={dictionary.register.dietaryLabel}
-                htmlFor={`reg-diet-${index}`}
-              >
+              <Field label={dictionary.register.dietaryLabel}>
                 <StyledSelect
                   value={entry.dietaryRequirements}
                   onValueChange={(value) =>
@@ -1102,7 +1149,7 @@ export function RegistrationForm() {
         {roster.length < maxHouseholdMembers ? (
           <button
             type="button"
-            className={buttonClassName}
+            className={buttonClassName()}
             onClick={addPerson}
           >
             {dictionary.register.addPerson}
@@ -1116,7 +1163,7 @@ export function RegistrationForm() {
         </p>
       ) : null}
 
-      <button type="submit" className={buttonClassName} disabled={pending}>
+      <button type="submit" className={buttonClassName()} disabled={pending}>
         {dictionary.register.submit}
       </button>
     </form>
@@ -1126,8 +1173,6 @@ export function RegistrationForm() {
 
 **Notes on the gate step:**
 - Client-side reveal only — no check against the real code here. The server re-verifies via `registerGuestAction`. If the code is wrong, the form POST will return `{ error: "Invalid code." }` and we surface that as `state.error` in the revealed form state.
-- `localCodeError` is unused for now because we never reject client-side. It's scaffolding we may repurpose if we add "click Continue without typing anything" handling.
-- If `Field`'s `hint` or `error` props don't already exist, inspect `src/components/ui.tsx` and extend as needed (it already supports both, per existing usage elsewhere).
 
 - [ ] **Step 2: Verify the component compiles**
 
@@ -1224,7 +1269,11 @@ test.describe("RegistrationForm", () => {
   test("shows the gate step by default", async ({ mount }) => {
     const component = await mount(<RegistrationForm />);
     await expect(component.getByLabel("Einladungscode")).toBeVisible();
-    await expect(component.getByText("Dein vollständiger Name")).toBeHidden();
+    // Before the gate is cleared, the post-gate form is not rendered at all.
+    // Use toHaveCount(0) (not toBeHidden()) because the element is absent
+    // from the DOM entirely, and toBeHidden() is for elements that exist but
+    // are not visible.
+    await expect(component.getByText("Dein vollständiger Name")).toHaveCount(0);
   });
 
   test("reveals the form after continue", async ({ mount }) => {
@@ -1429,9 +1478,10 @@ test.describe("/register", () => {
     page,
     manifest,
   }) => {
-    // Use a seeded email. Pick any persona from the e2e manifest whose
-    // primaryEmail is known — e.g., manifest.personas.both.primaryEmail.
-    const existingEmail = manifest.personas.both.primaryEmail;
+    // The Playwright manifest from `tests/setup/seed-playwright-data.ts` exposes
+    // seeded invitations under `manifest.invitations.<key>.primaryEmail`, NOT
+    // under a `personas` namespace. Use the `individual` fixture here.
+    const existingEmail = manifest.invitations.individual.primaryEmail;
 
     await page.goto("/register");
     await page.getByLabel("Einladungscode").fill(REGISTRATION_CODE);
@@ -1445,13 +1495,44 @@ test.describe("/register", () => {
     // Cannot easily assert "no duplicate invitation" without admin; a DB
     // assertion via a direct query would go here if the stack exposes one.
   });
+
+  test("phone round-trips from /register to the invitation RSVP form", async ({
+    page,
+  }) => {
+    // Spec requirement #4: phone entered at /register must be readable on the
+    // invitation page after the guest opens their magic link. This test
+    // registers with a phone, then logs in via the dev admin login (see
+    // existing e2e helpers) and opens the new invitation's guest page.
+    const email = `phone-roundtrip-${Date.now()}@example.com`;
+    const phone = "+49 171 9999999";
+
+    await page.goto("/register");
+    await page.getByLabel("Einladungscode").fill(REGISTRATION_CODE);
+    await page.getByRole("button", { name: "Weiter" }).click();
+    await page.getByLabel("Dein vollständiger Name").fill("Phone Roundtrip");
+    await page.getByLabel("Deine E-Mail").fill(email);
+    await page.getByLabel("Telefonnummer (optional)").fill(phone);
+    await page.getByRole("button", { name: "Anmeldung absenden" }).click();
+    await expect(page).toHaveURL(/\/register\/thanks$/);
+
+    // Open the invitation via the admin-issued magic link. The exact helper
+    // name depends on what the e2e fixture already exposes for retrieving a
+    // guest's invitation URL (see other /guest e2e specs for the pattern —
+    // commonly something like `loginAsAdmin()` + a helper that opens the
+    // invitation by primaryEmail). If no such helper exists, add one to
+    // `tests/e2e/fixtures` in a small follow-up; do NOT invent a bespoke DB
+    // query inside this spec file.
+    await openGuestPageByPrimaryEmail(page, email);
+
+    await expect(page.getByLabel("Telefonnummer (optional)")).toHaveValue(phone);
+  });
 });
 ```
 
 **Watch-outs:**
 - The "happy path" test asserts the thanks URL but does not assert the admin dashboard shows the row. If the E2E stack has an admin fixture with a known password (see `playwright-admin-password` in README), you may extend the test to log in as admin and verify the new invitation appears. This is nice-to-have, not required for the happy path to pass.
-- Phone round-trip: a separate case, easier once admin verification is added, because the admin detail page is the simplest place to read back the phone. If the admin detail page does not yet display `contact_phone` (it doesn't — this is out of scope per the spec), use a DB query helper (if the e2e fixture exposes one) or skip the assertion and rely on unit tests for Task 2.2.
-- Check `manifest.personas` shape in `tests/setup/seed-playwright-data.ts` — if `personas.both.primaryEmail` doesn't exist, pick whichever seed fixture has a stable `primaryEmail`.
+- `openGuestPageByPrimaryEmail` is a placeholder — before running the phone round-trip test, grep `tests/e2e/` for existing helpers that navigate to a guest page given an email (admin login + open invitation detail is the most likely existing pattern). Wire it up with the real helper. If none exists, add a small helper to the fixtures file rather than reaching into the DB inside the spec.
+- The manifest fixture keys live in `tests/setup/seed-playwright-data.ts` — verify at plan-execution time that `manifest.invitations.individual.primaryEmail` resolves. If the file has been reorganized since this plan was written, re-read it and pick whichever seeded fixture has a stable `primaryEmail`.
 
 - [ ] **Step 2: Run the E2E tests**
 
@@ -1529,9 +1610,9 @@ git commit -m "docs: document /register feature in README"
 
 2. **Server-side DB unit tests may require fixture infra** — If `src/server/invitations.test.ts` can't run against a real DB, demote `createInvitationFromRegistration` and the `saveGuestRsvp` phone-handling unit tests to e2e coverage (flag to reviewer).
 
-3. **Zod `.optional()` stripping** — The `saveGuestRsvp` change distinguishes "omitted" from "empty". Verify with a small manual test by printing `parsed` after `safeParse` for both inputs before trusting it.
+3. **Zod `.optional()` stripping** — Resolved in the plan (Task 2.2): presence detection runs on the raw JSON payload (`payloadJson` in the action) before validation, and `saveGuestRsvp` takes an explicit tri-state `contactPhone?: string | null` parameter (`undefined` = no change, `null`/empty = clear, non-empty = set). Do NOT regress back to `hasOwnProperty` on `parsed.data`.
 
-4. **`Field` component props** — The plan assumes `Field` supports `hint`, `error`, and `htmlFor`. If it doesn't, extend it in `src/components/ui.tsx` before writing `RegistrationForm`. This is a ~10-line addition.
+4. **`Field` component props** — Verified: `Field` in `src/components/ui.tsx` supports `{ label, children, hint, error }` and renders children inside a `<label>` wrapper, so there is no `htmlFor`. `inputClassName` and `buttonClassName` are functions — call them with `()`. This is already reflected in Task 3.2; flagged here so reviewers don't reintroduce bare references or `htmlFor` props.
 
 5. **CT test setup already configured** — If `tests/ct` doesn't yet have a config for mounting components that depend on server actions, add a stub or mock via `@playwright/experimental-ct-react`. If CT setup is too involved, demote the CT cases to an E2E-only check and note the gap.
 
