@@ -141,11 +141,20 @@ export async function registerGuestAction(
    - Returns { fieldErrors } on fail, same shape as saveGuestRsvpAction.
 
 3. Look up existing invitation by normalizeEmail(primaryEmail):
-   a. EXISTS → call sendRecoveryLinks(email, clientIp). Redirect to /register/thanks.
+   - Match on invitations.primary_email only (NOT invitees.email).
+     Self-registered rows always set invitees.email = null, so this keeps the
+     duplicate check scoped to the invitation-level contact.
+   a. EXISTS → call sendRecoveryLinks(email, clientIp). sendRecoveryLinks' broader
+              match (primary_email OR invitees.email) is intentional there — it
+              covers admin-imported rosters where a non-primary invitee's email
+              may be the one the recoverer remembers. Redirect to /register/thanks.
               Do NOT touch the existing invitation.
    b. NEW    → proceed to step 4.
 
-4. createInvitationFromRegistration (new helper in src/server/invitations.ts):
+4. createInvitationFromRegistration (new helper in src/server/invitations.ts).
+   Uses sequential, non-transactional getDb() writes — matches existing
+   saveInvitation and saveGuestRsvp patterns; introducing transactions is
+   out of scope here.
    a. Insert invitations { primaryEmail, contactPhone, invitationMode, locale: "de" }
       where invitationMode = roster.length === 1 ? "individual" : "household".
    b. Insert invitees rows — always with email: null (matches existing admin path);
@@ -172,7 +181,7 @@ export async function registerGuestAction(
 - `REGISTRATION_CODE` (default `"anna+aeneas"`) in `src/lib/env.ts` and `.env.example`.
 
 ### Invitation page server action
-`saveGuestRsvpAction` (existing) is extended to accept an optional `contactPhone` in its payload. When the field is present on the payload, `saveGuestRsvp` issues an additional `getDb().update(invitations).set({ contactPhone: ... })` call alongside its existing sequential writes (no new transaction; `saveGuestRsvp` today is not transactional and changing that is out of scope).
+`saveGuestRsvpAction` (existing) is extended to accept an optional `contactPhone` field. The existing action receives its payload as a JSON blob via `formData.get("payload")` (see `src/app-actions/guest.ts`); `contactPhone` is added as an additional top-level key on that JSON object — no separate form field, no new form contract. When the field is present on the payload, `saveGuestRsvp` issues an additional `getDb().update(invitations).set({ contactPhone: ... })` call alongside its existing sequential writes (no new transaction; `saveGuestRsvp` today is not transactional and changing that is out of scope).
 
 **Clearing semantics:**
 - Payload field **omitted** → column unchanged.
@@ -198,7 +207,7 @@ This matches the Open Questions default and removes the prior TBD.
 5. Missing `RESEND_API_KEY`/`EMAIL_FROM` → email silently skipped (existing behavior). Invitation still created; admin can resend.
 6. Phone field → free-form text, no regex. Max 40 chars.
 7. Wrong secret code → inline error, roster state preserved, no lockout.
-8. Double-submit → second call hits the "existing email" branch and silently sends a recovery email. No duplicate invitation. Acceptable.
+8. Double-submit → second call hits the "existing email" branch and silently sends a recovery email. No duplicate invitation. After more than `recoveryMaxPerEmailPerHour` submits on the same email within an hour, the recovery limiter kicks in and the thanks page still renders with no further email sent. Acceptable.
 9. Dietary for children → remains optional (matches existing schema).
 10. First-row kind tampering (client-side forces adult, server also enforces) → server rejects if first row kind != "adult".
 
@@ -216,7 +225,7 @@ This matches the Open Questions default and removes the prior TBD.
   - records `rsvp_updated` activity.
 
 ### Playwright E2E (`tests/e2e/register.spec.ts`)
-1. **Happy path**: open `/register`, enter code, fill form (1 primary + 1 partner + 1 child with dietary), submit → land on `/register/thanks` → admin dashboard shows the new invitation → invitation link (from manifest or direct lookup) shows the pre-filled RSVP with dietary values.
+1. **Happy path**: open `/register`, enter code, fill form (1 primary + 1 partner + 1 child with dietary), submit → land on `/register/thanks` → admin dashboard shows the new invitation → resolve the invitation id by admin-dashboard DOM scrape (the same technique existing e2e tests use) → open the invitation URL and verify the RSVP is pre-filled with dietary values, phone number is set, and `status=attending`.
 2. **Silent recovery**: register with an email that already exists in the seed → still land on thanks page → no duplicate invitation row in DB; one new `recovery_sent` activity recorded for the existing invitation.
 3. **Wrong secret code**: form step not revealed; inline error shown.
 4. **Phone round-trip**: phone filled on `/register` → open invitation page → phone is visible and editable → save → value persists (verifiable via admin detail or direct DB read in test).
@@ -232,7 +241,7 @@ This matches the Open Questions default and removes the prior TBD.
 
 ## Implementation notes
 
-- **File organization**: `app/register/page.tsx` for GET, `app/register/thanks/page.tsx` for the confirmation, `src/components/register/registration-form.tsx` for the client component, `src/app-actions/guest.ts` for the server action, `src/server/invitations.ts` for the shared helper.
+- **File organization**: `app/register/page.tsx` for GET, `app/register/thanks/page.tsx` for the confirmation, `src/components/registration-form.tsx` for the client component (flat under `src/components/`, matching existing convention — no `register/` subdir), `src/app-actions/guest.ts` for the server action, `src/server/invitations.ts` for the shared helper.
 - **Do not** branch the admin CSV / admin invitation form to accept `contact_phone` as part of this spec. That's a follow-up decision.
 - **Do not** add a `source` column to distinguish admin vs self registrations. If we want it, it comes later.
 
