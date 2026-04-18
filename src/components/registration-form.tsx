@@ -165,9 +165,6 @@ export function RegistrationForm() {
             }
             placeholder={dictionary.register.dietaryNone}
           >
-            <StyledSelectItem value="">
-              {dictionary.register.dietaryNone}
-            </StyledSelectItem>
             <StyledSelectItem value="meat">
               {dictionary.register.dietaryMeat}
             </StyledSelectItem>
@@ -223,10 +220,8 @@ export function RegistrationForm() {
                       dietaryRequirements: value as RosterEntry["dietaryRequirements"],
                     })
                   }
+                  placeholder={dictionary.register.dietaryNone}
                 >
-                  <StyledSelectItem value="">
-                    {dictionary.register.dietaryNone}
-                  </StyledSelectItem>
                   <StyledSelectItem value="meat">
                     {dictionary.register.dietaryMeat}
                   </StyledSelectItem>

@@ -63,18 +63,18 @@ async function submitAdminRespondedFamilyRsvp(page: Page) {
 
 async function loginAdmin(page: Page, password: string) {
   await page.goto("/admin");
-  await page.getByLabel("Shared password").fill(password);
-  await page.getByRole("button", { name: "Open dashboard" }).click();
+  await page.getByLabel("Gemeinsames Passwort").fill(password);
+  await page.getByRole("button", { name: "Dashboard öffnen" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Invitation state at a glance" }),
+    page.getByRole("heading", { name: "Einladungen auf einen Blick" }),
   ).toBeVisible();
 }
 
 async function searchAdminDashboard(page: Page, term: string) {
-  const searchInput = page.getByPlaceholder("Search guest, email, or external ID");
+  const searchInput = page.getByPlaceholder("Gast oder E-Mail suchen");
   await searchInput.fill(term);
-  await page.getByRole("button", { name: "Filter" }).click();
+  await page.getByRole("button", { name: "Filtern" }).click();
   await expect(page).toHaveURL(new RegExp(`search=${term}`));
 }
 
@@ -234,29 +234,29 @@ test.describe("Desktop guest and admin flows", () => {
 
     await loginAdmin(page, manifest.adminPassword);
 
-    await searchAdminDashboard(page, "admin-opened-only");
+    await searchAdminDashboard(page, "Morgan");
     const openedCard = page.locator("section").filter({
-      hasText: "admin-opened-only",
+      hasText: "Morgan Opened",
     });
-    await expect(openedCard.getByText("Access count: 1")).toBeVisible();
+    await expect(openedCard.getByText("Zugriffe: 1")).toBeVisible();
     await expect(openedCard.getByText("pending")).toBeVisible();
 
-    await searchAdminDashboard(page, "admin-responded-family");
+    await searchAdminDashboard(page, "Riley");
     const respondedCard = page.locator("section").filter({
-      hasText: "admin-responded-family",
+      hasText: "Riley Response",
     });
     await expect(respondedCard.getByText("attending")).toBeVisible();
-    await respondedCard.getByRole("link", { name: "Manage invitation" }).click();
+    await respondedCard.getByRole("link", { name: "Einladung verwalten" }).click();
 
-    await expect(page.getByText("Current RSVP state")).toBeVisible();
+    await expect(page.getByText("Aktueller RSVP-Status")).toBeVisible();
     await expect(
-      page.getByText("Riley Response | adult | attending"),
+      page.getByText("Riley Response | adult | dabei"),
     ).toBeVisible();
     await expect(
-      page.getByText("Household member 1 | adult | attending"),
+      page.getByText("Household member 1 | adult | dabei"),
     ).toBeVisible();
     await expect(
-      page.getByText("Child 1 | child | attending"),
+      page.getByText("Child 1 | child | dabei"),
     ).toBeVisible();
     await expect(page.getByText("rsvp_updated")).toBeVisible();
     await expect(page.getByText("link_opened")).toBeVisible();

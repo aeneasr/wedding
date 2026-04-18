@@ -6,8 +6,8 @@ const REGISTRATION_CODE = "anna+aeneas";
 
 async function loginAdmin(page: Page, password: string) {
   await page.goto("/admin");
-  await page.getByLabel("Shared password").fill(password);
-  await page.getByRole("button", { name: "Open dashboard" }).click();
+  await page.getByLabel("Gemeinsames Passwort").fill(password);
+  await page.getByRole("button", { name: "Dashboard öffnen" }).click();
   await expect(
     page.getByRole("heading", { name: "Einladungen auf einen Blick" }),
   ).toBeVisible();
