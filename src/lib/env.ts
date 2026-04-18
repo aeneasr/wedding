@@ -7,6 +7,7 @@ const envSchema = z.object({
   ADMIN_SHARED_PASSWORD_HASH: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).optional(),
+  REGISTRATION_CODE: z.string().min(1).optional(),
 });
 
 const parsedEnv = envSchema.parse({
@@ -16,6 +17,7 @@ const parsedEnv = envSchema.parse({
   ADMIN_SHARED_PASSWORD_HASH: process.env.ADMIN_SHARED_PASSWORD_HASH,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   EMAIL_FROM: process.env.EMAIL_FROM,
+  REGISTRATION_CODE: process.env.REGISTRATION_CODE,
 });
 
 export const env = {
@@ -43,4 +45,10 @@ export function isEmailConfigured() {
 
 export function isAdminAuthConfigured() {
   return Boolean(env.ADMIN_SHARED_PASSWORD_HASH && env.APP_SIGNING_SECRET);
+}
+
+const DEFAULT_REGISTRATION_CODE = "anna+aeneas";
+
+export function getRegistrationCode() {
+  return env.REGISTRATION_CODE ?? DEFAULT_REGISTRATION_CODE;
 }
