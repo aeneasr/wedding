@@ -14,7 +14,8 @@ Private wedding RSVP platform built with `Next.js` for Vercel deployment.
 
 ## Features
 
-- Admin-managed invitation list with no guest self-registration
+- Admin-managed invitation list plus a self-service /register page for guests
+- Self-service guest registration at `/register` (gated by the `REGISTRATION_CODE` env var)
 - Secure long-lived magic links for invitation access
 - Two isolated event flows with per-invitation entitlements
 - Separate RSVP behavior for Event One and Event Two
@@ -37,6 +38,7 @@ APP_SIGNING_SECRET="replace-with-a-32-character-secret"
 ADMIN_SHARED_PASSWORD_HASH="sha256:..."
 RESEND_API_KEY="re_..."
 EMAIL_FROM="Wedding RSVP <hello@example.com>"
+REGISTRATION_CODE="anna+aeneas"
 ```
 
 Generate the admin password hash with the same logic used by the app. A quick option is:
