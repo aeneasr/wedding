@@ -41,6 +41,7 @@ export const invitations = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     primaryEmail: text("primary_email").notNull(),
+    contactPhone: text("contact_phone"),
     invitationMode: invitationModeEnum("invitation_mode").notNull(),
     locale: localeEnum("locale").notNull().default("de"),
     tokenVersion: integer("token_version").notNull().default(1),

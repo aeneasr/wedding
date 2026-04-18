@@ -1,0 +1,1 @@
+ALTER TABLE "invitations" ADD COLUMN "contact_phone" text;
