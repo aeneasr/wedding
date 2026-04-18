@@ -14,8 +14,7 @@ Private wedding RSVP platform built with `Next.js` for Vercel deployment.
 
 ## Features
 
-- Admin-managed invitation list plus a self-service /register page for guests
-- Self-service guest registration at `/register` (gated by the `REGISTRATION_CODE` env var)
+- Admin-managed invitation list plus self-service guest registration at `/register` (gated by `REGISTRATION_CODE`)
 - Secure long-lived magic links for invitation access
 - Two isolated event flows with per-invitation entitlements
 - Separate RSVP behavior for Event One and Event Two

@@ -13,17 +13,6 @@ async function loginAdmin(page: Page, password: string) {
   ).toBeVisible();
 }
 
-/**
- * Opens the guest page for the invitation that has `email` as its primary
- * email by navigating through the admin detail view.
- *
- * Flow:
- *   1. Log in as admin
- *   2. Search the dashboard for the email
- *   3. Click "Einladung verwalten" for the matching row
- *   4. Read the read-only "Einladungslink" input value
- *   5. Navigate to that URL (which is the guest's invitation page)
- */
 async function openGuestPageByPrimaryEmail(
   page: Page,
   email: string,
@@ -31,17 +20,14 @@ async function openGuestPageByPrimaryEmail(
 ) {
   await loginAdmin(page, adminPassword);
 
-  // Search for the invitation by email
   const searchInput = page.getByPlaceholder("Gast oder E-Mail suchen");
   await searchInput.fill(email);
   await page.getByRole("button", { name: "Filtern" }).click();
   await expect(page).toHaveURL(new RegExp(`search=${encodeURIComponent(email)}`));
 
-  // Navigate to the invitation detail page
   const card = page.locator("div").filter({ hasText: email }).first();
   await card.getByRole("link", { name: "Einladung verwalten" }).click();
 
-  // The detail page has a read-only input containing the guest invitation link
   const invitationLinkInput = page.getByLabel("Einladungslink");
   const guestUrl = await invitationLinkInput.inputValue();
 

@@ -93,7 +93,6 @@ export function GuestRsvpFields({
       <input type="hidden" name="payload" value={payload} />
 
       <PaperPanel className="space-y-5">
-        {/* Contact phone */}
         <Field
           label={dictionary.guest.contactPhoneLabel}
           hint={dictionary.guest.contactPhoneHint}
