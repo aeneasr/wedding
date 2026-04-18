@@ -98,7 +98,7 @@ export function RegistrationForm() {
               onChange={(event) => setCodeValue(event.target.value)}
             />
           </Field>
-          <button type="submit" className={buttonClassName()}>
+          <button type="submit" className={`${buttonClassName()} w-full`}>
             {dictionary.register.codeSubmit}
           </button>
         </PaperPanel>
@@ -232,7 +232,7 @@ export function RegistrationForm() {
               </Field>
               <button
                 type="button"
-                className="text-sm underline"
+                className="min-h-[44px] px-1 text-sm underline"
                 onClick={() => removePerson(index)}
               >
                 {dictionary.register.removePerson}
@@ -243,7 +243,7 @@ export function RegistrationForm() {
         {roster.length < maxHouseholdMembers ? (
           <button
             type="button"
-            className={buttonClassName()}
+            className={`${buttonClassName()} w-full`}
             onClick={addPerson}
           >
             {dictionary.register.addPerson}
@@ -257,7 +257,7 @@ export function RegistrationForm() {
         </p>
       ) : null}
 
-      <button type="submit" className={buttonClassName()} disabled={pending}>
+      <button type="submit" className={`${buttonClassName()} w-full`} disabled={pending}>
         {dictionary.register.submit}
       </button>
     </form>
