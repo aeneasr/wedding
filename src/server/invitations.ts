@@ -66,7 +66,7 @@ export type DashboardFilters = {
   status?: "all" | "pending" | "responded" | "opened";
 };
 
-function normalizeEmail(email: string) {
+export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
