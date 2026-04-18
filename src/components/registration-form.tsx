@@ -212,7 +212,10 @@ export function RegistrationForm() {
                   </StyledSelectItem>
                 </StyledSelect>
               </Field>
-              <Field label={dictionary.register.dietaryLabel}>
+              <Field
+                label={dictionary.register.dietaryLabel}
+                error={fieldError(`roster.${index}.dietaryRequirements`)}
+              >
                 <StyledSelect
                   value={entry.dietaryRequirements}
                   onValueChange={(value) =>
@@ -254,7 +257,7 @@ export function RegistrationForm() {
       </PaperPanel>
 
       {state.error ? (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="rounded-xl bg-error-bg px-4 py-3 text-sm text-error-text" role="alert">
           {state.error}
         </p>
       ) : null}
