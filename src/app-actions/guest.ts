@@ -117,6 +117,8 @@ export type RegisterActionState = {
   fieldErrors?: Record<string, string[]>;
 };
 
+// Key is intentionally non-secret: its only purpose is to produce fixed-length
+// SHA-256 digests for timingSafeEqual, preventing length-based timing leaks.
 const REGISTRATION_CODE_DIGEST_KEY = Buffer.from("registration-code-comparison");
 
 function digestCode(value: string) {
