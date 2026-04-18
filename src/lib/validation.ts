@@ -112,3 +112,39 @@ export function validateGuestRsvpPayload(payload: unknown) {
     });
   }).safeParse(payload);
 }
+
+const rosterEntrySchema = z.object({
+  fullName: z.string().trim().min(1, "Name is required.").max(120),
+  kind: z.enum(["adult", "child"] satisfies [InviteeKind, ...InviteeKind[]]),
+  dietaryRequirements: z.enum(["", "meat", "vegetarian"]).default(""),
+});
+
+export const registrationSchema = z
+  .object({
+    primaryEmail: z.email("A valid email is required."),
+    contactPhone: z
+      .string()
+      .max(40, "Phone number is too long.")
+      .transform((value) => value.trim())
+      .default(""),
+    roster: z
+      .array(rosterEntrySchema)
+      .min(1, "Add at least one person.")
+      .max(maxHouseholdMembers, `A household can include up to ${maxHouseholdMembers} people.`),
+  })
+  .superRefine((value, ctx) => {
+    const first = value.roster[0];
+    if (first && first.kind !== "adult") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["roster", 0, "kind"],
+        message: "The first person must be an adult.",
+      });
+    }
+  });
+
+export type RegistrationPayload = z.infer<typeof registrationSchema>;
+
+export function validateRegistrationPayload(payload: unknown) {
+  return registrationSchema.safeParse(payload);
+}
