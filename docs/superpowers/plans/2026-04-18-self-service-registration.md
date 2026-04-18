@@ -1300,7 +1300,11 @@ test.describe("RegistrationForm", () => {
     for (let i = 0; i < 8; i += 1) {
       if (await addBtn.isVisible()) await addBtn.click();
     }
-    await expect(addBtn).toBeHidden();
+    // At cap, the "add person" button is removed from the DOM by the ternary
+    // in the component (see Task 3.2 — rendered only when roster.length <
+    // maxHouseholdMembers). Use toHaveCount(0) because the element is absent,
+    // not just invisible.
+    await expect(addBtn).toHaveCount(0);
   });
 });
 ```
@@ -1350,7 +1354,9 @@ Propagate through `GuestRsvpFieldsProps` and `GuestRsvpFormProps`.
 
 - [ ] **Step 3: Add the phone input to the fields component**
 
-Introduce a `useState` for `contactPhone`, initialized from the prop (treat `null` as empty string). Add a `<Field>` with an `<input type="tel">` somewhere near the top of the form (above the attendance checklist). Wire it into the JSON payload:
+**Before editing, open `src/components/guest-rsvp-fields.tsx` and locate the existing payload-serialization site.** It may already produce a shape like `{ invitees }` or include additional fields (e.g., `rsvpStatus`). **Merge** the new `contactPhone` key into the existing object — do NOT replace the payload wholesale, or you will silently drop keys the server action already expects.
+
+Introduce a `useState` for `contactPhone`, initialized from the prop (treat `null` as empty string). Add a `<Field>` with an `<input type="tel">` somewhere near the top of the form (above the attendance checklist). Extend the existing JSON payload with the new key — e.g., if the existing code is `JSON.stringify({ invitees })`, change to `JSON.stringify({ invitees, contactPhone })`:
 
 ```ts
 const payload = JSON.stringify({ invitees, contactPhone });
