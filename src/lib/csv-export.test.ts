@@ -15,6 +15,7 @@ function makeBundle(
     invitation: {
       id: "inv-1",
       primaryEmail: "alice@example.com",
+      contactPhone: null,
       invitationMode: "individual",
       locale: "de",
       tokenVersion: 1,

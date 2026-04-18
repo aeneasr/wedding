@@ -721,3 +721,80 @@ export async function getInvitationForAdmin(invitationId: string) {
   return getInvitationBundle(invitationId);
 }
 
+export type RegistrationInput = {
+  primaryEmail: string;
+  contactPhone: string;
+  roster: Array<{
+    fullName: string;
+    kind: "adult" | "child";
+    dietaryRequirements: "" | "meat" | "vegetarian";
+  }>;
+};
+
+export async function createInvitationFromRegistration(
+  input: RegistrationInput,
+): Promise<{ invitationId: string }> {
+  const db = getDb();
+  const now = new Date();
+  const invitationMode: InvitationMode =
+    input.roster.length === 1 ? "individual" : "household";
+
+  const [invitation] = await db
+    .insert(invitations)
+    .values({
+      primaryEmail: normalizeEmail(input.primaryEmail),
+      contactPhone: input.contactPhone.trim() || null,
+      invitationMode,
+      locale: "de",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning({ id: invitations.id });
+
+  const inviteeRows = input.roster.map((entry, index) => ({
+    invitationId: invitation.id,
+    fullName: entry.fullName.trim(),
+    email: null,
+    kind: index === 0 ? ("adult" as const) : entry.kind,
+    isPrimary: index === 0,
+    createdAt: new Date(now.getTime() + index),
+  }));
+
+  const insertedInvitees = await db
+    .insert(invitees)
+    .values(inviteeRows)
+    .returning({ id: invitees.id, isPrimary: invitees.isPrimary });
+
+  const [rsvpRow] = await db
+    .insert(rsvps)
+    .values({
+      invitationId: invitation.id,
+      status: "attending",
+      submittedAt: now,
+      updatedAt: now,
+    })
+    .returning({ id: rsvps.id });
+
+  const attendeeRows = input.roster.map((entry, index) => ({
+    rsvpId: rsvpRow.id,
+    inviteeId: insertedInvitees[index].id,
+    attendeeType: (entry.kind === "child" ? "child" : "named_guest") as
+      | "named_guest"
+      | "child",
+    fullName: entry.fullName.trim(),
+    isAttending: true,
+    dietaryRequirements: entry.dietaryRequirements || null,
+    phoneNumber: null,
+    sortOrder: index,
+  }));
+
+  await db.insert(attendeeResponses).values(attendeeRows);
+
+  await recordActivity(invitation.id, "rsvp_updated", {
+    status: "attending",
+    attendeeCount: attendeeRows.length,
+  });
+
+  return { invitationId: invitation.id };
+}
+
