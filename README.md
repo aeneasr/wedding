@@ -37,6 +37,7 @@ APP_SIGNING_SECRET="replace-with-a-32-character-secret"
 ADMIN_SHARED_PASSWORD_HASH="sha256:..."
 RESEND_API_KEY="re_..."
 EMAIL_FROM="Wedding RSVP <hello@example.com>"
+EMAIL_REPLY_TO="Your Name <you@example.com>"
 REGISTRATION_CODE="anna+aeneas"
 ```
 

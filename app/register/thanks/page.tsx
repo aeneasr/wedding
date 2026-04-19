@@ -12,6 +12,9 @@ export default function RegisterThanksPage() {
         <p className="text-base leading-relaxed">
           {dictionary.register.thanksBody}
         </p>
+        <p className="text-sm leading-relaxed text-stone-600">
+          {dictionary.register.thanksSpamNote}
+        </p>
       </PaperPanel>
     </main>
   );

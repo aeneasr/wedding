@@ -7,6 +7,7 @@ const envSchema = z.object({
   ADMIN_SHARED_PASSWORD_HASH: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).optional(),
+  EMAIL_REPLY_TO: z.string().min(1).optional(),
   REGISTRATION_CODE: z.string().min(1).optional(),
 });
 
@@ -17,6 +18,7 @@ const parsedEnv = envSchema.parse({
   ADMIN_SHARED_PASSWORD_HASH: process.env.ADMIN_SHARED_PASSWORD_HASH,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   EMAIL_FROM: process.env.EMAIL_FROM,
+  EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
   REGISTRATION_CODE: process.env.REGISTRATION_CODE,
 });
 

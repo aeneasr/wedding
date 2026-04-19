@@ -54,6 +54,7 @@ type Dictionary = {
     formError: string;
     thanksTitle: string;
     thanksBody: string;
+    thanksSpamNote: string;
   };
   guest: {
     details: string;
@@ -114,6 +115,7 @@ type Dictionary = {
     greeting: string;
     invitationIntro: string;
     manageRsvp: string;
+    linkFallback: string;
     reminder: string;
     recoveryIntro: string;
     confirmationIntro: string;
@@ -130,7 +132,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       eyebrow: "Hochzeitseinladung",
       title: "Deine Hochzeitseinladung und RSVP",
       description:
-        "Mit deinem persönlichen Einladungslink kannst du uns deine Zu- oder Absage mitteilen und später bei Bedarf Änderungen vornehmen.",
+        "Und DU bist eingeladen! Mit deinem persönlichen Einladungslink kannst du uns deine Zu- oder Absage mitteilen und später bei Bedarf Änderungen vornehmen.",
       primaryCta: "Einladung öffnen",
       recoverCta: "Einladungslink finden",
       emailPrivacyNote: "Einladungslinks werden privat per E-Mail geteilt",
@@ -187,6 +189,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       thanksTitle: "Danke!",
       thanksBody:
         "Wir haben dir einen Einladungslink per E-Mail geschickt. Öffne deinen Posteingang, um deine Angaben anzusehen oder zu ändern.",
+      thanksSpamNote:
+        "Bitte schau auch in deinem Spam-Ordner nach – manchmal landet die Einladung versehentlich dort. Falls ja, markiere sie bitte als „Kein Spam“, damit der Link wieder anklickbar wird.",
     },
     guest: {
       details: "Details",
@@ -253,6 +257,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       invitationIntro:
         "Nutze den Link unten, um deine Einladung zu öffnen, deine Details anzusehen und deine RSVP zu senden oder zu aktualisieren.",
       manageRsvp: "Einladung öffnen",
+      linkFallback:
+        "Falls der Button nicht klickbar ist, kopiere diesen Link in deinen Browser:",
       reminder:
         "Behalte diese E-Mail, damit du mit demselben Link später wiederkommen kannst, falls sich deine Pläne ändern.",
       recoveryIntro:

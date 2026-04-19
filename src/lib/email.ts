@@ -57,7 +57,6 @@ async function sendEmail(input: {
   subject: string;
   html: string;
   text: string;
-  replyTo?: string;
   attachments?: Array<{ filename: string; content: string }>;
 }) {
   const client = getClient();
@@ -72,7 +71,7 @@ async function sendEmail(input: {
     subject: input.subject,
     html: input.html,
     text: input.text,
-    ...(input.replyTo && { replyTo: input.replyTo }),
+    ...(env.EMAIL_REPLY_TO && { replyTo: env.EMAIL_REPLY_TO }),
     attachments: input.attachments,
   });
 }
@@ -87,7 +86,8 @@ export async function sendInvitationEmail(input: {
   const body = `
     <p style="margin:0 0 16px;">${dictionary.emails.greeting} ${input.guestName},</p>
     <p style="margin:0 0 24px;">${dictionary.emails.invitationIntro}</p>
-    <p style="margin:0 0 24px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0 0 16px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0 0 24px;font-size:13px;color:#7b6656;line-height:1.5;">${dictionary.emails.linkFallback}<br><a href="${input.invitationLink}" style="color:#2d241f;word-break:break-all;">${input.invitationLink}</a></p>
     <p style="margin:0;font-size:13px;color:#9b8b7e;">${dictionary.emails.reminder}</p>
   `;
 
@@ -122,7 +122,8 @@ export async function sendRecoveryEmail(input: {
   const body = `
     <p style="margin:0 0 16px;">${dictionary.emails.greeting} ${input.guestName},</p>
     <p style="margin:0 0 24px;">${dictionary.emails.recoveryIntro}</p>
-    <p style="margin:0 0 24px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0 0 16px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0 0 24px;font-size:13px;color:#7b6656;line-height:1.5;">${dictionary.emails.linkFallback}<br><a href="${input.invitationLink}" style="color:#2d241f;word-break:break-all;">${input.invitationLink}</a></p>
     <p style="margin:0;font-size:13px;color:#9b8b7e;">${dictionary.emails.reminder}</p>
   `;
 
@@ -166,7 +167,8 @@ export async function sendConfirmationEmail(input: {
     <p style="margin:0 0 20px;">${dictionary.emails.confirmationIntro}</p>
     <p style="margin:0 0 4px;font-weight:600;">${eventName}</p>
     <p style="margin:0 0 24px;color:#7b6656;">${eventSummary}</p>
-    <p style="margin:0 0 24px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0 0 16px;text-align:center;"><a href="${input.invitationLink}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:#2d241f;color:#fffaf4;text-decoration:none;font-size:16px;font-weight:600;">${dictionary.emails.manageRsvp}</a></p>
+    <p style="margin:0;font-size:13px;color:#7b6656;line-height:1.5;">${dictionary.emails.linkFallback}<br><a href="${input.invitationLink}" style="color:#2d241f;word-break:break-all;">${input.invitationLink}</a></p>
   `;
 
   return sendEmail({
