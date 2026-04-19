@@ -31,7 +31,7 @@ type EventContent = {
 };
 
 export const eventContent: EventContent = {
-  startsAt: "2026-08-22T15:30:00+02:00",
+  startsAt: "2026-08-22T17:00:00+02:00",
   endsAt: "2026-08-23T01:00:00+02:00",
   hero: {
     de: "Wir freuen uns mit Dir einen wundervollen Tag zu verbringen",
@@ -48,12 +48,6 @@ export const eventContent: EventContent = {
   addresses: [
     {
       label: {
-        de: "Eisbach Welle, Paradiesstraße, 81667 München",
-      },
-      mapUrl: "https://maps.app.goo.gl/UXJ2vfFmub59CSWA9",
-    },
-    {
-      label: {
         de: "TIVO, Oettingenstraße 74, 80538 München",
       },
       mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
@@ -61,21 +55,12 @@ export const eventContent: EventContent = {
   ],
   schedule: [
     {
-      time: "15:30",
-      title: {
-        de: "Treffen am Eisbach",
-      },
-      note: {
-        de: "Wir treffen uns an der kleinen Eisbach Welle, wo Aeneas und seine Freunde viel Zeit verbracht haben.",
-      },
-    },
-    {
       time: "17:00",
       title: {
-        de: "Ankunft im Tivo",
+        de: "Ankunft im TIVO",
       },
       note: {
-        de: "Vom Eisbach laufen wir zusammen zum TIVO (ca. 10 Minuten) wo wir mit leckeren Drinks erwartet werden.",
+        de: "Start ist im TIVO um 17:00, wo wir mit leckeren Drinks erwartet werden.",
       },
     },
     {
@@ -121,7 +106,7 @@ export const eventContent: EventContent = {
         de: "Anreise",
       },
       value: {
-        de: "Am besten erreicht man das Tivo mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
+        de: "Am besten erreicht man das TIVO mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
       },
     },
     {
