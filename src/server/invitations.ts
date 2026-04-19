@@ -138,11 +138,12 @@ async function recordActivity(
 async function loadBundlesByIds(invitationIds?: string[]) {
   const db = getDb();
 
+  if (invitationIds && invitationIds.length === 0) {
+    return [];
+  }
+
   const invitationRows = await db.query.invitations.findMany({
-    where:
-      invitationIds && invitationIds.length > 0
-        ? inArray(invitations.id, invitationIds)
-        : undefined,
+    where: invitationIds ? inArray(invitations.id, invitationIds) : undefined,
     orderBy: desc(invitations.createdAt),
   });
 
@@ -515,6 +516,13 @@ export async function sendRecoveryLinks(email: string, ipAddress?: string | null
   const matchedInvitations = await db.query.invitations.findMany({
     where: invitationWhere,
   });
+
+  if (matchedInvitations.length === 0) {
+    return {
+      rateLimited: false,
+      invitations: 0,
+    };
+  }
 
   const bundles = await loadBundlesByIds(matchedInvitations.map((row) => row.id));
 

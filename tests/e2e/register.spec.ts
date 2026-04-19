@@ -40,13 +40,13 @@ test.describe("/register", () => {
     page,
   }) => {
     await page.goto("/register");
-    await page.getByLabel("Einladungscode").fill(REGISTRATION_CODE);
+    await page.getByLabel("Einladungs-Passwort").fill(REGISTRATION_CODE);
     await page.getByRole("button", { name: "Weiter" }).click();
-    await page.getByLabel("Dein vollständiger Name").fill("E2E Registrant");
+    await page.getByLabel("Vollständiger Name").fill("E2E Registrant");
     await page.getByLabel("Deine E-Mail").fill("e2e-register@example.com");
     await page.getByLabel("Telefonnummer (optional)").fill("+49 170 1111111");
     await page.getByRole("button", { name: "Weitere Person hinzufügen" }).click();
-    const nameInputs = page.getByLabel("Dein vollständiger Name");
+    const nameInputs = page.getByLabel("Vollständiger Name");
     await nameInputs.nth(1).fill("E2E Partner");
     await page.getByRole("button", { name: "Anmeldung absenden" }).click();
     await expect(page).toHaveURL(/\/register\/thanks$/);
@@ -57,9 +57,9 @@ test.describe("/register", () => {
     page,
   }) => {
     await page.goto("/register");
-    await page.getByLabel("Einladungscode").fill("obviously-wrong");
+    await page.getByLabel("Einladungs-Passwort").fill("obviously-wrong");
     await page.getByRole("button", { name: "Weiter" }).click();
-    await page.getByLabel("Dein vollständiger Name").fill("Should Not Save");
+    await page.getByLabel("Vollständiger Name").fill("Should Not Save");
     await page.getByLabel("Deine E-Mail").fill("bad-code@example.com");
     await page.getByRole("button", { name: "Anmeldung absenden" }).click();
     await expect(page).toHaveURL(/\/register$/);
@@ -72,9 +72,9 @@ test.describe("/register", () => {
   }) => {
     const existingEmail = manifest.invitations.individual.primaryEmail;
     await page.goto("/register");
-    await page.getByLabel("Einladungscode").fill(REGISTRATION_CODE);
+    await page.getByLabel("Einladungs-Passwort").fill(REGISTRATION_CODE);
     await page.getByRole("button", { name: "Weiter" }).click();
-    await page.getByLabel("Dein vollständiger Name").fill("Duplicate Person");
+    await page.getByLabel("Vollständiger Name").fill("Duplicate Person");
     await page.getByLabel("Deine E-Mail").fill(existingEmail);
     await page.getByRole("button", { name: "Anmeldung absenden" }).click();
     await expect(page).toHaveURL(/\/register\/thanks$/);
@@ -89,9 +89,9 @@ test.describe("/register", () => {
 
     // Register with a phone number
     await page.goto("/register");
-    await page.getByLabel("Einladungscode").fill(REGISTRATION_CODE);
+    await page.getByLabel("Einladungs-Passwort").fill(REGISTRATION_CODE);
     await page.getByRole("button", { name: "Weiter" }).click();
-    await page.getByLabel("Dein vollständiger Name").fill("Phone Roundtrip");
+    await page.getByLabel("Vollständiger Name").fill("Phone Roundtrip");
     await page.getByLabel("Deine E-Mail").fill(testEmail);
     await page.getByLabel("Telefonnummer (optional)").fill(testPhone);
     await page.getByRole("button", { name: "Anmeldung absenden" }).click();

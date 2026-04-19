@@ -55,10 +55,12 @@ export default async function GuestPage({
         <PageContainer className="gap-6 py-8 sm:py-12">
 
           {/* Hero invitation image */}
-          <LandingInvitationCard
-            imageAlt={dictionary.landing.imageAlt}
-            imageLabel={dictionary.landing.imageLabel}
-          />
+          <div className="mx-auto w-full max-w-[28rem]">
+            <LandingInvitationCard
+              imageAlt={dictionary.landing.imageAlt}
+              imageLabel={dictionary.landing.imageLabel}
+            />
+          </div>
 
           {/* Section 1: Compact greeting + key info */}
           <PaperPanel className="space-y-4">
@@ -80,14 +82,19 @@ export default async function GuestPage({
                 {
                   label: dictionary.guest.address,
                   value: (
-                    <a
-                      href={eventContent.mapUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2"
-                    >
-                      {localizeEventText(eventContent.address, locale)}
-                    </a>
+                    <div className="flex flex-col gap-1">
+                      {eventContent.addresses.map((entry) => (
+                        <a
+                          key={entry.mapUrl}
+                          href={entry.mapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2"
+                        >
+                          {localizeEventText(entry.label, locale)}
+                        </a>
+                      ))}
+                    </div>
                   ),
                 },
                 {

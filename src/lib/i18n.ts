@@ -11,6 +11,9 @@ type Dictionary = {
     description: string;
     primaryCta: string;
     recoverCta: string;
+    makeChangesCta: string;
+    codePrompt: string;
+    inviteBody: string;
     emailPrivacyNote: string;
     imageAlt: string;
     imageLabel: string;
@@ -135,6 +138,11 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Und DU bist eingeladen! Mit deinem persönlichen Einladungslink kannst du uns deine Zu- oder Absage mitteilen und später bei Bedarf Änderungen vornehmen.",
       primaryCta: "Einladung öffnen",
       recoverCta: "Einladungslink finden",
+      makeChangesCta: "Bereits angemeldet? Änderungen vornehmen",
+      codePrompt:
+        "Bitte gib das Passwort ein um zu- oder abzusagen.",
+      inviteBody:
+        "Wir heiraten und möchten diesen besonderen Tag mit Dir teilen! Es würde uns riesig freuen, dich dabei zu haben.",
       emailPrivacyNote: "Einladungslinks werden privat per E-Mail geteilt",
       imageAlt:
         "Hochzeitseinladung für Anna und Aeneas mit der Botschaft Wir heiraten und dem Datum 22.08.2026.",
@@ -149,9 +157,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
     },
     recover: {
-      title: "Deinen Einladungslink finden",
+      title: "Deine Einladung anpassen",
       description:
-        "Gib die E-Mail-Adresse an, die für deine Einladung verwendet wurde. Wenn wir einen Treffer finden, schicken wir dir denselben Link erneut.",
+        "Gib die E-Mail-Adresse an, die du für deine Einladung verwendet hast. Wenn wir einen Treffer finden, schicken wir dir denselben Link erneut.",
       emailLabel: "E-Mail-Adresse der Einladung",
       submit: "Link senden",
       missingEmail: "Gib die E-Mail-Adresse ein, die zu deiner Einladung gehört.",
@@ -167,11 +175,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       title: "Sag uns Bescheid",
       description:
         "Trag dich und deine Begleitung ein. Wir schicken dir anschließend einen Einladungslink an die angegebene E-Mail-Adresse.",
-      codeLabel: "Einladungscode",
+      codeLabel: "Einladungs-Passwort",
       codeSubmit: "Weiter",
       codeError: "Der Code stimmt leider nicht.",
       primarySectionTitle: "Deine Angaben",
-      yourNameLabel: "Dein vollständiger Name",
+      yourNameLabel: "Vollständiger Name",
       yourEmailLabel: "Deine E-Mail",
       phoneLabel: "Telefonnummer (optional)",
       phoneHint: "Nur für kurzfristige Rücksprachen am Hochzeitstag.",
@@ -186,11 +194,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       child: "Kind",
       submit: "Anmeldung absenden",
       formError: "Bitte überprüfe die markierten Felder.",
-      thanksTitle: "Danke!",
+      thanksTitle: "Danke für deine Antwort!",
       thanksBody:
-        "Wir haben dir einen Einladungslink per E-Mail geschickt. Öffne deinen Posteingang, um deine Angaben anzusehen oder zu ändern.",
+        "Deine Antwort wurde gespeichert! Wir haben Dir einen Link geschickt, mit dem du deine Anmeldung jederzeit anpassen kannst, falls sich deine Pläne ändern sollten.",
       thanksSpamNote:
-        "Bitte schau auch in deinem Spam-Ordner nach – manchmal landet die Einladung versehentlich dort. Falls ja, markiere sie bitte als „Kein Spam“, damit der Link wieder anklickbar wird.",
+        "Bitte schau auch in deinem Spam-Ordner nach, manchmal landet die Einladung versehentlich dort. Falls ja, markiere sie bitte als „Kein Spam“, damit der Link anklickbar wird.",
     },
     guest: {
       details: "Details",
@@ -224,7 +232,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Mit dem Einladungs-Link kannst du deine Antworten jederzeit ändern.",
       summaryLead: "{name}",
       welcomeSubtitle:
-        "Wir freuen uns, diesen besonderen Tag mit dir zu feiern.",
+        "Wir freuen uns, diesen besonderen Tag mit dir zu feiern! Unten findest du alle Details zum Event. Bitte schau vor dem 22.8. nochmal hier vorbei um Änderungen mitzubekommen!",
       venue: "Ort",
       address: "Adresse",
       timing: "Zeit",
@@ -255,14 +263,14 @@ const dictionaries: Record<Locale, Dictionary> = {
       confirmationSubject: "Deine RSVP für die Hochzeitsfeier",
       greeting: "Hallo",
       invitationIntro:
-        "Nutze den Link unten, um deine Einladung zu öffnen, deine Details anzusehen und deine RSVP zu senden oder zu aktualisieren.",
+        "Nutze den Link unten, um deine Einladung zu ändern und Details anzusehen.",
       manageRsvp: "Einladung öffnen",
       linkFallback:
         "Falls der Button nicht klickbar ist, kopiere diesen Link in deinen Browser:",
       reminder:
         "Behalte diese E-Mail, damit du mit demselben Link später wiederkommen kannst, falls sich deine Pläne ändern.",
       recoveryIntro:
-        "Du hast deinen Einladungslink erneut angefordert. Mit dem Link unten kannst du deine Einladung wieder öffnen und antworten, wann immer es für dich passt.",
+        "Du hast deinen Einladungslink erneut angefordert. Mit dem Link unten kannst du deine Einladung wieder öffnen und Änderungen vornehmen.",
       confirmationIntro:
         "Danke für deine Antwort. Deine Details und dein Einladungslink stehen unten für dich bereit.",
       coupleNames: "Anna & Aeneas",

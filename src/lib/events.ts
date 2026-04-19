@@ -15,8 +15,10 @@ type EventContent = {
   name: LocalizedValue<string>;
   summary: LocalizedValue<string>;
   venueName: LocalizedValue<string>;
-  address: LocalizedValue<string>;
-  mapUrl: string;
+  addresses: Array<{
+    label: LocalizedValue<string>;
+    mapUrl: string;
+  }>;
   schedule: Array<{
     time: string;
     title: LocalizedValue<string>;
@@ -29,50 +31,78 @@ type EventContent = {
 };
 
 export const eventContent: EventContent = {
-  startsAt: "2026-08-22T16:00:00+02:00",
+  startsAt: "2026-08-22T15:30:00+02:00",
   endsAt: "2026-08-23T01:00:00+02:00",
   hero: {
-    de: "Feiert mit uns unseren großen Tag",
+    de: "Wir freuen uns mit Dir einen wundervollen Tag zu verbringen",
   },
   name: {
-    de: "Hochzeitsfeier",
+    de: "Hochzeitsfeier von Anna und Aeneas",
   },
   summary: {
-    de: "Zeremonie, Abendessen und Tanz.",
+    de: "Zusammen feiern wir unsere Hochzeit. Es wird eine entspannte, heitere Hochzeitsfeier ohne Zeremonie, da wir bereits einige Tage vorher mit der Familie standesamtlich heiraten.",
   },
   venueName: {
-    de: "TIVO",
+    de: "München",
   },
-  address: {
-    de: "Oettingenstraße 74, 80538 München",
-  },
-  mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
+  addresses: [
+    {
+      label: {
+        de: "Eisbach Welle, Paradiesstraße, 81667 München",
+      },
+      mapUrl: "https://maps.app.goo.gl/UXJ2vfFmub59CSWA9",
+    },
+    {
+      label: {
+        de: "TIVO, Oettingenstraße 74, 80538 München",
+      },
+      mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
+    },
+  ],
   schedule: [
     {
-      time: "16:00",
+      time: "15:30",
       title: {
-        de: "Ankunft",
+        de: "Treffen am Eisbach",
       },
       note: {
-        de: "",
+        de: "Wir treffen uns an der kleinen Eisbach Welle, wo Aeneas und seine Freunde viel Zeit verbracht haben.",
       },
     },
     {
-      time: "19:00",
+      time: "17:00",
+      title: {
+        de: "Ankunft im Tivo",
+      },
+      note: {
+        de: "Vom Eisbach laufen wir zusammen zum TIVO (ca. 10 Minuten) wo wir mit leckeren Drinks erwartet werden.",
+      },
+    },
+    {
+      time: "18:30",
       title: {
         de: "Essen",
       },
       note: {
-        de: "",
+        de: "Nach ein paar leckeren Drinks wird essen serviert, welches man im sitzen oder stehen genießen kann.",
       },
     },
     {
-      time: "21:00",
+      time: "20:00",
       title: {
         de: "Tanzen",
       },
       note: {
-        de: "",
+        de: "Sobald die Mägen gefüllt sind, feiern wir diesen wunderbaren Tag mit einem DJ-Set des Brautpaars und tanzen bis in die Nacht hinein!",
+      },
+    },
+    {
+      time: "22:00",
+      title: {
+        de: "Feiern",
+      },
+      note: {
+        de: "Ab 22 Uhr feiern und tanzen wir drinnen weiter.",
       },
     },
     {
@@ -81,7 +111,7 @@ export const eventContent: EventContent = {
         de: "Ende",
       },
       note: {
-        de: "",
+        de: "Das TIVO ist öffentlich gut angebunden mit Bus und Tram, auch nachts!",
       },
     },
   ],
@@ -92,6 +122,14 @@ export const eventContent: EventContent = {
       },
       value: {
         de: "Am besten erreicht man das Tivo mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
+      },
+    },
+    {
+      label: {
+        de: "Desscode",
+      },
+      value: {
+        de: "Locker sommerlich",
       },
     },
   ],

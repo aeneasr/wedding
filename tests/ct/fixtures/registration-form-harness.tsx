@@ -77,10 +77,8 @@ export function RegistrationFormHarness() {
     return (
       <div className="space-y-6">
         <PaperPanel className="space-y-4">
-          <Eyebrow>{dictionary.register.eyebrow}</Eyebrow>
-          <h1 className="text-2xl font-serif">{dictionary.register.title}</h1>
-          <p className="text-base leading-relaxed">
-            {dictionary.register.description}
+          <p className="text-sm leading-6 text-ink-light sm:text-base sm:leading-7">
+            {dictionary.landing.codePrompt}
           </p>
           <Field label={dictionary.register.codeLabel}>
             <input

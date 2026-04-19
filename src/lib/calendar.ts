@@ -42,7 +42,7 @@ export function buildCalendarFile(
     `DTEND:${toIcsTimestamp(eventContent.endsAt)}`,
     `SUMMARY:${escapeIcs(summary)}`,
     `DESCRIPTION:${escapeIcs(description)}`,
-    `LOCATION:${escapeIcs(localizeEventText(eventContent.address, locale))}`,
+    `LOCATION:${escapeIcs(localizeEventText(eventContent.addresses[eventContent.addresses.length - 1].label, locale))}`,
     `URL:${escapeIcs(invitationLink)}`,
     "BEGIN:VALARM",
     "ACTION:DISPLAY",

@@ -83,12 +83,7 @@ export function RegistrationForm() {
           setCodeRevealed(true);
         }}
       >
-        <PaperPanel className="space-y-4">
-          <Eyebrow>{dictionary.register.eyebrow}</Eyebrow>
-          <h1 className="text-2xl font-serif">{dictionary.register.title}</h1>
-          <p className="text-base leading-relaxed">
-            {dictionary.register.description}
-          </p>
+        <div className="space-y-4">
           <Field label={dictionary.register.codeLabel}>
             <input
               type="text"
@@ -101,7 +96,7 @@ export function RegistrationForm() {
           <button type="submit" className={`${buttonClassName()} w-full`}>
             {dictionary.register.codeSubmit}
           </button>
-        </PaperPanel>
+        </div>
       </form>
     );
   }
