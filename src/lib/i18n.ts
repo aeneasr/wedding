@@ -182,7 +182,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       yourNameLabel: "Vollständiger Name",
       yourEmailLabel: "Deine E-Mail",
       phoneLabel: "Telefonnummer (optional)",
-      phoneHint: "Nur für kurzfristige Rücksprachen am Hochzeitstag.",
+      phoneHint: "Nur für kurzfristige Rücksprachen.",
       dietaryLabel: "Essenswunsch",
       dietaryNone: "Keine Angabe",
       dietaryMeat: "Fleisch",
@@ -260,7 +260,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     emails: {
       invitationSubject: "Deine Hochzeitseinladung",
       recoverySubject: "Dein Link zur Hochzeitseinladung",
-      confirmationSubject: "Deine RSVP für die Hochzeitsfeier",
+      confirmationSubject: "Deine RSVP für die Hochzeitparty",
       greeting: "Hallo",
       invitationIntro:
         "Nutze den Link unten, um deine Einladung zu ändern und Details anzusehen.",

@@ -31,21 +31,27 @@ type EventContent = {
 };
 
 export const eventContent: EventContent = {
-  startsAt: "2026-08-22T17:00:00+02:00",
+  startsAt: "2026-08-22T15:00:00+02:00",
   endsAt: "2026-08-23T01:00:00+02:00",
   hero: {
     de: "Wir freuen uns mit Dir einen wundervollen Tag zu verbringen",
   },
   name: {
-    de: "Hochzeitsfeier von Anna und Aeneas",
+    de: "Hochzeitparty von Anna und Aeneas",
   },
   summary: {
-    de: "Zusammen feiern wir unsere Hochzeit. Es wird eine entspannte, heitere Hochzeitsfeier ohne Zeremonie, da wir bereits einige Tage vorher mit der Familie standesamtlich heiraten.",
+    de: "Zusammen feiern wir unsere Hochzeit. Es wird eine entspannte, heitere Hochzeitparty ohne Zeremonie. Wir heiraten standesamtlich ein paar Tage vorher.",
   },
   venueName: {
     de: "München",
   },
   addresses: [
+    {
+      label: {
+        de: "Eisbach Welle, Paradiesstraße, 81667 München",
+      },
+      mapUrl: "https://maps.app.goo.gl/UXJ2vfFmub59CSWA9",
+    },
     {
       label: {
         de: "TIVO, Oettingenstraße 74, 80538 München",
@@ -55,12 +61,21 @@ export const eventContent: EventContent = {
   ],
   schedule: [
     {
-      time: "17:00",
+      time: "15:00",
       title: {
-        de: "Ankunft im TIVO",
+        de: "Kleine Eisbach Welle",
       },
       note: {
-        de: "Start ist im TIVO um 17:00, wo wir mit leckeren Drinks erwartet werden.",
+        de: "Wir treffen uns an der kleinen Eisbach Welle für ein paar Drinks und Snacks, und wenn man möchte den Surfern zuschauen.",
+      },
+    },
+    {
+      time: "17:00",
+      title: {
+        de: "Ankunft im Tivo",
+      },
+      note: {
+        de: "Vom Eisbach laufen wir zusammen zum TIVO (ca. 10 Minuten) wo wir mit leckeren Drinks erwartet werden.",
       },
     },
     {
@@ -69,7 +84,7 @@ export const eventContent: EventContent = {
         de: "Essen",
       },
       note: {
-        de: "Nach ein paar leckeren Drinks wird essen serviert, welches man im sitzen oder stehen genießen kann.",
+        de: "Nach ein paar leckeren Drinks wird Essen serviert, welches im Sitzen oder Stehen genossen werden kann.",
       },
     },
     {
@@ -87,7 +102,7 @@ export const eventContent: EventContent = {
         de: "Feiern",
       },
       note: {
-        de: "Ab 22 Uhr feiern und tanzen wir drinnen weiter.",
+        de: "Ab 22 Uhr feiern und tanzen wir Drinnen weiter.",
       },
     },
     {
@@ -106,15 +121,15 @@ export const eventContent: EventContent = {
         de: "Anreise",
       },
       value: {
-        de: "Am besten erreicht man das TIVO mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
+        de: "Am Besten erreicht man das Tivo mit der Tram oder dem Bus. Es gibt nur begrenzt Parkplätze in der Nähe.",
       },
     },
     {
       label: {
-        de: "Desscode",
+        de: "Dresscode",
       },
       value: {
-        de: "Locker sommerlich",
+        de: "Sommer Party",
       },
     },
   ],
