@@ -17,6 +17,9 @@ function toIcsTimestamp(value: string) {
     .replace(/\.\d{3}/, "");
 }
 
+const EVENT_DTSTART = toIcsTimestamp("2026-08-22T15:00:00+02:00");
+const EVENT_DTEND = toIcsTimestamp("2026-08-23T01:00:00+02:00");
+
 export function buildCalendarFile(
   locale: Locale,
   invitationLink: string,
@@ -38,8 +41,8 @@ export function buildCalendarFile(
     "BEGIN:VEVENT",
     `UID:wedding@wedding-rsvp`,
     `DTSTAMP:${toIcsTimestamp(new Date().toISOString())}`,
-    `DTSTART:${toIcsTimestamp(eventContent.startsAt)}`,
-    `DTEND:${toIcsTimestamp(eventContent.endsAt)}`,
+    `DTSTART:${EVENT_DTSTART}`,
+    `DTEND:${EVENT_DTEND}`,
     `SUMMARY:${escapeIcs(summary)}`,
     `DESCRIPTION:${escapeIcs(description)}`,
     `LOCATION:${escapeIcs(localizeEventText(eventContent.addresses[eventContent.addresses.length - 1].label, locale))}`,

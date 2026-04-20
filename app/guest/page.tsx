@@ -23,7 +23,6 @@ import {
 import { mapAttendeesToInvitees } from "@/src/lib/household";
 import { getDictionary } from "@/src/lib/i18n";
 import { getStoredGuestLocale } from "@/src/lib/session";
-import { formatDateTime } from "@/src/lib/utils";
 import { requireGuestBundle } from "@/src/server/access";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +98,7 @@ export default async function GuestPage({
                 },
                 {
                   label: dictionary.guest.timing,
-                  value: `${formatDateTime(eventContent.startsAt, locale)} \u2013 ${formatDateTime(eventContent.endsAt, locale)}`,
+                  value: `${eventContent.startsAt} \u2013 ${eventContent.endsAt}`,
                 },
               ]}
             />

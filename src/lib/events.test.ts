@@ -8,8 +8,8 @@ import {
 
 describe("event content", () => {
   it("uses the August 2026 wedding dates", () => {
-    expect(eventContent.startsAt).toBe("2026-08-22T14:30:00+02:00");
-    expect(eventContent.endsAt).toBe("2026-08-23T00:30:00+02:00");
+    expect(eventContent.startsAt).toBe("15.00");
+    expect(eventContent.endsAt).toBe("01.00");
   });
 
   it("formats the guest-facing date badges using the selected locale", () => {
@@ -19,7 +19,7 @@ describe("event content", () => {
 
   it("expires invitations after the final invited event ends", () => {
     expect(new Date(getInvitationExpiry()).toISOString()).toBe(
-      "2026-08-22T22:30:00.000Z",
+      "2026-08-22T23:00:00.000Z",
     );
   });
 });

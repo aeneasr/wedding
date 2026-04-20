@@ -9,6 +9,7 @@ import { getDateFnsLocale } from "@/src/lib/utils";
 type LocalizedValue<T> = Record<Locale, T>;
 
 type EventContent = {
+  date: string;
   startsAt: string;
   endsAt: string;
   hero: LocalizedValue<string>;
@@ -31,8 +32,9 @@ type EventContent = {
 };
 
 export const eventContent: EventContent = {
-  startsAt: "2026-08-22T15:00:00+02:00",
-  endsAt: "2026-08-23T01:00:00+02:00",
+  date: "2026-08-22",
+  startsAt: "15.00",
+  endsAt: "01.00",
   hero: {
     de: "Wir freuen uns mit Dir einen wundervollen Tag zu verbringen",
   },
@@ -48,13 +50,13 @@ export const eventContent: EventContent = {
   addresses: [
     {
       label: {
-        de: "Eisbach Welle, Paradiesstraße, 81667 München",
+        de: "Kleine Eisbach Welle, Paradiesstraße, 81667 München (hier klicken für Google Maps)",
       },
       mapUrl: "https://maps.app.goo.gl/UXJ2vfFmub59CSWA9",
     },
     {
       label: {
-        de: "TIVO, Oettingenstraße 74, 80538 München",
+        de: "TIVO, Oettingenstraße 74, 80538 München (hier klicken für Google Maps)",
       },
       mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
     },
@@ -140,11 +142,11 @@ export function localizeEventText<T>(value: LocalizedValue<T>, locale: Locale) {
 }
 
 export function formatEventDateBadge(locale: Locale = defaultLocale) {
-  return format(new Date(eventContent.startsAt), "d MMM yyyy", {
+  return format(new Date(eventContent.date), "d MMM yyyy", {
     locale: getDateFnsLocale(locale),
   });
 }
 
 export function getInvitationExpiry() {
-  return new Date(eventContent.endsAt).getTime();
+  return new Date("2026-08-23T01:00:00+02:00").getTime();
 }
