@@ -1,0 +1,16 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - region "Darstellung der Hochzeitseinladung" [ref=e5]:
+        - img "Hochzeitseinladung für Anna und Aeneas mit der Botschaft Wir heiraten und dem Datum 22.08.2026." [ref=e6]
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]:
+            - generic [ref=e10]: Einladungs-Passwort
+            - textbox "Einladungs-Passwort" [ref=e11]
+          - button "Weiter" [ref=e12] [cursor=pointer]
+        - link "Bereits angemeldet? Änderungen vornehmen" [ref=e14] [cursor=pointer]:
+          - /url: /recover
+  - button "Open Next.js Dev Tools" [ref=e20] [cursor=pointer]:
+    - img [ref=e21]
+  - alert [ref=e24]
