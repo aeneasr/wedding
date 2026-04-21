@@ -117,9 +117,8 @@ export function validateGuestRsvpPayload(payload: unknown) {
 const rosterEntrySchema = z.object({
   fullName: z.string().trim().min(1, "Name is required.").max(120),
   kind: z.enum(["adult", "child"] satisfies [InviteeKind, ...InviteeKind[]]),
-  dietaryRequirements: z.enum(["meat", "vegetarian"], {
-    message: "Please choose a meal preference.",
-  }),
+  attending: z.boolean(),
+  dietaryRequirements: z.enum(["", "meat", "vegetarian"]).default(""),
 });
 
 export const registrationSchema = z
@@ -144,6 +143,16 @@ export const registrationSchema = z
         message: "The first person must be an adult.",
       });
     }
+
+    value.roster.forEach((entry, index) => {
+      if (entry.attending && !entry.dietaryRequirements) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["roster", index, "dietaryRequirements"],
+          message: "Please choose a meal preference.",
+        });
+      }
+    });
   });
 
 export type RegistrationPayload = z.infer<typeof registrationSchema>;

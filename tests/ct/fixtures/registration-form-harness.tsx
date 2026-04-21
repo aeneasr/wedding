@@ -27,15 +27,16 @@ type DietaryRequirements = "" | "meat" | "vegetarian";
 type RosterEntry = {
   fullName: string;
   kind: "adult" | "child";
+  attending: boolean;
   dietaryRequirements: DietaryRequirements;
 };
 
 function createPrimary(): RosterEntry {
-  return { fullName: "", kind: "adult", dietaryRequirements: "" };
+  return { fullName: "", kind: "adult", attending: true, dietaryRequirements: "" };
 }
 
 function createAdditional(): RosterEntry {
-  return { fullName: "", kind: "adult", dietaryRequirements: "" };
+  return { fullName: "", kind: "adult", attending: true, dietaryRequirements: "" };
 }
 
 export function RegistrationFormHarness({

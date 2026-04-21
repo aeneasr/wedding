@@ -120,4 +120,53 @@ test.describe("/register", () => {
     const phoneInput = page.getByLabel("Telefonnummer (optional)");
     await expect(phoneInput).toHaveValue(testPhone);
   });
+
+  test("auto-submits when invitation password is in the query string", async ({
+    page,
+  }) => {
+    const pageErrors: Error[] = [];
+    const consoleErrors: string[] = [];
+    page.on("pageerror", (err) => pageErrors.push(err));
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleErrors.push(msg.text());
+    });
+
+    await page.goto(`/?password=${encodeURIComponent(REGISTRATION_CODE)}`);
+
+    await expect(page.getByLabel("Vollständiger Name").first()).toBeVisible();
+    await expect(page.getByLabel("Einladungs-Passwort")).toHaveCount(0);
+
+    expect(pageErrors).toEqual([]);
+    expect(consoleErrors.filter((t) => /useActionState/i.test(t))).toEqual([]);
+  });
+
+  test("auto-submits when invitation password is in the URL fragment", async ({
+    page,
+  }) => {
+    const pageErrors: Error[] = [];
+    const consoleErrors: string[] = [];
+    page.on("pageerror", (err) => pageErrors.push(err));
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleErrors.push(msg.text());
+    });
+
+    await page.goto(`/#password=${encodeURIComponent(REGISTRATION_CODE)}`);
+
+    await expect(page.getByLabel("Vollständiger Name").first()).toBeVisible();
+    await expect(page.getByLabel("Einladungs-Passwort")).toHaveCount(0);
+
+    expect(pageErrors).toEqual([]);
+    expect(consoleErrors.filter((t) => /useActionState/i.test(t))).toEqual([]);
+  });
+
+  test("auto-submit with a wrong password keeps the gate visible with an error", async ({
+    page,
+  }) => {
+    await page.goto("/?password=obviously-wrong");
+    await expect(
+      page.getByText("Das Einladungs-Passwort stimmt leider nicht."),
+    ).toBeVisible();
+    await expect(page.getByLabel("Einladungs-Passwort")).toBeVisible();
+    await expect(page.getByLabel("Vollständiger Name")).toHaveCount(0);
+  });
 });

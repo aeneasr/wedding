@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   registerGuestAction,
@@ -28,6 +35,7 @@ import {
   localizeEventText,
 } from "@/src/lib/events";
 import { getDictionary } from "@/src/lib/i18n";
+import { cn } from "@/src/lib/utils";
 
 const initialState: RegisterActionState = {};
 const initialCodeState: CodeGateActionState = { valid: false };
@@ -35,15 +43,16 @@ const initialCodeState: CodeGateActionState = { valid: false };
 type RosterEntry = {
   fullName: string;
   kind: "adult" | "child";
+  attending: boolean;
   dietaryRequirements: "" | "meat" | "vegetarian";
 };
 
 function createPrimary(): RosterEntry {
-  return { fullName: "", kind: "adult", dietaryRequirements: "" };
+  return { fullName: "", kind: "adult", attending: true, dietaryRequirements: "" };
 }
 
 function createAdditional(): RosterEntry {
-  return { fullName: "", kind: "adult", dietaryRequirements: "" };
+  return { fullName: "", kind: "adult", attending: true, dietaryRequirements: "" };
 }
 
 export function RegistrationForm({ locale }: { locale: Locale }) {
@@ -70,7 +79,9 @@ export function RegistrationForm({ locale }: { locale: Locale }) {
     setCodeValue(urlCode);
     const formData = new FormData();
     formData.set("code", urlCode);
-    codeFormAction(formData);
+    startTransition(() => {
+      codeFormAction(formData);
+    });
   }, [codeFormAction]);
 
   const [primaryEmail, setPrimaryEmail] = useState("");
@@ -95,6 +106,20 @@ export function RegistrationForm({ locale }: { locale: Locale }) {
     );
   }
 
+  function toggleAttendance(index: number) {
+    setRoster((current) =>
+      current.map((entry, i) =>
+        i === index
+          ? {
+              ...entry,
+              attending: !entry.attending,
+              dietaryRequirements: entry.attending ? "" : entry.dietaryRequirements,
+            }
+          : entry,
+      ),
+    );
+  }
+
   function addPerson() {
     if (roster.length >= maxHouseholdMembers) return;
     setRoster((current) => [...current, createAdditional()]);
@@ -103,6 +128,67 @@ export function RegistrationForm({ locale }: { locale: Locale }) {
   function removePerson(index: number) {
     if (index === 0) return;
     setRoster((current) => current.filter((_, i) => i !== index));
+  }
+
+  function renderAttendanceToggle(index: number, attending: boolean) {
+    const toggleId = `registration-attending-${index}`;
+    return (
+      <div className="space-y-2">
+        <Eyebrow>{dictionary.register.statusLabel}</Eyebrow>
+        <div
+          className={cn(
+            "rounded-xl border p-3 transition",
+            attending ? "border-sage bg-sage-light" : "border-border bg-paper",
+          )}
+        >
+          <input
+            type="checkbox"
+            id={toggleId}
+            className="sr-only"
+            checked={attending}
+            onChange={() => toggleAttendance(index)}
+          />
+          <label
+            htmlFor={toggleId}
+            className="flex cursor-pointer select-none items-center gap-3"
+          >
+            <span
+              className={cn(
+                "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition",
+                attending
+                  ? "border-sage bg-sage text-paper"
+                  : "border-border-sage",
+              )}
+              aria-hidden="true"
+            >
+              {attending ? (
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M2 6l3 3 5-5" />
+                </svg>
+              ) : null}
+            </span>
+            <span
+              className={cn(
+                "text-sm font-medium",
+                attending ? "text-forest" : "text-sage-muted",
+              )}
+            >
+              {attending
+                ? dictionary.register.attending
+                : dictionary.register.notAttending}
+            </span>
+          </label>
+        </div>
+      </div>
+    );
   }
 
   const recoverLink = (
@@ -239,27 +325,30 @@ export function RegistrationForm({ locale }: { locale: Locale }) {
             onChange={(event) => setContactPhone(event.target.value)}
           />
         </Field>
-        <Field
-          label={dictionary.register.dietaryLabel}
-          error={fieldError("roster.0.dietaryRequirements")}
-        >
-          <StyledSelect
-            value={roster[0].dietaryRequirements}
-            onValueChange={(value) =>
-              updateRoster(0, {
-                dietaryRequirements: value as RosterEntry["dietaryRequirements"],
-              })
-            }
-            placeholder={dictionary.register.dietaryNone}
+        {renderAttendanceToggle(0, roster[0].attending)}
+        {roster[0].attending ? (
+          <Field
+            label={dictionary.register.dietaryLabel}
+            error={fieldError("roster.0.dietaryRequirements")}
           >
-            <StyledSelectItem value="meat">
-              {dictionary.register.dietaryMeat}
-            </StyledSelectItem>
-            <StyledSelectItem value="vegetarian">
-              {dictionary.register.dietaryVegetarian}
-            </StyledSelectItem>
-          </StyledSelect>
-        </Field>
+            <StyledSelect
+              value={roster[0].dietaryRequirements}
+              onValueChange={(value) =>
+                updateRoster(0, {
+                  dietaryRequirements: value as RosterEntry["dietaryRequirements"],
+                })
+              }
+              placeholder={dictionary.register.dietaryNone}
+            >
+              <StyledSelectItem value="meat">
+                {dictionary.register.dietaryMeat}
+              </StyledSelectItem>
+              <StyledSelectItem value="vegetarian">
+                {dictionary.register.dietaryVegetarian}
+              </StyledSelectItem>
+            </StyledSelect>
+          </Field>
+        ) : null}
       </PaperPanel>
 
       <PaperPanel className="space-y-4">
@@ -296,27 +385,30 @@ export function RegistrationForm({ locale }: { locale: Locale }) {
                   </StyledSelectItem>
                 </StyledSelect>
               </Field>
-              <Field
-                label={dictionary.register.dietaryLabel}
-                error={fieldError(`roster.${index}.dietaryRequirements`)}
-              >
-                <StyledSelect
-                  value={entry.dietaryRequirements}
-                  onValueChange={(value) =>
-                    updateRoster(index, {
-                      dietaryRequirements: value as RosterEntry["dietaryRequirements"],
-                    })
-                  }
-                  placeholder={dictionary.register.dietaryNone}
+              {renderAttendanceToggle(index, entry.attending)}
+              {entry.attending ? (
+                <Field
+                  label={dictionary.register.dietaryLabel}
+                  error={fieldError(`roster.${index}.dietaryRequirements`)}
                 >
-                  <StyledSelectItem value="meat">
-                    {dictionary.register.dietaryMeat}
-                  </StyledSelectItem>
-                  <StyledSelectItem value="vegetarian">
-                    {dictionary.register.dietaryVegetarian}
-                  </StyledSelectItem>
-                </StyledSelect>
-              </Field>
+                  <StyledSelect
+                    value={entry.dietaryRequirements}
+                    onValueChange={(value) =>
+                      updateRoster(index, {
+                        dietaryRequirements: value as RosterEntry["dietaryRequirements"],
+                      })
+                    }
+                    placeholder={dictionary.register.dietaryNone}
+                  >
+                    <StyledSelectItem value="meat">
+                      {dictionary.register.dietaryMeat}
+                    </StyledSelectItem>
+                    <StyledSelectItem value="vegetarian">
+                      {dictionary.register.dietaryVegetarian}
+                    </StyledSelectItem>
+                  </StyledSelect>
+                </Field>
+              ) : null}
               <button
                 type="button"
                 className="min-h-[44px] px-1 text-sm underline"

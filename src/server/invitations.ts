@@ -761,6 +761,7 @@ export type RegistrationInput = {
   roster: Array<{
     fullName: string;
     kind: "adult" | "child";
+    attending: boolean;
     dietaryRequirements: "" | "meat" | "vegetarian";
   }>;
 };
@@ -772,6 +773,11 @@ export async function createInvitationFromRegistration(
   const now = new Date();
   const invitationMode: InvitationMode =
     input.roster.length === 1 ? "individual" : "household";
+  const rsvpStatus: "attending" | "declined" = input.roster.some(
+    (entry) => entry.attending,
+  )
+    ? "attending"
+    : "declined";
 
   return db.transaction(async (tx) => {
     const [invitation] = await tx
@@ -812,7 +818,7 @@ export async function createInvitationFromRegistration(
       .insert(rsvps)
       .values({
         invitationId: invitation.id,
-        status: "attending",
+        status: rsvpStatus,
         submittedAt: now,
         updatedAt: now,
       })
@@ -829,8 +835,10 @@ export async function createInvitationFromRegistration(
           | "named_guest"
           | "child",
         fullName: entry.fullName.trim(),
-        isAttending: true,
-        dietaryRequirements: entry.dietaryRequirements || null,
+        isAttending: entry.attending,
+        dietaryRequirements: entry.attending
+          ? entry.dietaryRequirements || null
+          : null,
         phoneNumber: null,
         sortOrder: index,
       };
@@ -842,8 +850,8 @@ export async function createInvitationFromRegistration(
       invitation.id,
       "rsvp_updated",
       {
-        status: "attending",
-        attendeeCount: attendeeRows.length,
+        status: rsvpStatus,
+        attendeeCount: attendeeRows.filter((row) => row.isAttending).length,
       },
       tx,
     );

@@ -44,6 +44,9 @@ type Dictionary = {
     yourEmailLabel: string;
     phoneLabel: string;
     phoneHint: string;
+    statusLabel: string;
+    attending: string;
+    notAttending: string;
     dietaryLabel: string;
     dietaryNone: string;
     dietaryMeat: string;
@@ -184,6 +187,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       yourEmailLabel: "Deine E-Mail",
       phoneLabel: "Telefonnummer (optional)",
       phoneHint: "Nur für kurzfristige Rücksprachen.",
+      statusLabel: "Teilnahme",
+      attending: "Dabei",
+      notAttending: "Nicht dabei",
       dietaryLabel: "Essenswunsch",
       dietaryNone: "Keine Angabe",
       dietaryMeat: "Fleisch",
