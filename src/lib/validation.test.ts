@@ -60,7 +60,7 @@ describe("validateRegistrationPayload", () => {
       primaryEmail: "alex@example.com",
       contactPhone: "",
       roster: [
-        { fullName: "Alex Rivera", kind: "adult", dietaryRequirements: "" },
+        { fullName: "Alex Rivera", kind: "adult", dietaryRequirements: "meat" },
       ],
     });
     expect(result.success).toBe(true);
@@ -73,7 +73,7 @@ describe("validateRegistrationPayload", () => {
       roster: [
         { fullName: "Alex Rivera", kind: "adult", dietaryRequirements: "vegetarian" },
         { fullName: "Sam Rivera", kind: "adult", dietaryRequirements: "meat" },
-        { fullName: "Mia Rivera", kind: "child", dietaryRequirements: "" },
+        { fullName: "Mia Rivera", kind: "child", dietaryRequirements: "vegetarian" },
       ],
     });
     expect(result.success).toBe(true);
@@ -86,7 +86,7 @@ describe("validateRegistrationPayload", () => {
     const result = validateRegistrationPayload({
       primaryEmail: "not-an-email",
       contactPhone: "",
-      roster: [{ fullName: "Alex", kind: "adult", dietaryRequirements: "" }],
+      roster: [{ fullName: "Alex", kind: "adult", dietaryRequirements: "meat" }],
     });
     expect(result.success).toBe(false);
   });
@@ -104,7 +104,7 @@ describe("validateRegistrationPayload", () => {
     const roster = Array.from({ length: 11 }, (_, i) => ({
       fullName: `Person ${i}`,
       kind: "adult" as const,
-      dietaryRequirements: "" as const,
+      dietaryRequirements: "meat" as const,
     }));
     const result = validateRegistrationPayload({
       primaryEmail: "alex@example.com",
@@ -119,7 +119,7 @@ describe("validateRegistrationPayload", () => {
       primaryEmail: "alex@example.com",
       contactPhone: "",
       roster: [
-        { fullName: "Mia Rivera", kind: "child", dietaryRequirements: "" },
+        { fullName: "Mia Rivera", kind: "child", dietaryRequirements: "meat" },
       ],
     });
     expect(result.success).toBe(false);
@@ -130,7 +130,7 @@ describe("validateRegistrationPayload", () => {
       primaryEmail: "alex@example.com",
       contactPhone: "",
       roster: [
-        { fullName: "   ", kind: "adult", dietaryRequirements: "" },
+        { fullName: "   ", kind: "adult", dietaryRequirements: "meat" },
       ],
     });
     expect(result.success).toBe(false);
@@ -141,7 +141,28 @@ describe("validateRegistrationPayload", () => {
       primaryEmail: "alex@example.com",
       contactPhone: "x".repeat(41),
       roster: [
-        { fullName: "Alex", kind: "adult", dietaryRequirements: "" },
+        { fullName: "Alex", kind: "adult", dietaryRequirements: "meat" },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects when dietary preference is not chosen", () => {
+    const result = validateRegistrationPayload({
+      primaryEmail: "alex@example.com",
+      contactPhone: "",
+      roster: [{ fullName: "Alex Rivera", kind: "adult", dietaryRequirements: "" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects when an additional person has no dietary preference", () => {
+    const result = validateRegistrationPayload({
+      primaryEmail: "alex@example.com",
+      contactPhone: "",
+      roster: [
+        { fullName: "Alex", kind: "adult", dietaryRequirements: "meat" },
+        { fullName: "Sam", kind: "adult", dietaryRequirements: "" },
       ],
     });
     expect(result.success).toBe(false);

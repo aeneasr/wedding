@@ -38,10 +38,14 @@ function createAdditional(): RosterEntry {
   return { fullName: "", kind: "adult", dietaryRequirements: "" };
 }
 
-export function RegistrationFormHarness() {
+export function RegistrationFormHarness({
+  initialCode,
+}: {
+  initialCode?: string;
+} = {}) {
   const dictionary = getDictionary(defaultLocale);
-  const [codeRevealed, setCodeRevealed] = useState(false);
-  const [codeValue, setCodeValue] = useState("");
+  const [codeRevealed, setCodeRevealed] = useState(Boolean(initialCode));
+  const [codeValue, setCodeValue] = useState(initialCode ?? "");
 
   const [primaryEmail, setPrimaryEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");

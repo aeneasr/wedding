@@ -86,6 +86,12 @@ export function GuestRsvpFields({
     );
   };
 
+  const updateFullName = (index: number, fullName: string) => {
+    setInvitees((current) =>
+      current.map((entry, i) => (i === index ? { ...entry, fullName } : entry)),
+    );
+  };
+
   const attendingInvitees = invitees.filter((inv) => inv.attending);
 
   return (
@@ -111,11 +117,35 @@ export function GuestRsvpFields({
           <Eyebrow>{dictionary.guest.status}</Eyebrow>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {invitees.map((invitee, index) => {
             const rowId = `attendance-${invitee.inviteeId}`;
+            const nameErrorMessage = fieldError(`invitees.${index}.fullName`);
+            const nameLabel =
+              invitee.kind === "child"
+                ? `${dictionary.guest.fullName} (${dictionary.guest.child})`
+                : dictionary.guest.fullName;
             return (
-              <div key={invitee.inviteeId}>
+              <div
+                key={invitee.inviteeId}
+                className={cn(
+                  "space-y-3 rounded-xl border p-4 transition",
+                  invitee.attending
+                    ? "border-sage bg-sage-light"
+                    : "border-border bg-paper",
+                )}
+              >
+                <Field label={nameLabel} error={nameErrorMessage}>
+                  <input
+                    type="text"
+                    value={invitee.fullName}
+                    onChange={(event) => updateFullName(index, event.target.value)}
+                    className={inputClassName({ error: Boolean(nameErrorMessage) })}
+                    aria-invalid={nameErrorMessage ? true : undefined}
+                    autoComplete="name"
+                  />
+                </Field>
+
                 <input
                   type="checkbox"
                   id={rowId}
@@ -126,14 +156,8 @@ export function GuestRsvpFields({
                 />
                 <label
                   htmlFor={rowId}
-                  className={cn(
-                    "flex cursor-pointer select-none items-center gap-3 rounded-xl border p-4 transition",
-                    invitee.attending
-                      ? "border-sage bg-sage-light"
-                      : "border-border bg-paper",
-                  )}
+                  className="flex cursor-pointer select-none items-center gap-3"
                 >
-                  {/* Visual checkbox */}
                   <span
                     className={cn(
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition",
@@ -158,20 +182,9 @@ export function GuestRsvpFields({
                     )}
                   </span>
 
-                  {/* Name */}
-                  <span className="flex-1 text-base font-medium text-ink">
-                    {invitee.fullName}
-                    {invitee.kind === "child" ? (
-                      <span className="ml-1 text-sm font-normal text-sage-muted">
-                        ({dictionary.guest.child})
-                      </span>
-                    ) : null}
-                  </span>
-
-                  {/* Status label */}
                   <span
                     className={cn(
-                      "text-sm",
+                      "text-sm font-medium",
                       invitee.attending ? "text-forest" : "text-sage-muted",
                     )}
                   >

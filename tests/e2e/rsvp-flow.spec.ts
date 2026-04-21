@@ -200,7 +200,7 @@ test.describe("Desktop guest and admin flows", () => {
     await page.goto("/guest");
     await expect(page).toHaveURL(/\/recover$/);
     await expect(
-      page.getByRole("heading", { name: "Deinen Einladungslink finden" }),
+      page.getByRole("heading", { name: "Deine Einladung anpassen" }),
     ).toBeVisible();
 
     await page

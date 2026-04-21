@@ -129,6 +129,22 @@ function codesMatch(input: string, expected: string) {
   return timingSafeEqual(digestCode(input), digestCode(expected));
 }
 
+export type CodeGateActionState = {
+  valid: boolean;
+  invalid?: boolean;
+};
+
+export async function validateRegistrationCodeAction(
+  _state: CodeGateActionState,
+  formData: FormData,
+): Promise<CodeGateActionState> {
+  const code = String(formData.get("code") ?? "");
+  if (!codesMatch(code, getRegistrationCode())) {
+    return { valid: false, invalid: true };
+  }
+  return { valid: true };
+}
+
 export async function registerGuestAction(
   _state: RegisterActionState,
   formData: FormData,

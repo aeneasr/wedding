@@ -11,13 +11,13 @@ test("landing page presents the wedding invitation design", async ({ page }) => 
     }),
   ).toBeVisible();
 
-  const recoverLink = page.getByRole("link", {
-    name: "Einladungslink finden",
-  });
-  const adminLink = page.getByRole("link", { name: "Admin" });
+  // Landing page now embeds the registration gate directly.
+  await expect(page.getByLabel("Einladungs-Passwort")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Weiter" })).toBeVisible();
 
+  const recoverLink = page.getByRole("link", {
+    name: "Bereits angemeldet? Änderungen vornehmen",
+  });
   await expect(recoverLink).toBeVisible();
-  await expect(adminLink).toBeVisible();
-  await expect(recoverLink).toHaveCSS("background-color", "rgb(107, 124, 94)");
-  await expect(recoverLink).toHaveCSS("color", "rgb(255, 253, 248)");
+  await expect(recoverLink).toHaveAttribute("href", "/recover");
 });

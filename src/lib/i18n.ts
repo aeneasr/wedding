@@ -91,6 +91,7 @@ type Dictionary = {
     welcomeSubtitle: string;
     venue: string;
     address: string;
+    mapLinkLabel: string;
     timing: string;
     saveError: string;
     status: string;
@@ -177,7 +178,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Trag dich und deine Begleitung ein. Wir schicken dir anschließend einen Einladungslink an die angegebene E-Mail-Adresse.",
       codeLabel: "Einladungs-Passwort",
       codeSubmit: "Weiter",
-      codeError: "Der Code stimmt leider nicht.",
+      codeError: "Das Einladungs-Passwort stimmt leider nicht.",
       primarySectionTitle: "Deine Angaben",
       yourNameLabel: "Vollständiger Name",
       yourEmailLabel: "Deine E-Mail",
@@ -235,6 +236,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Wir freuen uns, diesen besonderen Tag mit dir zu feiern! Unten findest du alle Details zum Event. Bitte schau vor dem 22.8. nochmal hier vorbei um Änderungen mitzubekommen!",
       venue: "Ort",
       address: "Adresse",
+      mapLinkLabel: "hier klicken für Google Maps",
       timing: "Zeit",
       saveError: "Deine Antwort kann gerade nicht gespeichert werden.",
       attendingGuestDetails: "Angaben der Teilnehmenden",

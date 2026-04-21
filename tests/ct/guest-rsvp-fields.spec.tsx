@@ -343,6 +343,30 @@ test("meal preference select saves chosen value in payload", async ({
     });
 });
 
+test("name inputs are editable and flow into the payload", async ({
+  mount,
+}) => {
+  const component = await mount(
+    <form className="space-y-6">
+      <GuestRsvpFields {...buildProps()} />
+    </form>,
+  );
+
+  const nameInputs = component.getByLabel("Vollständiger Name");
+  await nameInputs.nth(0).fill("Aeneas Rempel");
+  await nameInputs.nth(2).fill("Mia Müller");
+
+  await expect
+    .poll(async () => readPayload(component))
+    .toMatchObject({
+      invitees: [
+        { fullName: "Aeneas Rempel", isPrimary: true, kind: "adult" },
+        { fullName: "Household member 1", kind: "adult" },
+        { fullName: "Mia Müller", kind: "child" },
+      ],
+    });
+});
+
 test("household detail fields appear for each attending guest", async ({
   mount,
   page,

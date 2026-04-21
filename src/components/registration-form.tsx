@@ -1,23 +1,36 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import Link from "next/link";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   registerGuestAction,
   type RegisterActionState,
+  validateRegistrationCodeAction,
+  type CodeGateActionState,
 } from "@/src/app-actions/guest";
+import { extractInvitationCodeFromUrl } from "@/src/lib/invitation-url";
 import {
   buttonClassName,
+  DataList,
+  Eyebrow,
   Field,
   inputClassName,
   PaperPanel,
-  Eyebrow,
+  SectionTitle,
 } from "@/src/components/ui";
 import { StyledSelect, StyledSelectItem } from "@/src/components/styled-select";
+import type { Locale } from "@/src/lib/constants";
+import { maxHouseholdMembers } from "@/src/lib/constants";
+import {
+  eventContent,
+  formatEventDateBadge,
+  localizeEventText,
+} from "@/src/lib/events";
 import { getDictionary } from "@/src/lib/i18n";
-import { defaultLocale, maxHouseholdMembers } from "@/src/lib/constants";
 
 const initialState: RegisterActionState = {};
+const initialCodeState: CodeGateActionState = { valid: false };
 
 type RosterEntry = {
   fullName: string;
@@ -33,14 +46,32 @@ function createAdditional(): RosterEntry {
   return { fullName: "", kind: "adult", dietaryRequirements: "" };
 }
 
-export function RegistrationForm() {
-  const dictionary = getDictionary(defaultLocale);
+export function RegistrationForm({ locale }: { locale: Locale }) {
+  const dictionary = getDictionary(locale);
   const [state, formAction, pending] = useActionState(
     registerGuestAction,
     initialState,
   );
-  const [codeRevealed, setCodeRevealed] = useState(false);
+  const [codeState, codeFormAction, codePending] = useActionState(
+    validateRegistrationCodeAction,
+    initialCodeState,
+  );
   const [codeValue, setCodeValue] = useState("");
+  const urlCodeApplied = useRef(false);
+
+  useEffect(() => {
+    if (urlCodeApplied.current) return;
+    urlCodeApplied.current = true;
+    const urlCode = extractInvitationCodeFromUrl(window.location.href);
+    if (!urlCode) return;
+    // Deferred to post-mount so the client reads window.location without
+    // triggering SSR hydration mismatches on the gate input's value.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCodeValue(urlCode);
+    const formData = new FormData();
+    formData.set("code", urlCode);
+    codeFormAction(formData);
+  }, [codeFormAction]);
 
   const [primaryEmail, setPrimaryEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -74,37 +105,98 @@ export function RegistrationForm() {
     setRoster((current) => current.filter((_, i) => i !== index));
   }
 
-  if (!codeRevealed) {
+  const recoverLink = (
+    <div className="flex justify-center">
+      <Link
+        href="/recover"
+        className="inline-flex text-sm font-medium tracking-wide text-sage-muted underline decoration-border underline-offset-4 transition hover:text-sage sm:text-base"
+      >
+        {dictionary.landing.makeChangesCta}
+      </Link>
+    </div>
+  );
+
+  if (!codeState.valid) {
     return (
       <form
-        className="space-y-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setCodeRevealed(true);
-        }}
+        action={codeFormAction}
+        className="mx-auto flex w-full max-w-[28rem] flex-col gap-6"
       >
         <div className="space-y-4">
-          <Field label={dictionary.register.codeLabel}>
+          <Field
+            label={dictionary.register.codeLabel}
+            error={codeState.invalid ? dictionary.register.codeError : undefined}
+          >
             <input
               type="text"
+              name="code"
               autoComplete="off"
-              className={inputClassName()}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className={inputClassName({ error: Boolean(codeState.invalid) })}
               value={codeValue}
               onChange={(event) => setCodeValue(event.target.value)}
             />
           </Field>
-          <button type="submit" className={`${buttonClassName()} w-full`}>
+          <button
+            type="submit"
+            className={`${buttonClassName()} w-full`}
+            disabled={codePending}
+          >
             {dictionary.register.codeSubmit}
           </button>
         </div>
+        {recoverLink}
       </form>
     );
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex w-full flex-col gap-6">
       <input type="hidden" name="code" value={codeValue} />
       <input type="hidden" name="payload" value={payload} />
+
+      <PaperPanel className="space-y-4">
+        <Eyebrow>{dictionary.guest.privateAccess}</Eyebrow>
+        <DataList
+          items={[
+            {
+              label: formatEventDateBadge(locale),
+              value: localizeEventText(eventContent.name, locale),
+            },
+            {
+              label: dictionary.guest.venue,
+              value: localizeEventText(eventContent.venueName, locale),
+            },
+            {
+              label: dictionary.guest.address,
+              value: (
+                <div className="flex flex-col gap-1">
+                  {eventContent.addresses.map((entry) => (
+                    <p key={entry.mapUrl}>
+                      {localizeEventText(entry.label, locale)} (
+                      <a
+                        href={entry.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2"
+                      >
+                        {dictionary.guest.mapLinkLabel}
+                      </a>
+                      )
+                    </p>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              label: dictionary.guest.timing,
+              value: `${eventContent.startsAt} – ${eventContent.endsAt}`,
+            },
+          ]}
+        />
+      </PaperPanel>
 
       <PaperPanel className="space-y-4">
         <Eyebrow>{dictionary.register.primarySectionTitle}</Eyebrow>
@@ -255,6 +347,51 @@ export function RegistrationForm() {
       <button type="submit" className={`${buttonClassName()} w-full`} disabled={pending}>
         {dictionary.register.submit}
       </button>
+
+      {recoverLink}
+
+      <PaperPanel className="space-y-5">
+        <SectionTitle title={dictionary.guest.schedule} />
+        <div className="grid gap-3">
+          {eventContent.schedule.map((item) => (
+            <div
+              key={item.time}
+              className="grid gap-2 rounded-xl bg-cream p-4 sm:grid-cols-[120px_1fr]"
+            >
+              <p className="text-sm font-medium uppercase tracking-wide text-sage">
+                {item.time}
+              </p>
+              <div>
+                <p className="font-medium text-ink">
+                  {localizeEventText(item.title, locale)}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-light">
+                  {localizeEventText(item.note, locale)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </PaperPanel>
+
+      <PaperPanel className="space-y-5">
+        <SectionTitle title={dictionary.guest.logistics} />
+        <div className="grid gap-3">
+          {eventContent.logistics.map((item) => (
+            <div
+              key={localizeEventText(item.label, locale)}
+              className="rounded-xl bg-cream p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wide text-sage-muted">
+                {localizeEventText(item.label, locale)}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-ink">
+                {localizeEventText(item.value, locale)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </PaperPanel>
     </form>
   );
 }

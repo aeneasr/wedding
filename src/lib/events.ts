@@ -50,13 +50,13 @@ export const eventContent: EventContent = {
   addresses: [
     {
       label: {
-        de: "Kleine Eisbach Welle, Paradiesstraße, 81667 München (hier klicken für Google Maps)",
+        de: "Kleine Eisbach Welle, Paradiesstraße, 81667 München",
       },
       mapUrl: "https://maps.app.goo.gl/UXJ2vfFmub59CSWA9",
     },
     {
       label: {
-        de: "TIVO, Oettingenstraße 74, 80538 München (hier klicken für Google Maps)",
+        de: "TIVO, Oettingenstraße 74, 80538 München",
       },
       mapUrl: "https://maps.app.goo.gl/f1yhKmPSPiPUuGFp8",
     },
@@ -104,7 +104,7 @@ export const eventContent: EventContent = {
         de: "Feiern",
       },
       note: {
-        de: "Ab 22 Uhr feiern und tanzen wir Drinnen weiter.",
+        de: "Ab 22 Uhr feiern und tanzen wir drinnen weiter.",
       },
     },
     {

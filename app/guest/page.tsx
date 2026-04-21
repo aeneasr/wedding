@@ -83,15 +83,18 @@ export default async function GuestPage({
                   value: (
                     <div className="flex flex-col gap-1">
                       {eventContent.addresses.map((entry) => (
-                        <a
-                          key={entry.mapUrl}
-                          href={entry.mapUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-2"
-                        >
-                          {localizeEventText(entry.label, locale)}
-                        </a>
+                        <p key={entry.mapUrl}>
+                          {localizeEventText(entry.label, locale)} (
+                          <a
+                            href={entry.mapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2"
+                          >
+                            {dictionary.guest.mapLinkLabel}
+                          </a>
+                          )
+                        </p>
                       ))}
                     </div>
                   ),

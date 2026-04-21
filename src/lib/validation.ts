@@ -117,7 +117,9 @@ export function validateGuestRsvpPayload(payload: unknown) {
 const rosterEntrySchema = z.object({
   fullName: z.string().trim().min(1, "Name is required.").max(120),
   kind: z.enum(["adult", "child"] satisfies [InviteeKind, ...InviteeKind[]]),
-  dietaryRequirements: z.enum(["", "meat", "vegetarian"]).default(""),
+  dietaryRequirements: z.enum(["meat", "vegetarian"], {
+    message: "Please choose a meal preference.",
+  }),
 });
 
 export const registrationSchema = z

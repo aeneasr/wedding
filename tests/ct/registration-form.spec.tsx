@@ -16,24 +16,26 @@ import { RegistrationFormHarness } from "./fixtures/registration-form-harness";
 test.describe("RegistrationForm", () => {
   test("shows the gate step by default", async ({ mount }) => {
     const component = await mount(<RegistrationFormHarness />);
-    await expect(component.getByLabel("Einladungscode")).toBeVisible();
+    await expect(component.getByLabel("Einladungs-Passwort")).toBeVisible();
     // Before the gate is cleared, the post-gate form is not rendered at all.
     // Use toHaveCount(0) because the element is absent from the DOM entirely.
-    await expect(component.getByText("Dein vollständiger Name")).toHaveCount(0);
+    await expect(component.getByLabel("Vollständiger Name")).toHaveCount(0);
   });
 
   test("reveals the form after continue", async ({ mount }) => {
     const component = await mount(<RegistrationFormHarness />);
-    await component.getByLabel("Einladungscode").fill("irrelevant-client-side");
+    await component
+      .getByLabel("Einladungs-Passwort")
+      .fill("irrelevant-client-side");
     await component.getByRole("button", { name: "Weiter" }).click();
-    await expect(component.getByLabel("Dein vollständiger Name")).toBeVisible();
+    await expect(component.getByLabel("Vollständiger Name").first()).toBeVisible();
   });
 
   test("can add and remove additional people up to the cap", async ({
     mount,
   }) => {
     const component = await mount(<RegistrationFormHarness />);
-    await component.getByLabel("Einladungscode").fill("x");
+    await component.getByLabel("Einladungs-Passwort").fill("x");
     await component.getByRole("button", { name: "Weiter" }).click();
 
     const addBtn = component.getByRole("button", {
@@ -51,5 +53,21 @@ test.describe("RegistrationForm", () => {
     // At cap, the "add person" button is removed from the DOM by the ternary.
     // Use toHaveCount(0) because the element is absent, not just invisible.
     await expect(addBtn).toHaveCount(0);
+  });
+
+  test("renders the post-gate form immediately when initialCode is provided", async ({
+    mount,
+  }) => {
+    const component = await mount(
+      <RegistrationFormHarness initialCode="anna+aeneas" />,
+    );
+    // Gate input must be gone — we skipped straight past it.
+    await expect(
+      component.getByLabel("Einladungs-Passwort"),
+    ).toHaveCount(0);
+    // Post-gate form is visible.
+    await expect(
+      component.getByLabel("Vollständiger Name").first(),
+    ).toBeVisible();
   });
 });
