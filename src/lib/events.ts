@@ -34,7 +34,7 @@ type EventContent = {
 export const eventContent: EventContent = {
   date: "2026-08-22",
   startsAt: "15.00",
-  endsAt: "01.00",
+  endsAt: "00.00",
   hero: {
     de: "Wir freuen uns mit Dir einen wundervollen Tag zu verbringen",
   },
@@ -108,7 +108,7 @@ export const eventContent: EventContent = {
       },
     },
     {
-      time: "01:00",
+      time: "00:00",
       title: {
         de: "Ende",
       },
@@ -148,5 +148,5 @@ export function formatEventDateBadge(locale: Locale = defaultLocale) {
 }
 
 export function getInvitationExpiry() {
-  return new Date("2026-08-23T01:00:00+02:00").getTime();
+  return new Date("2026-08-23T00:00:00+02:00").getTime();
 }

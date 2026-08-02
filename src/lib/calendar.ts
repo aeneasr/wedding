@@ -18,7 +18,7 @@ function toIcsTimestamp(value: string) {
 }
 
 const EVENT_DTSTART = toIcsTimestamp("2026-08-22T15:00:00+02:00");
-const EVENT_DTEND = toIcsTimestamp("2026-08-23T01:00:00+02:00");
+const EVENT_DTEND = toIcsTimestamp("2026-08-23T00:00:00+02:00");
 
 export function buildCalendarFile(
   locale: Locale,
