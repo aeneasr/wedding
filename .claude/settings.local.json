@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: sort admin list and CSV exports by acceptance date *)",
+      "Bash(git push *)"
+    ]
+  }
+}

@@ -91,9 +91,48 @@ describe("buildAttendeeRows", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       rsvpStatus: "attending",
+      respondedAt: now.toISOString(),
       attending: "yes",
       mealPreference: "vegan",
     });
+  });
+
+  it("sorts bundles descending by RSVP submission date, pending last", () => {
+    const earlier = new Date("2026-03-01T12:00:00Z");
+
+    const pendingBundle = makeBundle();
+    const earlierBundle = makeBundle({
+      rsvps: [
+        {
+          id: "rsvp-early",
+          invitationId: "inv-1",
+          status: "attending",
+          submittedAt: earlier,
+          updatedAt: earlier,
+          attendees: [],
+        },
+      ],
+    });
+    const laterBundle = makeBundle({
+      rsvps: [
+        {
+          id: "rsvp-late",
+          invitationId: "inv-1",
+          status: "attending",
+          submittedAt: now,
+          updatedAt: now,
+          attendees: [],
+        },
+      ],
+    });
+
+    const rows = buildAttendeeRows([pendingBundle, earlierBundle, laterBundle]);
+
+    expect(rows.map((row) => row.respondedAt)).toEqual([
+      now.toISOString(),
+      earlier.toISOString(),
+      "",
+    ]);
   });
 
   it("includes every household member as a roster row", () => {

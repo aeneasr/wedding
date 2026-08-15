@@ -117,9 +117,17 @@ function buildInvitationSummary(bundle: InvitationBundle) {
     lastOpenedAt: bundle.invitation.lastOpenedAt,
     sentAt: bundle.invitation.sentAt,
     rsvpStatus: bundle.rsvps[0]?.status ?? "pending",
+    respondedAt: bundle.rsvps[0]?.submittedAt ?? null,
     responded: hasFullyResponded(bundle),
     pending: !hasFullyResponded(bundle),
   };
+}
+
+function byRespondedAtDesc(
+  a: { respondedAt: Date | null },
+  b: { respondedAt: Date | null },
+) {
+  return (b.respondedAt?.getTime() ?? 0) - (a.respondedAt?.getTime() ?? 0);
 }
 
 async function recordActivity(
@@ -400,7 +408,8 @@ export async function listDashboardData(filters: DashboardFilters = {}) {
       }
 
       return true;
-    });
+    })
+    .sort(byRespondedAtDesc);
 
   const stats = {
     invitations: bundles.length,
@@ -733,10 +742,10 @@ export async function buildAttendeeExportRows() {
 export async function buildInvitationStatusExportRows() {
   const bundles = await listInvitationBundles();
 
-  return bundles.map((bundle) => {
-    const summary = buildInvitationSummary(bundle);
-
-    return {
+  return bundles
+    .map(buildInvitationSummary)
+    .sort(byRespondedAtDesc)
+    .map((summary) => ({
       invitationId: summary.id,
       primaryGuest: summary.primaryGuestName,
       primaryEmail: summary.primaryEmail,
@@ -747,8 +756,8 @@ export async function buildInvitationStatusExportRows() {
       lastOpenedAt: summary.lastOpenedAt?.toISOString() ?? "",
       responded: summary.responded ? "yes" : "no",
       rsvpStatus: summary.rsvpStatus,
-    };
-  });
+      respondedAt: summary.respondedAt?.toISOString() ?? "",
+    }));
 }
 
 export async function getInvitationForAdmin(invitationId: string) {

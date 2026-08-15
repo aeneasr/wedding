@@ -151,6 +151,7 @@ export default async function AdminPage({
                 <div className="grid gap-2 text-sm text-ink-light">
                   <p>Zugriffe: {row.accessCount}</p>
                   <p>Gesendet: {row.sentAt ? row.sentAt.toLocaleString() : "Noch nicht"}</p>
+                  <p>Beantwortet: {row.respondedAt ? row.respondedAt.toLocaleString() : "Noch nicht"}</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">

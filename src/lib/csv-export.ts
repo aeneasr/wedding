@@ -1,26 +1,33 @@
 import { mapAttendeesToInvitees } from "@/src/lib/household";
 import type { InvitationBundle } from "@/src/server/invitations";
 
+function rsvpSubmittedAtMs(bundle: InvitationBundle) {
+  return bundle.rsvps[0]?.submittedAt?.getTime() ?? 0;
+}
+
 export function buildAttendeeRows(bundles: InvitationBundle[]) {
-  return bundles.flatMap((bundle) => {
-    const primaryGuest = bundle.invitees.find((i) => i.isPrimary) ?? bundle.invitees[0];
-    const rsvp = bundle.rsvps[0] ?? null;
+  return [...bundles]
+    .sort((a, b) => rsvpSubmittedAtMs(b) - rsvpSubmittedAtMs(a))
+    .flatMap((bundle) => {
+      const primaryGuest = bundle.invitees.find((i) => i.isPrimary) ?? bundle.invitees[0];
+      const rsvp = bundle.rsvps[0] ?? null;
 
-    return mapAttendeesToInvitees(bundle.invitees, rsvp?.attendees ?? []).map((invitee) => {
-      const attendeeType = invitee.kind === "child" ? "child" : "named_guest";
+      return mapAttendeesToInvitees(bundle.invitees, rsvp?.attendees ?? []).map((invitee) => {
+        const attendeeType = invitee.kind === "child" ? "child" : "named_guest";
 
-      return {
-        invitationId: bundle.invitation.id,
-        primaryGuest: primaryGuest?.fullName ?? "",
-        primaryEmail: bundle.invitation.primaryEmail,
-        rsvpStatus: rsvp?.status ?? "pending",
-        inviteeName: invitee.fullName,
-        attendeeType,
-        attending: rsvp ? (invitee.attending ? "yes" : "no") : "",
-        mealPreference: rsvp ? invitee.dietaryRequirements : "",
-      };
+        return {
+          invitationId: bundle.invitation.id,
+          primaryGuest: primaryGuest?.fullName ?? "",
+          primaryEmail: bundle.invitation.primaryEmail,
+          rsvpStatus: rsvp?.status ?? "pending",
+          respondedAt: rsvp?.submittedAt?.toISOString() ?? "",
+          inviteeName: invitee.fullName,
+          attendeeType,
+          attending: rsvp ? (invitee.attending ? "yes" : "no") : "",
+          mealPreference: rsvp ? invitee.dietaryRequirements : "",
+        };
+      });
     });
-  });
 }
 
 export function toCsv(rows: Array<Record<string, string>>) {
