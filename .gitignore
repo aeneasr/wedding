@@ -48,3 +48,4 @@ next-env.d.ts
 .idea
 .env*.local
 .superpowers/
+.claude/settings.local.json
